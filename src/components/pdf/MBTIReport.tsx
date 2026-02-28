@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#6b7280',
     marginTop: 12,
-    fontStyle: 'italic',
+    // fontStyle: 'italic', // NotoSansSC 不支持 italic 变体
   },
   dateContainer: {
     position: 'absolute',

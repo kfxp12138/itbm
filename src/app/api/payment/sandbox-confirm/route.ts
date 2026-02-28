@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getOrder, updateOrderStatus } from '@/lib/db';
 import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
+import { sendTestResultEmail, TestType } from '@/lib/send-email';
 
 interface SandboxConfirmRequest {
   orderId: string;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   // Only allow in sandbox mode
   if (!isSandboxMode()) {
     return NextResponse.json(
@@ -51,15 +52,11 @@ export async function POST(request: NextRequest) {
         const resultData = order.result_data ? JSON.parse(order.result_data) : null;
         if (resultData) {
           // Fire and forget - don't block the response
-          fetch(new URL('/api/email/send', request.url).toString(), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: order.email,
-              testType: order.test_type,
-              resultData,
-              orderId,
-            }),
+          sendTestResultEmail({
+            to: order.email,
+            testType: order.test_type as TestType,
+            resultData,
+            orderId,
           }).catch((err) => console.error('Email send failed:', err));
         }
       } catch (err) {

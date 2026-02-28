@@ -1,32 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
-import { getOrder, updateOrderStatus } from '@/lib/db';
+import { NextResponse } from 'next/server';
+import { isSandboxMode } from '@/lib/payment-config';
+// import { getOrder, updateOrderStatus } from '@/lib/db';
+// import { sendTestResultEmail, TestType } from '@/lib/send-email';
 
-// Helper to send email after successful payment
-async function sendResultEmail(request: NextRequest, orderId: string) {
-  const order = getOrder(orderId);
-  if (!order?.email || !RESEND_CONFIG.apiKey) return;
-
-  try {
-    const resultData = order.result_data ? JSON.parse(order.result_data) : null;
-    if (resultData) {
-      fetch(new URL('/api/email/send', request.url).toString(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: order.email,
-          testType: order.test_type,
-          resultData,
-          orderId,
-        }),
-      }).catch((err) => console.error('Email send failed:', err));
-    }
-  } catch (err) {
-    console.error('Failed to parse result_data for email:', err);
-  }
-}
-
-export async function POST(request: NextRequest) {
+export async function POST() {
   if (isSandboxMode()) {
     return new NextResponse('SANDBOX MODE', { status: 200 });
   }
@@ -40,8 +17,16 @@ export async function POST(request: NextRequest) {
 
   // Example implementation (uncomment when ready):
   // const orderId = extractOrderIdFromXml(body);
+  // const order = getOrder(orderId);
   // updateOrderStatus(orderId, 'paid', { paymentMethod: 'wechat', transactionId: '...' });
-  // await sendResultEmail(request, orderId);
+  // if (order?.email && order.result_data) {
+  //   sendTestResultEmail({
+  //     to: order.email,
+  //     testType: order.test_type as TestType,
+  //     resultData: JSON.parse(order.result_data),
+  //     orderId,
+  //   }).catch(console.error);
+  // }
 
   return new NextResponse(
     '<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>',

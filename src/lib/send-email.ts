@@ -7,10 +7,14 @@ import { RESEND_CONFIG, TEST_NAMES } from '@/lib/payment-config';
 import { MBTIReport } from '@/components/pdf/MBTIReport';
 import { IQReport } from '@/components/pdf/IQReport';
 import { CareerReport } from '@/components/pdf/CareerReport';
+import { getMBTITypeDescription } from '@/lib/mbti-scoring';
+import { getIQDescription } from '@/lib/iq-scoring';
+import { mbtiCareers } from '@/data/career-data';
 
 // Register fonts on module load
 registerFonts();
 
+// Full data interfaces (what PDF components expect)
 export interface MBTIResultData {
   type: string;
   typeName: string;
@@ -38,8 +42,65 @@ export interface CareerResultData {
   careers: string[];
 }
 
+// Partial data interfaces (what localStorage stores)
+interface PartialMBTIData {
+  type: string;
+  counts: Record<string, number>;
+}
+
+interface PartialIQData {
+  score: number;
+  correctCount: number;
+  age: number;
+  timestamp?: number;
+}
+
+interface PartialCareerData {
+  mbtiType: string;
+  mbtiTypeName?: string;
+  ffmScores: Array<{ trait: string; percentage: number }>;
+  careers: string[];
+}
+
 export type TestType = 'mbti' | 'iq' | 'career';
 export type ResultData = MBTIResultData | IQResultData | CareerResultData;
+
+// Enrich partial data with full details from type definitions
+function enrichMBTIData(partial: PartialMBTIData): MBTIResultData {
+  const typeInfo = getMBTITypeDescription(partial.type);
+  return {
+    type: partial.type,
+    typeName: typeInfo?.name ?? partial.type,
+    epithet: typeInfo?.epithet ?? '',
+    description: typeInfo?.description ?? '',
+    counts: partial.counts,
+    generalTraits: typeInfo?.generalTraits ?? [],
+    strengths: typeInfo?.strengths ?? [],
+    tenRulesToLive: typeInfo?.tenRulesToLive ?? [],
+  };
+}
+
+function enrichIQData(partial: PartialIQData): IQResultData {
+  const { level, description } = getIQDescription(partial.score);
+  return {
+    score: partial.score,
+    correctCount: partial.correctCount,
+    age: partial.age,
+    level,
+    description,
+    timestamp: partial.timestamp ?? Date.now(),
+  };
+}
+
+function enrichCareerData(partial: PartialCareerData): CareerResultData {
+  const careerMatch = mbtiCareers.find(c => c.type === partial.mbtiType);
+  return {
+    mbtiType: partial.mbtiType,
+    mbtiTypeName: partial.mbtiTypeName ?? careerMatch?.typeName ?? '',
+    ffmScores: partial.ffmScores,
+    careers: partial.careers,
+  };
+}
 
 // Helper to render PDF with proper typing
 async function renderPdf(element: React.ReactElement): Promise<Buffer> {
@@ -116,7 +177,7 @@ function generateEmailHtml(testType: TestType, resultData: ResultData): string {
 export interface SendEmailParams {
   to: string;
   testType: TestType;
-  resultData: ResultData;
+  resultData: unknown; // Accept partial data, will be enriched
   orderId?: string;
 }
 
@@ -127,7 +188,8 @@ export interface SendEmailResult {
 }
 
 export async function sendTestResultEmail(params: SendEmailParams): Promise<SendEmailResult> {
-  const { to, testType, resultData, orderId } = params;
+  const { to, testType, orderId } = params;
+  let { resultData } = params;
 
   // Check if Resend is configured
   if (!RESEND_CONFIG.apiKey) {
@@ -140,13 +202,23 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
     return { success: false, error: '邮箱格式无效' };
   }
 
+  if (!resultData || typeof resultData !== 'object') {
+    return { success: false, error: '结果数据无效' };
+  }
+
   try {
     // Generate PDF
     let pdfBuffer: Buffer;
+    let enrichedData: ResultData;
 
     switch (testType) {
       case 'mbti': {
-        const data = resultData as MBTIResultData;
+        const partial = resultData as PartialMBTIData;
+        if (!partial.type || !partial.counts) {
+          return { success: false, error: 'MBTI数据不完整' };
+        }
+        enrichedData = enrichMBTIData(partial);
+        const data = enrichedData as MBTIResultData;
         pdfBuffer = await renderPdf(
           React.createElement(MBTIReport, {
             type: data.type,
@@ -162,7 +234,12 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
         break;
       }
       case 'iq': {
-        const data = resultData as IQResultData;
+        const partial = resultData as PartialIQData;
+        if (typeof partial.score !== 'number' || typeof partial.correctCount !== 'number') {
+          return { success: false, error: 'IQ数据不完整' };
+        }
+        enrichedData = enrichIQData(partial);
+        const data = enrichedData as IQResultData;
         pdfBuffer = await renderPdf(
           React.createElement(IQReport, {
             score: data.score,
@@ -176,7 +253,12 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
         break;
       }
       case 'career': {
-        const data = resultData as CareerResultData;
+        const partial = resultData as PartialCareerData;
+        if (!partial.mbtiType || !partial.ffmScores || !partial.careers) {
+          return { success: false, error: '职业测试数据不完整' };
+        }
+        enrichedData = enrichCareerData(partial);
+        const data = enrichedData as CareerResultData;
         pdfBuffer = await renderPdf(
           React.createElement(CareerReport, {
             mbtiType: data.mbtiType,
@@ -201,7 +283,7 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
       from: RESEND_CONFIG.fromEmail,
       to: to,
       subject: `你的${testName}测试报告 — 心理测试平台`,
-      html: generateEmailHtml(testType, resultData),
+      html: generateEmailHtml(testType, enrichedData),
       attachments: [
         {
           filename: `xinli-report-${testType}.pdf`,

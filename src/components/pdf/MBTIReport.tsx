@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     fontSize: 72,
     color: '#7c3aed',
     fontWeight: 'bold',
-    letterSpacing: 8,
+    letterSpacing: 4,
   },
   typeName: {
     fontSize: 24,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#374151',
     lineHeight: 1.8,
-    textAlign: 'justify',
+    textAlign: 'left',
   },
   listContainer: {
     marginTop: 16,
@@ -312,36 +312,35 @@ export function MBTIReport({
         <Footer pageNum={3} />
       </Page>
 
-      {/* Page 4: Traits + Strengths */}
+      {/* Page 4: Traits */}
       <Page size="A4" style={styles.page}>
-        <View style={styles.twoColumn}>
-          <View style={styles.column}>
-            <Text style={styles.columnTitle}>性格特点</Text>
-            <View style={styles.listContainer}>
-              {generalTraits.map((trait, index) => (
-                <View key={index} style={styles.listItem}>
-                  <View style={styles.listBullet} />
-                  <Text style={styles.listText}>{trait}</Text>
-                </View>
-              ))}
+        <Text style={styles.sectionTitle}>性格特点</Text>
+        <View style={styles.listContainer}>
+          {generalTraits.map((trait, index) => (
+            <View key={index} style={styles.listItem}>
+              <View style={styles.listBullet} />
+              <Text style={styles.listText}>{trait}</Text>
             </View>
-          </View>
-          <View style={styles.column}>
-            <Text style={styles.columnTitle}>优势特长</Text>
-            <View style={styles.listContainer}>
-              {strengths.map((strength, index) => (
-                <View key={index} style={styles.listItem}>
-                  <View style={styles.listBullet} />
-                  <Text style={styles.listText}>{strength}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          ))}
         </View>
         <Footer pageNum={4} />
       </Page>
 
-      {/* Page 5: Life Advice */}
+      {/* Page 5: Strengths */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.sectionTitle}>优势特长</Text>
+        <View style={styles.listContainer}>
+          {strengths.map((strength, index) => (
+            <View key={index} style={styles.listItem}>
+              <View style={styles.listBullet} />
+              <Text style={styles.listText}>{strength}</Text>
+            </View>
+          ))}
+        </View>
+        <Footer pageNum={5} />
+      </Page>
+
+      {/* Page 6: Life Advice */}
       <Page size="A4" style={styles.page}>
         <Text style={styles.sectionTitle}>生活建议</Text>
         <View style={styles.listContainer}>
@@ -354,7 +353,7 @@ export function MBTIReport({
             </View>
           ))}
         </View>
-        <Footer pageNum={5} />
+        <Footer pageNum={6} />
       </Page>
     </Document>
   );

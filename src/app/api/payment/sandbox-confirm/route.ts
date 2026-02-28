@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrder, updateOrderStatus } from '@/lib/db';
-import { isSandboxMode } from '@/lib/payment-config';
+import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
 
 interface SandboxConfirmRequest {
   orderId: string;
@@ -44,6 +44,28 @@ export async function POST(request: NextRequest) {
 
     // Update order status to paid
     updateOrderStatus(orderId, 'paid');
+
+    // Send email if configured and email exists
+    if (order.email && RESEND_CONFIG.apiKey) {
+      try {
+        const resultData = order.result_data ? JSON.parse(order.result_data) : null;
+        if (resultData) {
+          // Fire and forget - don't block the response
+          fetch(new URL('/api/email/send', request.url).toString(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: order.email,
+              testType: order.test_type,
+              resultData,
+              orderId,
+            }),
+          }).catch((err) => console.error('Email send failed:', err));
+        }
+      } catch (err) {
+        console.error('Failed to parse result_data for email:', err);
+      }
+    }
 
     return NextResponse.json({
       success: true,

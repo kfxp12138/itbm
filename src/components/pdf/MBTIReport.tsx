@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 12,
     paddingLeft: 8,
+    flexWrap: 'wrap',
   },
   listBullet: {
     width: 8,
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#374151',
     lineHeight: 1.6,
+    flexWrap: 'wrap',
   },
   // Advice page styles
   adviceNumber: {
@@ -172,6 +174,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 16,
     alignItems: 'flex-start',
+    flexWrap: 'wrap',
   },
   adviceText: {
     flex: 1,
@@ -179,6 +182,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     lineHeight: 1.6,
     paddingTop: 4,
+    flexWrap: 'wrap',
   },
   // Footer styles
   footer: {

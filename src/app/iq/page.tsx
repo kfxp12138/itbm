@@ -73,10 +73,10 @@ export default function IQTestPage() {
       <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8">
           <p className="section-kicker text-center">IQ Test</p>
-          <h1 className="mb-4 mt-4 text-center text-3xl font-bold text-zinc-50">瑞文智力测试</h1>
-          <p className="mb-8 text-center text-zinc-400">请输入您的年龄以开始测试</p>
+          <h1 className="mb-4 mt-4 text-center text-3xl font-bold text-slate-900">瑞文智力测试</h1>
+          <p className="mb-8 text-center text-slate-600">请输入您的年龄以开始测试</p>
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-zinc-300">年龄</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">年龄</label>
             <input
               type="number"
               min={10}
@@ -102,8 +102,8 @@ export default function IQTestPage() {
       <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
           <p className="section-kicker text-center">Instructions</p>
-          <h1 className="mb-6 mt-4 text-center text-3xl font-bold text-zinc-50">测试说明</h1>
-          <div className="mb-8 space-y-4 text-zinc-400">
+          <h1 className="mb-6 mt-4 text-center text-3xl font-bold text-slate-900">测试说明</h1>
+          <div className="mb-8 space-y-4 text-slate-600">
             <p>本测试是瑞文标准推理测验（Raven&apos;s Progressive Matrices），用于评估您的逻辑推理能力。</p>
             <ul className="list-disc list-inside space-y-2">
               <li>共 60 道图形推理题，分为 A、B、C、D、E 五组</li>
@@ -112,7 +112,7 @@ export default function IQTestPage() {
               <li>时间结束后将自动提交</li>
               <li>可以在各组之间自由切换</li>
             </ul>
-            <p className="font-medium text-zinc-200">准备好后，点击开始测试。</p>
+            <p className="font-medium text-slate-800">准备好后，点击开始测试。</p>
           </div>
           <div className="flex gap-4">
             <button
@@ -137,9 +137,9 @@ export default function IQTestPage() {
 
   return (
     <div className="app-shell-module-indigo min-h-screen flex flex-col">
-      <div className="border-b border-white/8 bg-black/20 px-4 py-3 backdrop-blur-xl">
+      <div className="border-b border-slate-200/80 bg-white/75 px-4 py-3 backdrop-blur-xl">
         <div className="app-container flex items-center justify-between px-0">
-          <div className="text-sm font-medium text-zinc-200 sm:text-base">
+          <div className="text-sm font-medium text-slate-700 sm:text-base">
           第 {currentQuestion + 1}/{TOTAL_QUESTIONS} 题 (组 {SETS[currentSet]})
           </div>
           <div className={`font-mono text-base font-bold sm:text-lg ${timeLeft <= 60 ? 'text-red-300' : 'text-blue-300'}`}>
@@ -155,8 +155,8 @@ export default function IQTestPage() {
             onClick={() => goToSet(index)}
             className={`flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors sm:px-4 sm:py-2 sm:text-base ${
               currentSet === index
-                ? 'bg-blue-500 text-white shadow-[0_0_18px_rgba(59,130,246,0.28)]'
-                : 'border border-white/8 bg-white/6 text-zinc-400 hover:bg-white/10'
+                ? 'bg-blue-500 text-white shadow-[0_0_18px_rgba(59,130,246,0.22)]'
+                : 'border border-slate-200 bg-white text-slate-600 hover:bg-blue-50'
             }`}
           >
             {set}
@@ -185,8 +185,8 @@ export default function IQTestPage() {
               onClick={() => handleAnswerSelect(i)}
               className={`rounded-2xl py-4 text-lg font-bold transition-colors ${
                 answers[currentQuestion] === i
-                  ? 'bg-blue-500 text-white shadow-[0_0_22px_rgba(59,130,246,0.28)]'
-                  : 'border border-white/8 bg-black/20 text-zinc-200 hover:bg-blue-500/12'
+                  ? 'bg-blue-500 text-white shadow-[0_0_22px_rgba(59,130,246,0.22)]'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:bg-blue-50'
               }`}
             >
               {i + 1}

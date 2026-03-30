@@ -78,7 +78,7 @@ function PaymentContent() {
     return (
       <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">加载中...</p>
+          <p className="text-slate-600">加载中...</p>
         </div>
       </div>
     );
@@ -88,35 +88,35 @@ function PaymentContent() {
     <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
       <div className="glass-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
         <p className="section-kicker text-center">Payment</p>
-        <h1 className="mb-2 mt-4 text-center text-2xl font-bold text-zinc-50">确认支付</h1>
-        <p className="mb-6 text-center text-zinc-400">完成支付后查看测试结果</p>
+        <h1 className="mb-2 mt-4 text-center text-2xl font-bold text-slate-900">确认支付</h1>
+        <p className="mb-6 text-center text-slate-600">完成支付后查看测试结果</p>
 
         {/* Test Info */}
         <div className="glass-card-soft mb-6 rounded-[1.5rem] p-4">
           <div className="flex justify-between items-center">
-            <span className="text-zinc-400">测试项目</span>
-            <span className="font-medium text-zinc-100">{TEST_NAMES[testType] || testType}</span>
+            <span className="text-slate-500">测试项目</span>
+            <span className="font-medium text-slate-900">{TEST_NAMES[testType] || testType}</span>
           </div>
           <div className="flex justify-between items-center mt-2">
-            <span className="text-zinc-400">支付金额</span>
+            <span className="text-slate-500">支付金额</span>
             <span className="text-xl font-bold text-amber-300">{TEST_PRICES[testType] || '¥9.99'}</span>
           </div>
         </div>
 
         {/* Payment Method */}
         <div className="mb-6">
-          <p className="mb-3 text-sm font-medium text-zinc-300">选择支付方式</p>
+          <p className="mb-3 text-sm font-medium text-slate-700">选择支付方式</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setSelectedMethod('wechat')}
               className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
                 selectedMethod === 'wechat'
-                  ? 'border-emerald-400 bg-emerald-500/12'
-                  : 'border-white/8 bg-black/20 hover:border-emerald-400/40'
+                  ? 'border-emerald-300 bg-emerald-50'
+                  : 'border-slate-200 bg-white hover:border-emerald-200'
                }`}
             >
               <span className="text-2xl">💬</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'wechat' ? 'text-emerald-200' : 'text-zinc-400'}`}>
+              <span className={`text-sm font-medium ${selectedMethod === 'wechat' ? 'text-emerald-700' : 'text-slate-600'}`}>
                 微信支付
               </span>
             </button>
@@ -124,12 +124,12 @@ function PaymentContent() {
               onClick={() => setSelectedMethod('alipay')}
               className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
                 selectedMethod === 'alipay'
-                  ? 'border-blue-400 bg-blue-500/12'
-                  : 'border-white/8 bg-black/20 hover:border-blue-400/40'
+                  ? 'border-blue-300 bg-blue-50'
+                  : 'border-slate-200 bg-white hover:border-blue-200'
                }`}
             >
               <span className="text-2xl">💳</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-blue-200' : 'text-zinc-400'}`}>
+              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-blue-700' : 'text-slate-600'}`}>
                 支付宝
               </span>
             </button>
@@ -138,7 +138,7 @@ function PaymentContent() {
 
         {/* Email Input */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <label className="mb-2 block text-sm font-medium text-slate-700">
             邮箱（可选，用于接收结果）
           </label>
           <input
@@ -162,7 +162,7 @@ function PaymentContent() {
         {/* Back Link */}
         <button
           onClick={() => router.back()}
-          className="mt-3 w-full text-sm text-zinc-500 transition-colors hover:text-zinc-200"
+          className="mt-3 w-full text-sm text-slate-500 transition-colors hover:text-slate-900"
         >
           返回
         </button>
@@ -177,7 +177,7 @@ export default function PaymentPage() {
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
           <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-            <p className="text-zinc-300">加载中...</p>
+            <p className="text-slate-600">加载中...</p>
           </div>
         </div>
       }

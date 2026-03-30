@@ -87,7 +87,7 @@ export default function HistoryPage() {
   if (!loaded) {
     return (
       <div className="app-shell flex min-h-screen items-center justify-center px-4">
-        <div className="glass-card rounded-[2rem] px-8 py-10 text-center text-zinc-300">
+        <div className="glass-card rounded-[2rem] px-8 py-10 text-center text-slate-600">
           加载中...
         </div>
       </div>
@@ -100,12 +100,12 @@ export default function HistoryPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <p className="section-kicker">History</p>
-            <h1 className="mt-3 text-3xl font-bold text-zinc-50">测试记录</h1>
+            <h1 className="mt-3 text-3xl font-bold text-slate-900">测试记录</h1>
           </div>
           {entries.length > 0 && (
             <button
               onClick={clearHistory}
-              className="rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-200 hover:bg-red-500/16"
+              className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 hover:bg-red-100"
             >
               清除记录
             </button>
@@ -115,7 +115,7 @@ export default function HistoryPage() {
         {entries.length === 0 ? (
           <div className="glass-card rounded-[2rem] p-12 text-center">
             <div className="text-4xl mb-4">📋</div>
-            <p className="mb-6 text-zinc-400">暂无测试记录，去做一个测试吧！</p>
+            <p className="mb-6 text-slate-600">暂无测试记录，去做一个测试吧！</p>
             <Link
               href="/"
               className="app-button-primary gap-2 px-6 py-3 text-sm font-medium"
@@ -128,7 +128,7 @@ export default function HistoryPage() {
             {entries.map((entry, i) => {
               const config = typeConfig[entry.type];
               const cardContent = (
-                <div className="glass-card rounded-[1.75rem] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/12">
+                <div className="glass-card rounded-[1.75rem] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300/80">
                   <div className="flex items-start gap-4">
                     <div className="text-2xl">{config.icon}</div>
                     <div className="flex-1 min-w-0">
@@ -136,13 +136,13 @@ export default function HistoryPage() {
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${config.color}`}>
                           {config.label}
                         </span>
-                        <span className="text-xs text-zinc-500">
+                        <span className="text-xs text-slate-500">
                           {new Date(entry.timestamp).toLocaleString('zh-CN')}
                         </span>
                       </div>
-                      <div className="font-bold text-zinc-50">{entry.summary}</div>
+                      <div className="font-bold text-slate-900">{entry.summary}</div>
                       {entry.detail && (
-                        <div className="mt-0.5 text-sm text-zinc-400">{entry.detail}</div>
+                        <div className="mt-0.5 text-sm text-slate-600">{entry.detail}</div>
                       )}
                       {entry.href ? (
                         <div className="mt-2 text-sm font-medium text-violet-300">查看该次结果概览 →</div>

@@ -25,14 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="antialiased min-h-screen flex flex-col bg-gray-50 text-gray-900">
+      <body className="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900">
         <Navbar />
         
         <main className="flex-grow">
           {children}
         </main>
 
-        <footer className="border-t border-white/8 bg-black/25 py-14 backdrop-blur-xl">
+        <footer className="border-t border-slate-200/80 bg-white/75 py-14 backdrop-blur-xl">
           <div className="app-container">
             <div className="md:flex md:justify-between">
               <div className="mb-8 md:mb-0">
@@ -40,47 +40,47 @@ export default function RootLayout({
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-lg font-bold text-white shadow-[0_0_26px_rgba(139,92,246,0.3)]">
                     心
                   </div>
-                  <span className="font-bold text-xl tracking-tight text-zinc-50">
+                    <span className="font-bold text-xl tracking-tight text-slate-900">
                     心理测试平台
                   </span>
                 </span>
-                <p className="max-w-xs text-sm leading-relaxed text-zinc-400">
+                <p className="max-w-xs text-sm leading-relaxed text-slate-600">
                   专业的在线心理测评平台，提供科学、准确的MBTI、智商及职业性格测试，助你探索潜能，规划未来。
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-16">
                 <div>
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-200">测试项目</h3>
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-800">测试项目</h3>
                   <ul className="space-y-3">
                     <li>
-                      <Link href="/mbti" className="text-base text-zinc-400 hover:text-violet-300">MBTI人格测试</Link>
+                       <Link href="/mbti" className="text-base text-slate-600 hover:text-violet-600">MBTI人格测试</Link>
                     </li>
                     <li>
-                      <Link href="/iq" className="text-base text-zinc-400 hover:text-blue-300">IQ智力测试</Link>
+                       <Link href="/iq" className="text-base text-slate-600 hover:text-blue-600">IQ智力测试</Link>
                     </li>
                     <li>
-                      <Link href="/career" className="text-base text-zinc-400 hover:text-emerald-300">职业性格测试</Link>
+                       <Link href="/career" className="text-base text-slate-600 hover:text-emerald-600">职业性格测试</Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-200">关于我们</h3>
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-800">关于我们</h3>
                   <ul className="space-y-3">
                     <li>
-                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">关于平台</a>
+                       <a href="#" className="text-base text-slate-600 hover:text-slate-900">关于平台</a>
                     </li>
                     <li>
-                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">联系我们</a>
+                       <a href="#" className="text-base text-slate-600 hover:text-slate-900">联系我们</a>
                     </li>
                     <li>
-                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">隐私政策</a>
+                       <a href="#" className="text-base text-slate-600 hover:text-slate-900">隐私政策</a>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
-            <div className="mt-12 border-t border-white/8 pt-8">
-              <p className="text-center text-base text-zinc-500">
+            <div className="mt-12 border-t border-slate-200 pt-8">
+              <p className="text-center text-base text-slate-500">
                 &copy; {new Date().getFullYear()} 心理测试平台. All rights reserved.
               </p>
             </div>

@@ -84,7 +84,7 @@ function SandboxContent() {
     return (
       <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">加载中...</p>
+          <p className="text-slate-600">加载中...</p>
         </div>
       </div>
     );
@@ -97,7 +97,7 @@ function SandboxContent() {
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="text-amber-300 hover:text-amber-200"
+            className="text-amber-600 hover:text-amber-700"
           >
             返回首页
           </button>
@@ -110,27 +110,27 @@ function SandboxContent() {
     <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
       <div className="glass-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
         <div className="mb-6 rounded-[1.25rem] border border-amber-500/25 bg-amber-500/12 p-3">
-          <p className="text-center text-sm font-medium text-amber-200">
+          <p className="text-center text-sm font-medium text-amber-700">
             ⚠️ 沙盒模式 — 仅用于开发测试
           </p>
         </div>
 
-        <h1 className="mb-2 text-center text-2xl font-bold text-zinc-50">模拟支付</h1>
-        <p className="mb-6 text-center text-zinc-400">点击下方按钮模拟支付成功</p>
+        <h1 className="mb-2 text-center text-2xl font-bold text-slate-900">模拟支付</h1>
+        <p className="mb-6 text-center text-slate-600">点击下方按钮模拟支付成功</p>
 
         {/* Order Info */}
         {orderInfo && (
           <div className="glass-card-soft mb-6 space-y-2 rounded-[1.5rem] p-4">
             <div className="flex justify-between">
-              <span className="text-zinc-500">订单号</span>
-              <span className="font-mono text-sm text-zinc-300">{orderInfo.orderId.slice(0, 8)}...</span>
+              <span className="text-slate-500">订单号</span>
+              <span className="font-mono text-sm text-slate-700">{orderInfo.orderId.slice(0, 8)}...</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">测试项目</span>
-              <span className="font-medium text-zinc-100">{TEST_NAMES[orderInfo.testType] || orderInfo.testType}</span>
+              <span className="text-slate-500">测试项目</span>
+              <span className="font-medium text-slate-900">{TEST_NAMES[orderInfo.testType] || orderInfo.testType}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-500">订单状态</span>
+              <span className="text-slate-500">订单状态</span>
               <span className={`font-medium ${orderInfo.isPaid ? 'text-green-600' : 'text-orange-600'}`}>
                 {orderInfo.isPaid ? '已支付' : '待支付'}
               </span>
@@ -161,7 +161,7 @@ function SandboxContent() {
         {/* Back Link */}
         <button
           onClick={() => router.push('/')}
-          className="mt-3 w-full text-sm text-zinc-500 transition-colors hover:text-zinc-200"
+          className="mt-3 w-full text-sm text-slate-500 transition-colors hover:text-slate-900"
         >
           返回首页
         </button>
@@ -176,7 +176,7 @@ export default function SandboxPage() {
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
           <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-            <p className="text-zinc-300">加载中...</p>
+            <p className="text-slate-600">加载中...</p>
           </div>
         </div>
       }

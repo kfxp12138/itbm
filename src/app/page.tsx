@@ -35,10 +35,10 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
               <p className="section-kicker">人格 · 智力 · 职业倾向</p>
-              <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-zinc-50 sm:text-6xl sm:leading-[1.05]">
+              <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 sm:text-6xl sm:leading-[1.05]">
                 不是一堆冰冷题目，而是一次更有质感的自我探索。
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
+              <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
                 用更沉浸的界面和更清晰的反馈，把 MBTI、IQ 和职业性格三类测试串成一条完整的自我认知旅程。
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -55,18 +55,18 @@ export default function Home() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">MBTI</p>
-                  <p className="mt-3 text-2xl font-semibold text-violet-200">200 题五级量表</p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-400">更细的倾向强度，更接近真实状态。</p>
+                  <p className="mt-3 text-2xl font-semibold text-violet-700">200 题五级量表</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">更细的倾向强度，更接近真实状态。</p>
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">IQ</p>
-                  <p className="mt-3 text-2xl font-semibold text-blue-200">20 分钟推理挑战</p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-400">图形推理、分组作答、即时反馈。</p>
+                  <p className="mt-3 text-2xl font-semibold text-blue-700">20 分钟推理挑战</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">图形推理、分组作答、即时反馈。</p>
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5 sm:col-span-2">
                   <p className="section-kicker">职业画像</p>
-                  <p className="mt-3 text-2xl font-semibold text-emerald-200">人格维度 × 职业建议</p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-400">从大五人格出发，把结果落到可理解、可行动的职业方向上。</p>
+                  <p className="mt-3 text-2xl font-semibold text-emerald-700">人格维度 × 职业建议</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">从大五人格出发，把结果落到可理解、可行动的职业方向上。</p>
                 </div>
               </div>
             </div>
@@ -76,10 +76,10 @@ export default function Home() {
 
       <section id="tests" className="py-16 sm:py-20">
         <div className="app-container">
-          <h2 className="text-center text-2xl font-bold text-zinc-50 sm:text-3xl">
+          <h2 className="text-center text-2xl font-bold text-slate-900 sm:text-3xl">
             选择你的测试
           </h2>
-          <p className="mx-auto mb-12 mt-4 max-w-lg text-center text-zinc-400">
+          <p className="mx-auto mb-12 mt-4 max-w-lg text-center text-slate-600">
             每项测试都基于经典心理学理论，结果仅供参考与自我探索。
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -87,15 +87,15 @@ export default function Home() {
               <Link
                 key={test.href}
                 href={test.href}
-                className="group glass-card rounded-[2rem] p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-white/14"
+                className="group glass-card rounded-[2rem] p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300/80"
               >
                 <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${test.bgColor} text-2xl transition-transform group-hover:scale-110`}>
                   {test.icon}
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-zinc-50">
+                  <h3 className="mb-3 text-xl font-bold text-slate-900">
                   {test.title}
                 </h3>
-                <p className="mb-6 leading-relaxed text-zinc-400">
+                  <p className="mb-6 leading-relaxed text-slate-600">
                   {test.description}
                 </p>
                 <span className={`inline-flex items-center gap-1 text-sm font-medium bg-gradient-to-r ${test.color} bg-clip-text text-transparent`}>

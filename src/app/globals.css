@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --primary: #8b5cf6;
   --primary-foreground: #ffffff;
-  --surface: rgba(24, 24, 27, 0.82);
-  --surface-soft: rgba(39, 39, 42, 0.58);
-  --surface-border: rgba(255, 255, 255, 0.08);
-  --muted: #a1a1aa;
-  --card-shadow: 0 32px 90px rgba(0, 0, 0, 0.38);
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-soft: rgba(255, 255, 255, 0.72);
+  --surface-border: rgba(148, 163, 184, 0.18);
+  --muted: #64748b;
+  --card-shadow: 0 24px 70px rgba(15, 23, 42, 0.09);
 }
 
 @theme inline {
@@ -22,9 +22,9 @@
 
 body {
   background:
-    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 24%),
-    radial-gradient(circle at 85% 12%, rgba(59, 130, 246, 0.12), transparent 18%),
-    linear-gradient(180deg, #09090b 0%, #111827 46%, #09090b 100%);
+    radial-gradient(circle at top, rgba(124, 58, 237, 0.08), transparent 24%),
+    radial-gradient(circle at 85% 12%, rgba(59, 130, 246, 0.06), transparent 18%),
+    linear-gradient(180deg, #f8fafc 0%, #f3f4f6 48%, #ffffff 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -37,44 +37,44 @@ a {
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.32);
-  color: #faf5ff;
+  background: rgba(139, 92, 246, 0.18);
+  color: #312e81;
 }
 
 .app-shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 28%),
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.09), transparent 24%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(15, 23, 42, 0.96));
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.1), transparent 28%),
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(243, 244, 246, 0.96));
 }
 
 .app-shell-module-violet {
   background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 26%),
-    radial-gradient(circle at 84% 16%, rgba(217, 70, 239, 0.1), transparent 20%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(24, 24, 27, 1));
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(217, 70, 239, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(250, 245, 255, 0.98), rgba(255, 255, 255, 1));
 }
 
 .app-shell-module-indigo {
   background:
-    radial-gradient(circle at top left, rgba(79, 70, 229, 0.16), transparent 26%),
-    radial-gradient(circle at 84% 16%, rgba(59, 130, 246, 0.1), transparent 20%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(15, 23, 42, 1));
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.12), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(59, 130, 246, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 1));
 }
 
 .app-shell-module-emerald {
   background:
-    radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent 26%),
-    radial-gradient(circle at 84% 16%, rgba(20, 184, 166, 0.1), transparent 20%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(6, 78, 59, 0.42));
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(20, 184, 166, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(236, 253, 245, 0.98), rgba(255, 255, 255, 1));
 }
 
 .app-shell-module-amber {
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 26%),
-    radial-gradient(circle at 84% 16%, rgba(249, 115, 22, 0.1), transparent 20%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(120, 53, 15, 0.42));
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(249, 115, 22, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 255, 255, 1));
 }
 
 .app-container {
@@ -88,17 +88,17 @@ a {
   border: 1px solid var(--surface-border);
   background: var(--surface);
   box-shadow: var(--card-shadow);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(14px);
 }
 
 .glass-card-soft {
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   background: var(--surface-soft);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
 }
 
 .section-kicker {
-  color: rgba(244, 244, 245, 0.5);
+  color: rgba(71, 85, 105, 0.72);
   font-size: 0.75rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -120,17 +120,17 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(24, 24, 27, 0.78);
-  color: #f4f4f5;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.84);
+  color: #334155;
 }
 
 .app-input {
   width: 100%;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(9, 9, 11, 0.55);
-  color: #fafafa;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
   outline: none;
   transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }

@@ -38,9 +38,17 @@ export default function CareerTestPage() {
       ffmScores: result.ffmScores,
       careers: result.careers,
     };
-    const existing = JSON.parse(localStorage.getItem('career_results') || '[]');
-    existing.push(entry);
-    localStorage.setItem('career_results', JSON.stringify(existing));
+    let existing: unknown = [];
+
+    try {
+      existing = JSON.parse(localStorage.getItem('career_results') || '[]');
+    } catch {
+      existing = [];
+    }
+
+    const history = Array.isArray(existing) ? existing : [];
+    history.push(entry);
+    localStorage.setItem('career_results', JSON.stringify(history));
     localStorage.setItem('career_latest_result', JSON.stringify(result));
     router.push('/payment?testType=career');
   };
@@ -50,12 +58,12 @@ export default function CareerTestPage() {
       <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
           <div className="text-4xl text-center mb-4">💼</div>
-          <h1 className="mb-4 text-center text-2xl font-bold text-zinc-50">职业性格测试</h1>
-          <div className="mb-8 space-y-4 text-zinc-400">
+          <h1 className="mb-4 text-center text-2xl font-bold text-slate-900">职业性格测试</h1>
+          <div className="mb-8 space-y-4 text-slate-600">
             <p>本测试基于大五人格模型（BFI-10），通过10道简短的自我评估题目，分析你的五大人格特质，并映射到MBTI类型，为你推荐最适合的职业方向。</p>
-            <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 p-4">
-              <p className="mb-2 font-medium text-emerald-200">五大人格特质：</p>
-              <ul className="space-y-1 text-sm text-emerald-100/80">
+            <div className="rounded-[1.5rem] border border-emerald-100 bg-emerald-50 p-4">
+              <p className="mb-2 font-medium text-emerald-700">五大人格特质：</p>
+              <ul className="space-y-1 text-sm text-emerald-700/80">
                 <li>• 开放性 — 对新体验和创意的接受程度</li>
                 <li>• 尽责性 — 做事的条理性和责任感</li>
                 <li>• 外向性 — 社交活跃度和精力来源</li>
@@ -63,7 +71,7 @@ export default function CareerTestPage() {
                 <li>• 神经质 — 情绪稳定性和压力应对</li>
               </ul>
             </div>
-            <p className="text-sm text-zinc-500">共10道题，约2分钟完成。请根据直觉作答。</p>
+            <p className="text-sm text-slate-500">共10道题，约2分钟完成。请根据直觉作答。</p>
           </div>
           <button
             onClick={() => setStarted(true)}
@@ -83,11 +91,11 @@ export default function CareerTestPage() {
     <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
       <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
         <div className="mb-6">
-          <div className="mb-2 flex justify-between text-sm text-zinc-500">
+          <div className="mb-2 flex justify-between text-sm text-slate-500">
             <span>第 {currentQ + 1}/10 题</span>
             <span>{question.trait}</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-zinc-800">
+          <div className="h-2 w-full rounded-full bg-emerald-100">
             <div
               className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
               style={{ width: `${((currentQ + 1) / 10) * 100}%` }}
@@ -95,7 +103,7 @@ export default function CareerTestPage() {
           </div>
         </div>
 
-        <h2 className="mb-6 flex min-h-[3rem] items-center justify-center text-center text-base font-medium text-zinc-100 sm:mb-8 sm:text-lg">
+        <h2 className="mb-6 flex min-h-[3rem] items-center justify-center text-center text-base font-medium text-slate-900 sm:mb-8 sm:text-lg">
           {question.text}
         </h2>
 
@@ -114,7 +122,7 @@ export default function CareerTestPage() {
             </button>
           ))}
         </div>
-        <div className="mb-8 flex justify-between px-2 text-xs text-zinc-500">
+        <div className="mb-8 flex justify-between px-2 text-xs text-slate-500">
           <span>非常不同意</span>
           <span>非常同意</span>
         </div>

@@ -4,6 +4,18 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { CareerResult } from '@/lib/career-scoring';
 
+function parseCareerResult(raw: string | null): CareerResult | null {
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw) as CareerResult;
+  } catch {
+    return null;
+  }
+}
+
 function CareerResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,11 +40,14 @@ function CareerResultContent() {
 
           // Try to use resultData from API, fallback to localStorage
           if (data.resultData) {
-            setResult(JSON.parse(data.resultData));
+            const parsed = parseCareerResult(data.resultData);
+            if (parsed) {
+              setResult(parsed);
+            }
           } else {
-            const stored = localStorage.getItem('career_latest_result');
-            if (stored) {
-              setResult(JSON.parse(stored));
+            const parsed = parseCareerResult(localStorage.getItem('career_latest_result'));
+            if (parsed) {
+              setResult(parsed);
             }
           }
         } catch (error) {
@@ -43,9 +58,9 @@ function CareerResultContent() {
         }
       } else {
         // No orderId - fallback to localStorage (backward compatible)
-        const stored = localStorage.getItem('career_latest_result');
-        if (stored) {
-          setResult(JSON.parse(stored));
+        const parsed = parseCareerResult(localStorage.getItem('career_latest_result'));
+        if (parsed) {
+          setResult(parsed);
         }
       }
     };
@@ -57,7 +72,7 @@ function CareerResultContent() {
     return (
       <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">验证支付中...</p>
+          <p className="text-slate-600">验证支付中...</p>
         </div>
       </div>
     );
@@ -67,7 +82,7 @@ function CareerResultContent() {
     return (
       <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">加载中...</p>
+          <p className="text-slate-600">加载中...</p>
         </div>
       </div>
     );
@@ -85,41 +100,41 @@ function CareerResultContent() {
     <div className="app-shell-module-emerald min-h-screen px-4 py-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="glass-card rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-500 mb-2">你的MBTI类型</p>
+          <p className="mb-2 text-slate-500">你的MBTI类型</p>
           <div className="mb-2 text-3xl font-bold text-emerald-300 sm:text-5xl">{result.mbtiType}</div>
-          <div className="text-xl text-zinc-200">{result.mbtiTypeName}</div>
+          <div className="text-xl text-slate-700">{result.mbtiTypeName}</div>
         </div>
 
         <div className="glass-card rounded-[2rem] p-8">
-          <h2 className="mb-6 text-xl font-bold text-zinc-50">大五人格分析</h2>
+          <h2 className="mb-6 text-xl font-bold text-slate-900">大五人格分析</h2>
           <div className="space-y-5">
             {result.ffmScores.map((score) => (
               <div key={score.trait}>
                 <div className="flex justify-between mb-1">
-                  <span className="font-medium text-zinc-200">{score.trait}</span>
+                  <span className="font-medium text-slate-800">{score.trait}</span>
                   <span className="font-bold text-emerald-300">{score.percentage}%</span>
                 </div>
-                <div className="h-3 w-full rounded-full bg-zinc-800">
+                <div className="h-3 w-full rounded-full bg-emerald-100">
                   <div
                     className="bg-gradient-to-r from-emerald-400 to-teal-500 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${score.percentage}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-zinc-500">{traitDescriptions[score.trait]}</p>
+                <p className="mt-1 text-xs text-slate-500">{traitDescriptions[score.trait]}</p>
               </div>
             ))}
           </div>
         </div>
 
         <div className="glass-card rounded-[2rem] p-8">
-          <h2 className="mb-6 text-xl font-bold text-zinc-50">推荐职业方向</h2>
+          <h2 className="mb-6 text-xl font-bold text-slate-900">推荐职业方向</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {result.careers.map((career) => (
               <div
                 key={career}
-                className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center transition-colors hover:bg-emerald-500/16"
+                className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center transition-colors hover:bg-emerald-100"
               >
-                <span className="font-medium text-emerald-100">{career}</span>
+                <span className="font-medium text-emerald-700">{career}</span>
               </div>
             ))}
           </div>

@@ -189,7 +189,7 @@ export interface SendEmailResult {
 
 export async function sendTestResultEmail(params: SendEmailParams): Promise<SendEmailResult> {
   const { to, testType, orderId } = params;
-  let { resultData } = params;
+  const { resultData } = params;
 
   // Check if Resend is configured
   if (!RESEND_CONFIG.apiKey) {

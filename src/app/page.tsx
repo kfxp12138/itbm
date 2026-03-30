@@ -4,7 +4,7 @@ const tests = [
   {
     title: "MBTI人格测试",
     icon: "🧠",
-    description: "70道题目，探索你的16种人格类型，深入了解自己的性格特征、优势与成长方向。",
+    description: "200道五级倾向题，保留经典16型结果，同时呈现更细腻的四维偏好强度与人格画像。",
     href: "/mbti",
     color: "from-violet-500 to-purple-600",
     bgColor: "bg-violet-50",

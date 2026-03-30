@@ -59,7 +59,11 @@ export default function HistoryPage() {
   };
 
   useEffect(() => {
-    loadHistory();
+    const timer = window.setTimeout(() => {
+      loadHistory();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const clearHistory = () => {

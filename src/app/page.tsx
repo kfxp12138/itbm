@@ -2,7 +2,15 @@ import Link from "next/link";
 
 const tests = [
   {
-    title: "MBTI人格测试",
+    title: "免费MBTI快速版",
+    icon: "✨",
+    description: "20道题免费快速测，先看你的主类型，以及最可能接近的几个相邻类型。",
+    href: "/mbti/free",
+    color: "from-fuchsia-500 to-violet-600",
+    bgColor: "bg-fuchsia-50",
+  },
+  {
+    title: "MBTI人格测试（完整版）",
     icon: "🧠",
     description: "200道五级倾向题，保留经典16型结果，同时呈现更细腻的四维偏好强度与人格画像。",
     href: "/mbti",
@@ -36,10 +44,10 @@ export default function Home() {
             <div>
               <p className="section-kicker">人格 · 智力 · 职业倾向</p>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 sm:text-6xl sm:leading-[1.05]">
-                不是一堆冰冷题目，而是一次更有质感的自我探索。
+                用更清晰的测试流程，认识你的性格、能力与职业倾向。
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                用更沉浸的界面和更清晰的反馈，把 MBTI、IQ 和职业性格三类测试串成一条完整的自我认知旅程。
+                你可以先做 20 题免费 MBTI 快速版，也可以直接进入 200 题完整版，再配合 IQ 与职业测试补全自己的画像。
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="#tests" className="app-button-primary px-8 py-3 text-base font-medium">
@@ -55,8 +63,8 @@ export default function Home() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">MBTI</p>
-                  <p className="mt-3 text-2xl font-semibold text-violet-700">200 题五级量表</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">更细的倾向强度，更接近真实状态。</p>
+                  <p className="mt-3 text-2xl font-semibold text-violet-700">免费 20 题 + 完整 200 题</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">先快速判断主类型，再按需查看完整版深度画像。</p>
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">IQ</p>
@@ -82,7 +90,7 @@ export default function Home() {
           <p className="mx-auto mb-12 mt-4 max-w-lg text-center text-slate-600">
             每项测试都基于经典心理学理论，结果仅供参考与自我探索。
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
             {tests.map((test) => (
               <Link
                 key={test.href}

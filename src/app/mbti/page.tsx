@@ -6,6 +6,7 @@ import { MBTI_DIMENSIONS, mbtiQuestions } from '@/data/mbti-questions';
 import { calculateMBTIResult, type MBTIAnswerValue } from '@/lib/mbti-scoring';
 
 const MBTI_DRAFT_KEY = 'mbti_draft_v2';
+const SECTION_SIZE = 50;
 
 interface MBTIDraft {
   currentQ: number;
@@ -20,8 +21,6 @@ const SCALE_OPTIONS: Array<{ value: MBTIAnswerValue; tone: string; size: string 
   { value: 4, tone: '比较符合', size: 'h-12 w-12 sm:h-14 sm:w-14' },
   { value: 5, tone: '非常符合', size: 'h-14 w-14 sm:h-16 sm:w-16' },
 ];
-
-const SECTION_SIZE = 50;
 
 function createEmptyAnswers(): Array<MBTIAnswerValue | null> {
   return Array.from({ length: mbtiQuestions.length }, () => null);
@@ -43,19 +42,9 @@ function parseDraft(raw: string | null): MBTIDraft | null {
       return null;
     }
 
-    const answers = parsed.answers.map((answer) => {
-      if (answer === null) {
-        return null;
-      }
-
-      return answer === 1 || answer === 2 || answer === 3 || answer === 4 || answer === 5 ? answer : null;
-    });
-
-    const currentQ = Math.min(Math.max(parsed.currentQ, 0), mbtiQuestions.length - 1);
-
     return {
-      answers,
-      currentQ,
+      answers: parsed.answers.map((answer) => (answer === 1 || answer === 2 || answer === 3 || answer === 4 || answer === 5 ? answer : null)),
+      currentQ: Math.min(Math.max(parsed.currentQ, 0), mbtiQuestions.length - 1),
       savedAt: parsed.savedAt,
     };
   } catch {
@@ -82,8 +71,7 @@ export default function MBTITestPage() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const storedDraft = parseDraft(localStorage.getItem(MBTI_DRAFT_KEY));
-      setDraft(storedDraft);
+      setDraft(parseDraft(localStorage.getItem(MBTI_DRAFT_KEY)));
       setDraftReady(true);
     }, 0);
 
@@ -95,13 +83,14 @@ export default function MBTITestPage() {
       return;
     }
 
-    const nextDraft: MBTIDraft = {
-      currentQ,
-      answers,
-      savedAt: Date.now(),
-    };
-
-    localStorage.setItem(MBTI_DRAFT_KEY, JSON.stringify(nextDraft));
+    localStorage.setItem(
+      MBTI_DRAFT_KEY,
+      JSON.stringify({
+        currentQ,
+        answers,
+        savedAt: Date.now(),
+      } satisfies MBTIDraft)
+    );
   }, [answers, currentQ, started]);
 
   const totalQuestions = mbtiQuestions.length;
@@ -114,13 +103,10 @@ export default function MBTITestPage() {
   const overallProgress = Math.round((answeredCount / totalQuestions) * 100);
   const canSubmit = answeredCount === totalQuestions;
 
-  const summaryText = useMemo(() => {
-    return [
-      '200道题，五级倾向作答',
-      '每题只选最贴近你日常状态的一侧',
-      '支持自动保存进度，可随时回来继续',
-    ];
-  }, []);
+  const summaryText = useMemo(
+    () => ['200 道题，5 级作答', '四个部分逐步完成', '自动保存进度，完成后查看完整画像'],
+    []
+  );
 
   const handleStart = () => {
     setAnswers(createEmptyAnswers());
@@ -162,7 +148,6 @@ export default function MBTITestPage() {
     };
 
     let existing: unknown = [];
-
     try {
       existing = JSON.parse(localStorage.getItem('mbti_results') || '[]');
     } catch {
@@ -181,12 +166,11 @@ export default function MBTITestPage() {
 
   if (!draftReady) {
     return (
-      <div className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-100">
+      <div className="app-shell-module-violet px-4 py-10">
         <div className="mx-auto flex min-h-[70vh] max-w-md items-center justify-center">
-          <div className="w-full rounded-3xl border border-zinc-800 bg-zinc-900/80 p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur">
-            <div className="mx-auto mb-5 h-12 w-12 rounded-full border border-violet-500/30 bg-violet-500/10" />
-            <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">MBTI 量表载入中</p>
-            <p className="mt-3 text-lg font-medium text-zinc-100">正在准备你的 200 题性格旅程...</p>
+          <div className="glass-card w-full rounded-[2rem] p-8 text-center">
+            <p className="section-kicker justify-center">MBTI</p>
+            <p className="mt-4 text-lg font-medium text-slate-900">正在加载完整版测试...</p>
           </div>
         </div>
       </div>
@@ -195,51 +179,50 @@ export default function MBTITestPage() {
 
   if (!started) {
     return (
-      <div className="min-h-screen overflow-hidden bg-zinc-950 px-4 py-10 text-zinc-100 sm:py-14">
+      <div className="app-shell-module-violet px-4 py-10 sm:py-14">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <section className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 px-7 py-8 shadow-[0_30px_120px_rgba(0,0,0,0.45)] sm:px-10 sm:py-12">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.22),_transparent_38%),radial-gradient(circle_at_80%_20%,_rgba(217,70,239,0.18),_transparent_28%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/70 to-transparent" />
+            <section className="glass-card relative overflow-hidden rounded-[2rem] px-7 py-8 sm:px-10 sm:py-12">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.14),_transparent_36%),radial-gradient(circle_at_85%_15%,_rgba(217,70,239,0.08),_transparent_24%)]" />
               <div className="relative">
-                <div className="inline-flex items-center gap-3 rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-2 text-xs font-medium uppercase tracking-[0.28em] text-violet-200">
-                  <span>MBTI 200题进阶版</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-                  <span>五级倾向量表</span>
+                <div className="inline-flex items-center gap-3 rounded-full border border-violet-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.28em] text-violet-700">
+                  <span>MBTI 完整版</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                  <span>200 题</span>
                 </div>
 
-                <h1 className="mt-8 max-w-3xl text-4xl font-semibold leading-tight text-zinc-50 sm:text-6xl sm:leading-[1.05]">
-                  不再是匆忙二选一，而是一场更沉浸的性格剖面阅读。
+                <h1 className="mt-8 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 sm:text-6xl sm:leading-[1.05]">
+                  用更完整的题量，看到更稳定的 MBTI 结果和四维倾向。
                 </h1>
-                <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
-                  200 道题、四个部分、五个程度。你只需要按照日常状态判断自己更靠近哪一侧，系统会保留经典 16 型结果，同时给出更细腻的倾向强度。
+                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+                  测试共 200 题，分为 4 个部分，采用 5 级作答。完成后会给出 16 型结果、四个维度倾向以及详细的人格解读。
                 </p>
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-3">
                   {summaryText.map((item, index) => (
-                    <div key={item} className="rounded-3xl border border-zinc-800 bg-zinc-900/70 px-5 py-5 backdrop-blur">
-                      <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-zinc-500">0{index + 1}</p>
-                      <p className="text-sm leading-7 text-zinc-200">{item}</p>
+                    <div key={item} className="glass-card-soft rounded-[1.5rem] px-5 py-5">
+                      <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-slate-400">0{index + 1}</p>
+                      <p className="text-sm leading-7 text-slate-700">{item}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-10 rounded-[1.75rem] border border-zinc-800 bg-zinc-900/70 p-5 backdrop-blur sm:p-6">
+                <div className="mt-10 rounded-[1.75rem] border border-white/70 bg-white/70 p-5 backdrop-blur sm:p-6">
                   <div className="mb-5 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.32em] text-zinc-500">4 个阶段</p>
-                      <p className="mt-2 text-xl font-semibold text-zinc-50">从行为习惯到决策偏好，逐层展开</p>
+                      <p className="text-xs uppercase tracking-[0.32em] text-slate-400">4 个阶段</p>
+                      <p className="mt-2 text-xl font-semibold text-slate-900">覆盖能量、信息、决策与节奏四个核心维度</p>
                     </div>
-                    <div className="hidden rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-xs font-medium text-violet-200 sm:block">
-                      一次完成更准确
+                    <div className="hidden rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-xs font-medium text-violet-700 sm:block">
+                      建议一次完成
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {MBTI_DIMENSIONS.map((dimension, index) => (
-                      <div key={dimension.key} className="rounded-3xl border border-zinc-800 bg-zinc-950/80 px-5 py-5">
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-violet-300/70">Part {index + 1}</p>
-                        <p className="mt-3 text-lg font-semibold text-zinc-50">{dimension.sectionTitle}</p>
-                        <p className="mt-2 text-sm leading-6 text-zinc-400">{dimension.sectionSubtitle}</p>
+                      <div key={dimension.key} className="rounded-[1.5rem] border border-slate-200 bg-white px-5 py-5">
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-violet-500/80">Part {index + 1}</p>
+                        <p className="mt-3 text-lg font-semibold text-slate-900">{dimension.sectionTitle}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{dimension.sectionSubtitle}</p>
                       </div>
                     ))}
                   </div>
@@ -247,39 +230,37 @@ export default function MBTITestPage() {
               </div>
             </section>
 
-            <aside className="rounded-[2rem] border border-zinc-800 bg-zinc-900/80 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.4)] backdrop-blur sm:p-10">
-              <div>
-                <p className="text-xs uppercase tracking-[0.32em] text-zinc-500">开始前建议</p>
-                <ul className="mt-5 space-y-4 text-sm leading-7 text-zinc-300">
-                  <li className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-4">约 25~35 分钟完成，尽量一次做完，但系统会自动保存进度。</li>
-                  <li className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-4">请按你平时最自然的状态作答，而不是理想中的自己。</li>
-                  <li className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-4">中间选项代表两边都不像或比较平衡，不必强迫自己偏向。</li>
-                </ul>
+            <aside className="glass-card rounded-[2rem] p-8 sm:p-10">
+              <p className="section-kicker">完整版说明</p>
+              <ul className="mt-5 space-y-4 text-sm leading-7 text-slate-700">
+                <li className="glass-card-soft rounded-2xl px-4 py-4">适合想看详细人格解读和四维倾向的人。</li>
+                <li className="glass-card-soft rounded-2xl px-4 py-4">请按自己平时的真实状态作答，不必追求理想答案。</li>
+                <li className="glass-card-soft rounded-2xl px-4 py-4">如果想先快速试一版，也可以先做 20 题免费版。</li>
+              </ul>
 
-                {draft ? (
-                  <div className="mt-6 rounded-3xl border border-violet-500/25 bg-violet-500/10 px-5 py-5">
-                    <p className="text-sm font-semibold text-violet-100">检测到上次进度</p>
-                    <p className="mt-2 text-sm leading-6 text-violet-100/80">
-                      你上次保存于 {formatSavedAt(draft.savedAt)}，当前已完成 {draft.answers.filter((answer) => answer !== null).length}/{totalQuestions} 题。
-                    </p>
-                  </div>
-                ) : null}
-              </div>
+              {draft ? (
+                <div className="mt-6 rounded-3xl border border-violet-200 bg-violet-50 px-5 py-5">
+                  <p className="text-sm font-semibold text-violet-700">检测到上次进度</p>
+                  <p className="mt-2 text-sm leading-6 text-violet-700/80">
+                    你上次保存于 {formatSavedAt(draft.savedAt)}，当前已完成 {draft.answers.filter((answer) => answer !== null).length}/{totalQuestions} 题。
+                  </p>
+                </div>
+              ) : null}
 
-              <div className="mt-10 space-y-3">
+              <div className="mt-8 space-y-3">
                 {draft ? (
-                  <button
-                    onClick={handleResume}
-                    className="w-full rounded-2xl border border-violet-500/30 bg-violet-500 px-5 py-4 font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition-all duration-300 hover:bg-violet-400"
-                  >
+                  <button onClick={handleResume} className="app-button-primary w-full justify-center px-5 py-4 text-sm font-semibold">
                     从上次进度继续
                   </button>
                 ) : null}
                 <button
                   onClick={handleStart}
-                  className={`w-full rounded-2xl px-5 py-4 font-semibold transition-all duration-300 ${draft ? 'border border-zinc-700 bg-zinc-950 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-900' : 'border border-violet-500/20 bg-violet-500 text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] hover:bg-violet-400'}`}
+                  className={draft ? 'app-button-secondary w-full justify-center px-5 py-4 text-sm font-semibold' : 'app-button-primary w-full justify-center px-5 py-4 text-sm font-semibold'}
                 >
-                  {draft ? '重新开始测试' : '开始测试'}
+                  {draft ? '重新开始完整版' : '开始完整版测试'}
+                </button>
+                <button onClick={() => router.push('/mbti/free')} className="app-button-secondary w-full justify-center px-5 py-4 text-sm font-semibold">
+                  先做 20 题免费版
                 </button>
               </div>
             </aside>
@@ -290,142 +271,128 @@ export default function MBTITestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 pb-10 pt-20 text-zinc-100 sm:pb-16 sm:pt-24">
-      <div className="fixed inset-x-0 top-0 z-40 h-1 bg-zinc-900/90 backdrop-blur">
-        <div
-          className="h-full bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,0.8)] transition-all duration-500"
-          style={{ width: `${Math.max(overallProgress, currentQ === 0 ? 1 : 0)}%` }}
-        />
+    <div className="app-shell-module-violet px-4 pb-10 pt-20 sm:pb-16 sm:pt-24">
+      <div className="fixed inset-x-0 top-0 z-40 h-1 bg-violet-100/80 backdrop-blur">
+        <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500" style={{ width: `${Math.max(overallProgress, currentQ === 0 ? 1 : 0)}%` }} />
       </div>
 
       <div className="mx-auto max-w-6xl space-y-6">
-        <section className="rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-6 shadow-[0_28px_100px_rgba(0,0,0,0.42)] backdrop-blur sm:p-8">
+        <section className="glass-card rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-3 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.32em] text-violet-200">
+              <div className="inline-flex items-center gap-3 rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.32em] text-violet-700">
                 <span>Part {currentSection + 1}</span>
-                <span className="h-1 w-1 rounded-full bg-violet-400" />
+                <span className="h-1 w-1 rounded-full bg-violet-500" />
                 <span>{sectionMeta.sectionTitle}</span>
               </div>
-              <h2 className="mt-5 text-3xl font-semibold text-zinc-50 sm:text-5xl">第 {question.no} 题</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">{sectionMeta.sectionSubtitle}</p>
+              <h2 className="mt-5 text-3xl font-semibold text-slate-900 sm:text-5xl">第 {question.no} 题</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">{sectionMeta.sectionSubtitle}</p>
             </div>
 
             <div className="grid min-w-full gap-3 sm:grid-cols-3 lg:min-w-[430px]">
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-950/80 px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">整体进度</p>
-                <p className="mt-2 text-xl font-semibold text-zinc-50">{answeredCount}/{totalQuestions}</p>
+              <div className="glass-card-soft rounded-[1.5rem] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">整体进度</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900">{answeredCount}/{totalQuestions}</p>
               </div>
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-950/80 px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-zinc-500">本部分</p>
-                <p className="mt-2 text-xl font-semibold text-zinc-50">{currentSectionAnswered}/{SECTION_SIZE}</p>
+              <div className="glass-card-soft rounded-[1.5rem] px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">本部分</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900">{currentSectionAnswered}/{SECTION_SIZE}</p>
               </div>
-              <div className="rounded-3xl border border-violet-500/20 bg-violet-500/10 px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-violet-200/80">状态</p>
-                <p className="mt-2 text-base font-medium text-violet-100">自动保存已开启</p>
+              <div className="rounded-[1.5rem] border border-violet-200 bg-violet-50 px-4 py-4">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-violet-500/80">状态</p>
+                <p className="mt-2 text-base font-medium text-violet-700">自动保存已开启</p>
               </div>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_220px] lg:items-end">
             <div>
-              <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.25em] text-zinc-500">
+              <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.25em] text-slate-400">
                 <span>总进度</span>
                 <span>{overallProgress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                <div className="h-full rounded-full bg-violet-500 transition-all duration-500" style={{ width: `${Math.max(overallProgress, currentQ === 0 ? 1 : 0)}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500" style={{ width: `${Math.max(overallProgress, currentQ === 0 ? 1 : 0)}%` }} />
               </div>
             </div>
 
             <div>
-              <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.25em] text-zinc-500">
+              <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.25em] text-slate-400">
                 <span>{sectionMeta.sectionTitle}</span>
                 <span>{Math.round((currentSectionAnswered / SECTION_SIZE) * 100)}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                <div className="h-full rounded-full bg-fuchsia-500 transition-all duration-500" style={{ width: `${Math.max((currentSectionAnswered / SECTION_SIZE) * 100, currentQ % SECTION_SIZE === 0 ? 2 : 0)}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-400 transition-all duration-500" style={{ width: `${Math.max((currentSectionAnswered / SECTION_SIZE) * 100, currentQ % SECTION_SIZE === 0 ? 2 : 0)}%` }} />
               </div>
             </div>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-[0_32px_120px_rgba(0,0,0,0.48)]">
-          <div className="border-b border-zinc-800 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.18),_transparent_36%),linear-gradient(180deg,_rgba(24,24,27,0.98),_rgba(9,9,11,1))] px-6 py-12 sm:px-10 sm:py-16">
+        <section className="glass-card overflow-hidden rounded-[2rem]">
+          <div className="border-b border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.12),_transparent_40%),linear-gradient(180deg,_rgba(255,255,255,0.95),_rgba(248,250,252,0.95))] px-6 py-12 sm:px-10 sm:py-16">
             <div className="mx-auto max-w-4xl text-center">
-              <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Question {currentQ + 1} of {totalQuestions}</p>
-              <h1 className="mx-auto mt-5 max-w-3xl text-2xl font-semibold leading-[1.55] text-zinc-50 sm:text-4xl sm:leading-[1.35]">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Question {currentQ + 1} of {totalQuestions}</p>
+              <h1 className="mx-auto mt-5 max-w-3xl text-2xl font-semibold leading-[1.55] text-slate-900 sm:text-4xl sm:leading-[1.35]">
                 {question.prompt}
               </h1>
-              <p className="mt-4 text-sm leading-6 text-zinc-500 sm:text-base">
-                请选择更接近你日常状态的一侧
-              </p>
+              <p className="mt-4 text-sm leading-6 text-slate-500 sm:text-base">请选择更符合你日常状态的一侧</p>
             </div>
           </div>
 
           <div className="px-6 py-8 sm:px-10 sm:py-10">
-            <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-              <div className="rounded-3xl border border-violet-500/15 bg-violet-500/6 px-5 py-6 text-center sm:px-6 sm:py-8 sm:text-left">
-                <p className="text-xl font-medium leading-9 text-zinc-100 sm:text-2xl sm:leading-10">{question.leftLabel}</p>
+            <div className="grid grid-cols-2 gap-3 sm:gap-5">
+              <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4 text-left sm:rounded-3xl sm:px-6 sm:py-8">
+                <p className="text-[15px] font-medium leading-7 text-slate-900 sm:text-2xl sm:leading-10">{question.leftLabel}</p>
               </div>
-              <div className="rounded-3xl border border-fuchsia-500/15 bg-fuchsia-500/6 px-5 py-6 text-center sm:px-6 sm:py-8 sm:text-right">
-                <p className="text-xl font-medium leading-9 text-zinc-100 sm:text-2xl sm:leading-10">{question.rightLabel}</p>
+              <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 text-right sm:rounded-3xl sm:px-6 sm:py-8">
+                <p className="text-[15px] font-medium leading-7 text-slate-900 sm:text-2xl sm:leading-10">{question.rightLabel}</p>
               </div>
             </div>
 
-            <div className="mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-4 sm:mt-10 sm:p-5">
-              <div className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-6">
-                <div className="mx-auto max-w-3xl">
-                  <div className="grid grid-cols-5 items-start gap-2 sm:gap-4">
-                  {SCALE_OPTIONS.map((option) => {
-                    const isSelected = currentAnswer === option.value;
-                    const isLeft = option.value < 3;
-                    const isNeutral = option.value === 3;
+            <div className="mt-8 rounded-[2rem] border border-slate-200 bg-slate-50/80 p-4 sm:mt-10 sm:p-5">
+              <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 sm:p-6">
+                <div className="relative mx-auto max-w-3xl">
+                  <div className="absolute left-[10%] right-[10%] top-7 h-px bg-slate-200 sm:top-8" />
+                  <div className="relative grid grid-cols-5 items-start gap-1.5 sm:gap-4">
+                    {SCALE_OPTIONS.map((option) => {
+                      const isSelected = currentAnswer === option.value;
+                      const isLeft = option.value < 3;
+                      const isNeutral = option.value === 3;
 
-                    return (
-                      <div key={option.value} className="flex flex-col items-center gap-3 text-center">
-                        <button
-                          onClick={() => handleAnswer(option.value)}
-                          className={`mx-auto flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
-                            isSelected
-                              ? isNeutral
-                                ? 'scale-110 border-zinc-300 bg-zinc-100 text-zinc-950 shadow-[0_0_24px_rgba(255,255,255,0.16)]'
-                                : isLeft
-                                  ? 'scale-110 border-violet-400 bg-violet-500 text-white shadow-[0_0_28px_rgba(139,92,246,0.45)]'
-                                  : 'scale-110 border-fuchsia-400 bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,0.42)]'
-                              : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:-translate-y-1 hover:border-zinc-500 hover:bg-zinc-800'
-                          }`}
-                          aria-label={`选择第 ${option.value} 档`}
-                        >
-                          {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
-                        </button>
-                        <p className={`text-[10px] font-medium leading-4 sm:text-xs ${isSelected ? 'text-zinc-100' : 'text-zinc-500'}`}>
-                          {option.tone}
-                        </p>
-                      </div>
-                    );
-                  })}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-4 text-[11px] leading-5 text-zinc-500 sm:text-xs">
-                    <span className="max-w-[40%] text-left">左边更像你</span>
-                    <span className="text-zinc-600">中间表示两边都差不多</span>
-                    <span className="max-w-[40%] text-right">右边更像你</span>
+                      return (
+                        <div key={option.value} className="flex flex-col items-center gap-3 text-center">
+                          <button
+                            onClick={() => handleAnswer(option.value)}
+                            className={`mx-auto flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
+                              isSelected
+                                ? isNeutral
+                                  ? 'scale-110 border-slate-300 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.15)]'
+                                  : isLeft
+                                    ? 'scale-110 border-violet-300 bg-violet-500 text-white shadow-[0_12px_28px_rgba(139,92,246,0.25)]'
+                                    : 'scale-110 border-fuchsia-300 bg-fuchsia-500 text-white shadow-[0_12px_28px_rgba(217,70,239,0.22)]'
+                                : 'border-slate-200 bg-white text-slate-400 hover:-translate-y-1 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                            aria-label={`选择第 ${option.value} 档`}
+                          >
+                            {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
+                          </button>
+                          <p className={`text-[10px] font-medium leading-4 sm:text-xs ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>{option.tone}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-4 border-t border-zinc-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm leading-6 text-zinc-500">
-                当前答案{currentAnswer ? '已记录' : '尚未选择'}。你可以返回上一题修改，系统会实时保存。
-              </div>
+            <div className="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm leading-6 text-slate-500">当前答案{currentAnswer ? '已记录' : '尚未选择'}，可返回上一题修改，系统会自动保存。</div>
 
               <div className="flex gap-3">
                 <button
                   onClick={() => setCurrentQ((previous) => Math.max(0, previous - 1))}
                   disabled={currentQ === 0}
-                  className="rounded-2xl border border-zinc-700 bg-zinc-900 px-5 py-3 font-medium text-zinc-200 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="app-button-secondary rounded-2xl px-5 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   上一题
                 </button>
@@ -433,7 +400,7 @@ export default function MBTITestPage() {
                   <button
                     onClick={() => setCurrentQ((previous) => Math.min(previous + 1, totalQuestions - 1))}
                     disabled={currentAnswer === null}
-                    className="rounded-2xl border border-violet-500/30 bg-violet-500 px-5 py-3 font-medium text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition-all duration-300 hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="app-button-primary rounded-2xl px-5 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     下一题
                   </button>
@@ -441,9 +408,9 @@ export default function MBTITestPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={!canSubmit}
-                    className="rounded-2xl border border-violet-500/30 bg-violet-500 px-5 py-3 font-medium text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition-all duration-300 hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="app-button-primary rounded-2xl px-5 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    查看结果
+                    查看完整版结果
                   </button>
                 )}
               </div>
@@ -451,26 +418,26 @@ export default function MBTITestPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-zinc-800 bg-zinc-900/55 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur sm:p-8">
+        <section className="glass-card rounded-[2rem] p-6 sm:p-8">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-zinc-50">200题作答总览</h2>
-              <p className="mt-1 text-sm text-zinc-500">总览已经移到题目下方，方便先专注作答，再在需要时跳转检查。</p>
+              <h2 className="text-xl font-semibold text-slate-900">200 题作答总览</h2>
+              <p className="mt-1 text-sm text-slate-500">可在下方查看作答情况，并跳转到任意题目。</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-200">
-                <span className="h-2.5 w-2.5 rounded-[4px] bg-violet-400" />当前题
+              <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-violet-700">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-violet-500" />当前题
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-600 bg-zinc-700/80 px-3 py-1 text-zinc-100">
-                <span className="h-2.5 w-2.5 rounded-[4px] bg-zinc-300" />已作答
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-slate-700">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-slate-400" />已作答
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950 px-3 py-1 text-zinc-400">
-                <span className="h-2.5 w-2.5 rounded-[4px] bg-zinc-700" />未作答
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-500">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-slate-200" />未作答
               </span>
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/80 p-4 sm:p-6">
+          <div className="glass-card-soft rounded-[1.75rem] p-4 sm:p-6">
             <div className="grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-20">
               {answers.map((answer, index) => {
                 const isAnswered = answer !== null;
@@ -482,10 +449,10 @@ export default function MBTITestPage() {
                     onClick={() => setCurrentQ(index)}
                     className={`group relative flex aspect-square items-center justify-center rounded-xl border text-[11px] font-semibold transition-all duration-200 sm:text-xs ${
                       isCurrent
-                        ? 'z-10 scale-105 border-violet-400 bg-violet-500 text-white shadow-[0_0_24px_rgba(139,92,246,0.55)]'
+                        ? 'z-10 scale-105 border-violet-300 bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.22)]'
                         : isAnswered
-                          ? 'border-zinc-600 bg-zinc-700/80 text-zinc-100 hover:border-violet-400 hover:bg-zinc-700'
-                          : 'border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                          ? 'border-slate-200 bg-slate-100 text-slate-700 hover:border-violet-300 hover:bg-violet-50'
+                          : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-700'
                     }`}
                   >
                     <span className="absolute inset-x-2 bottom-1 h-px rounded-full bg-current opacity-15" />

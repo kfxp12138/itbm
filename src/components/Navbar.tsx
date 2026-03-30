@@ -10,7 +10,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "首页", href: "/" },
-    { name: "MBTI测试", href: "/mbti" },
+    { name: "免费MBTI", href: "/mbti/free" },
     { name: "IQ测试", href: "/iq" },
     { name: "职业测试", href: "/career" },
     { name: "测试记录", href: "/history" },
@@ -52,7 +52,7 @@ export default function Navbar() {
               href="/mbti" 
               className="app-button-primary px-4 py-2 text-sm font-medium"
             >
-              开始测试
+              完整MBTI
             </Link>
           </div>
 
@@ -101,7 +101,7 @@ export default function Navbar() {
               onClick={() => setIsOpen(false)}
               className="app-button-primary block w-full px-4 py-3 text-center text-base font-medium"
             >
-              立即开始
+              完整MBTI
             </Link>
           </div>
         </div>

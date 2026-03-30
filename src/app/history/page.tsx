@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 interface HistoryEntry {
-  type: 'mbti' | 'iq' | 'career';
+  type: 'mbti' | 'mbti-free' | 'iq' | 'career';
   timestamp: number;
   summary: string;
   detail: string;
@@ -27,6 +27,25 @@ export default function HistoryPage() {
           summary: `MBTI: ${r.type}`,
           detail: r.type,
           href: `/mbti/result?historyTs=${r.timestamp}`,
+        });
+      });
+    } catch { /* empty */ }
+
+    try {
+      const mbtiFree = JSON.parse(localStorage.getItem('mbti_free_results') || '[]');
+      mbtiFree.forEach((r: { completedAt?: number; timestamp?: number; type: string; nearbyTypes?: string[] }) => {
+        const timestamp = r.completedAt ?? r.timestamp;
+
+        if (typeof timestamp !== 'number') {
+          return;
+        }
+
+        all.push({
+          type: 'mbti-free',
+          timestamp,
+          summary: `免费MBTI: ${r.type}`,
+          detail: Array.isArray(r.nearbyTypes) && r.nearbyTypes.length > 0 ? `可能接近：${r.nearbyTypes.join('、')}` : '20题快速版',
+          href: `/mbti/free/result?historyTs=${timestamp}`,
         });
       });
     } catch { /* empty */ }
@@ -70,9 +89,12 @@ export default function HistoryPage() {
 
   const clearHistory = () => {
     localStorage.removeItem('mbti_results');
+    localStorage.removeItem('mbti_free_results');
     localStorage.removeItem('iq_results');
     localStorage.removeItem('career_results');
     localStorage.removeItem('mbti_latest_result');
+    localStorage.removeItem('mbti_free_latest_result');
+    localStorage.removeItem('mbti_free_draft_v1');
     localStorage.removeItem('iq_latest_result');
     localStorage.removeItem('career_latest_result');
     setEntries([]);
@@ -80,6 +102,7 @@ export default function HistoryPage() {
 
   const typeConfig = {
     mbti: { label: 'MBTI测试', color: 'bg-violet-100 text-violet-700', icon: '🧠' },
+    'mbti-free': { label: '免费MBTI', color: 'bg-fuchsia-100 text-fuchsia-700', icon: '✨' },
     iq: { label: 'IQ测试', color: 'bg-blue-100 text-blue-700', icon: '🧩' },
     career: { label: '职业测试', color: 'bg-emerald-100 text-emerald-700', icon: '💼' },
   };

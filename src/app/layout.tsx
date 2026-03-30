@@ -53,6 +53,9 @@ export default function RootLayout({
                   <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-800">测试项目</h3>
                   <ul className="space-y-3">
                     <li>
+                       <Link href="/mbti/free" className="text-base text-slate-600 hover:text-fuchsia-600">免费MBTI快速版</Link>
+                    </li>
+                    <li>
                        <Link href="/mbti" className="text-base text-slate-600 hover:text-violet-600">MBTI人格测试</Link>
                     </li>
                     <li>

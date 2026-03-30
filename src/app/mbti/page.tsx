@@ -13,12 +13,12 @@ interface MBTIDraft {
   savedAt: number;
 }
 
-const SCALE_OPTIONS: Array<{ value: MBTIAnswerValue; label: string; tone: string }> = [
-  { value: 1, label: '非常偏左', tone: '强烈倾向' },
-  { value: 2, label: '稍偏左', tone: '轻度倾向' },
-  { value: 3, label: '中间', tone: '比较均衡' },
-  { value: 4, label: '稍偏右', tone: '轻度倾向' },
-  { value: 5, label: '非常偏右', tone: '强烈倾向' },
+const SCALE_OPTIONS: Array<{ value: MBTIAnswerValue; tone: string; size: string }> = [
+  { value: 1, tone: '非常符合', size: 'h-14 w-14 sm:h-16 sm:w-16' },
+  { value: 2, tone: '比较符合', size: 'h-12 w-12 sm:h-14 sm:w-14' },
+  { value: 3, tone: '中立', size: 'h-10 w-10 sm:h-12 sm:w-12' },
+  { value: 4, tone: '比较符合', size: 'h-12 w-12 sm:h-14 sm:w-14' },
+  { value: 5, tone: '非常符合', size: 'h-14 w-14 sm:h-16 sm:w-16' },
 ];
 
 const SECTION_SIZE = 50;
@@ -354,70 +354,64 @@ export default function MBTITestPage() {
           <div className="border-b border-zinc-800 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.18),_transparent_36%),linear-gradient(180deg,_rgba(24,24,27,0.98),_rgba(9,9,11,1))] px-6 py-12 sm:px-10 sm:py-16">
             <div className="mx-auto max-w-4xl text-center">
               <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">Question {currentQ + 1} of {totalQuestions}</p>
-              <p className="mt-5 text-sm leading-7 text-violet-200/70">{question.prompt}</p>
-              <h1 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold leading-[1.35] text-zinc-50 sm:text-5xl sm:leading-[1.2]">
-                这一题里，你通常更接近哪一边？
+              <h1 className="mx-auto mt-5 max-w-3xl text-2xl font-semibold leading-[1.55] text-zinc-50 sm:text-4xl sm:leading-[1.35]">
+                {question.prompt}
               </h1>
+              <p className="mt-4 text-sm leading-6 text-zinc-500 sm:text-base">
+                请选择更接近你日常状态的一侧
+              </p>
             </div>
           </div>
 
           <div className="px-6 py-8 sm:px-10 sm:py-10">
-            <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 px-5 py-6 text-left">
-                <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-500">左侧描述</p>
-                <p className="mt-3 text-lg font-medium leading-8 text-zinc-100">{question.leftLabel}</p>
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+              <div className="rounded-3xl border border-violet-500/15 bg-violet-500/6 px-5 py-6 text-center sm:px-6 sm:py-8 sm:text-left">
+                <p className="text-xl font-medium leading-9 text-zinc-100 sm:text-2xl sm:leading-10">{question.leftLabel}</p>
               </div>
-              <div className="text-center text-sm uppercase tracking-[0.4em] text-zinc-600">VS</div>
-              <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 px-5 py-6 text-left lg:text-right">
-                <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-500">右侧描述</p>
-                <p className="mt-3 text-lg font-medium leading-8 text-zinc-100">{question.rightLabel}</p>
+              <div className="rounded-3xl border border-fuchsia-500/15 bg-fuchsia-500/6 px-5 py-6 text-center sm:px-6 sm:py-8 sm:text-right">
+                <p className="text-xl font-medium leading-9 text-zinc-100 sm:text-2xl sm:leading-10">{question.rightLabel}</p>
               </div>
             </div>
 
-            <div className="mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-4 sm:p-5">
-              <div className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-5">
-                <div className="mb-4 flex items-center justify-between gap-4 text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
-                  <span className="max-w-[42%] text-left text-[11px] leading-5 sm:text-xs">{question.leftLabel}</span>
-                  <span className="text-zinc-700">平衡</span>
-                  <span className="max-w-[42%] text-right text-[11px] leading-5 sm:text-xs">{question.rightLabel}</span>
-                </div>
-
-                <div className="grid grid-cols-5 gap-2 sm:gap-3">
+            <div className="mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-4 sm:mt-10 sm:p-5">
+              <div className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-6">
+                <div className="mx-auto max-w-3xl">
+                  <div className="grid grid-cols-5 items-start gap-2 sm:gap-4">
                   {SCALE_OPTIONS.map((option) => {
                     const isSelected = currentAnswer === option.value;
                     const isLeft = option.value < 3;
                     const isNeutral = option.value === 3;
 
                     return (
-                      <button
-                        key={option.value}
-                        onClick={() => handleAnswer(option.value)}
-                        className={`rounded-[1.5rem] border px-2 py-4 text-center transition-all duration-300 sm:px-4 sm:py-5 ${
-                          isSelected
-                            ? isNeutral
-                              ? 'border-zinc-300 bg-zinc-100 text-zinc-950 shadow-[0_0_24px_rgba(255,255,255,0.16)]'
-                              : isLeft
-                                ? 'border-violet-400 bg-violet-500 text-white shadow-[0_0_28px_rgba(139,92,246,0.45)]'
-                                : 'border-fuchsia-400 bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,0.42)]'
-                            : 'border-zinc-800 bg-zinc-950 text-zinc-300 hover:-translate-y-1 hover:border-zinc-600 hover:bg-zinc-900'
-                        }`}
-                      >
-                        <div className="mb-4 flex items-center justify-center">
-                          <span
-                            className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold ${
-                              isSelected ? 'bg-black/20 text-white' : 'bg-zinc-800 text-zinc-400'
-                            }`}
-                          >
-                            {option.value}
-                          </span>
-                        </div>
-                        <p className="text-sm font-semibold sm:text-base">{option.label}</p>
-                        <p className={`mt-2 text-[11px] leading-5 sm:text-xs sm:leading-6 ${isSelected ? 'text-white/80' : 'text-zinc-500'}`}>
-                          {option.value < 3 ? '更接近左侧描述' : option.value > 3 ? '更接近右侧描述' : '两边都能接受或差异不大'}
+                      <div key={option.value} className="flex flex-col items-center gap-3 text-center">
+                        <button
+                          onClick={() => handleAnswer(option.value)}
+                          className={`mx-auto flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
+                            isSelected
+                              ? isNeutral
+                                ? 'scale-110 border-zinc-300 bg-zinc-100 text-zinc-950 shadow-[0_0_24px_rgba(255,255,255,0.16)]'
+                                : isLeft
+                                  ? 'scale-110 border-violet-400 bg-violet-500 text-white shadow-[0_0_28px_rgba(139,92,246,0.45)]'
+                                  : 'scale-110 border-fuchsia-400 bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,0.42)]'
+                              : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:-translate-y-1 hover:border-zinc-500 hover:bg-zinc-800'
+                          }`}
+                          aria-label={`选择第 ${option.value} 档`}
+                        >
+                          {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
+                        </button>
+                        <p className={`text-[10px] font-medium leading-4 sm:text-xs ${isSelected ? 'text-zinc-100' : 'text-zinc-500'}`}>
+                          {option.tone}
                         </p>
-                      </button>
+                      </div>
                     );
                   })}
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between gap-4 text-[11px] leading-5 text-zinc-500 sm:text-xs">
+                    <span className="max-w-[40%] text-left">左边更像你</span>
+                    <span className="text-zinc-600">中间表示两边都差不多</span>
+                    <span className="max-w-[40%] text-right">右边更像你</span>
+                  </div>
                 </div>
               </div>
             </div>

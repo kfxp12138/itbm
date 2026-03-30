@@ -350,49 +350,6 @@ export default function MBTITestPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-zinc-800 bg-zinc-900/55 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur sm:p-8">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-zinc-50">200题作答总览</h2>
-              <p className="mt-1 text-sm text-zinc-500">当前题会发光，已完成题目会更亮。点击任意格子可直接跳转。</p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-200">
-                <span className="h-2.5 w-2.5 rounded-[4px] bg-violet-400" />当前/已作答
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950 px-3 py-1 text-zinc-400">
-                <span className="h-2.5 w-2.5 rounded-[4px] bg-zinc-700" />未作答
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/80 p-4 sm:p-6">
-            <div className="grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-20">
-              {answers.map((answer, index) => {
-                const isAnswered = answer !== null;
-                const isCurrent = index === currentQ;
-
-                return (
-                  <button
-                    key={mbtiQuestions[index].no}
-                    onClick={() => setCurrentQ(index)}
-                    className={`group relative flex aspect-square items-center justify-center rounded-xl border text-[11px] font-semibold transition-all duration-200 sm:text-xs ${
-                      isCurrent
-                        ? 'z-10 scale-105 border-violet-400 bg-violet-500 text-white shadow-[0_0_24px_rgba(139,92,246,0.55)]'
-                        : isAnswered
-                          ? 'border-zinc-600 bg-zinc-700/80 text-zinc-100 hover:border-violet-400 hover:bg-zinc-700'
-                          : 'border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
-                    }`}
-                  >
-                    <span className="absolute inset-x-2 bottom-1 h-px rounded-full bg-current opacity-15" />
-                    {index + 1}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         <section className="overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950 shadow-[0_32px_120px_rgba(0,0,0,0.48)]">
           <div className="border-b border-zinc-800 bg-[radial-gradient(circle_at_top,_rgba(139,92,246,0.18),_transparent_36%),linear-gradient(180deg,_rgba(24,24,27,0.98),_rgba(9,9,11,1))] px-6 py-12 sm:px-10 sm:py-16">
             <div className="mx-auto max-w-4xl text-center">
@@ -418,10 +375,14 @@ export default function MBTITestPage() {
             </div>
 
             <div className="mt-8 rounded-[2rem] border border-zinc-800 bg-zinc-900/70 p-4 sm:p-5">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="text-sm font-medium text-zinc-400 lg:max-w-[180px] lg:text-right">{question.leftLabel}</div>
+              <div className="rounded-[1.5rem] border border-zinc-800 bg-zinc-950/70 p-4 sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-4 text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  <span className="max-w-[42%] text-left text-[11px] leading-5 sm:text-xs">{question.leftLabel}</span>
+                  <span className="text-zinc-700">平衡</span>
+                  <span className="max-w-[42%] text-right text-[11px] leading-5 sm:text-xs">{question.rightLabel}</span>
+                </div>
 
-                <div className="grid flex-1 gap-3 lg:grid-cols-5">
+                <div className="grid grid-cols-5 gap-2 sm:gap-3">
                   {SCALE_OPTIONS.map((option) => {
                     const isSelected = currentAnswer === option.value;
                     const isLeft = option.value < 3;
@@ -431,7 +392,7 @@ export default function MBTITestPage() {
                       <button
                         key={option.value}
                         onClick={() => handleAnswer(option.value)}
-                        className={`rounded-3xl border px-4 py-5 text-center transition-all duration-300 ${
+                        className={`rounded-[1.5rem] border px-2 py-4 text-center transition-all duration-300 sm:px-4 sm:py-5 ${
                           isSelected
                             ? isNeutral
                               ? 'border-zinc-300 bg-zinc-100 text-zinc-950 shadow-[0_0_24px_rgba(255,255,255,0.16)]'
@@ -450,16 +411,14 @@ export default function MBTITestPage() {
                             {option.value}
                           </span>
                         </div>
-                        <p className="text-base font-semibold">{option.label}</p>
-                        <p className={`mt-2 text-xs leading-6 ${isSelected ? 'text-white/80' : 'text-zinc-500'}`}>
+                        <p className="text-sm font-semibold sm:text-base">{option.label}</p>
+                        <p className={`mt-2 text-[11px] leading-5 sm:text-xs sm:leading-6 ${isSelected ? 'text-white/80' : 'text-zinc-500'}`}>
                           {option.value < 3 ? '更接近左侧描述' : option.value > 3 ? '更接近右侧描述' : '两边都能接受或差异不大'}
                         </p>
                       </button>
                     );
                   })}
                 </div>
-
-                <div className="text-sm font-medium text-zinc-400 lg:max-w-[180px] lg:text-left">{question.rightLabel}</div>
               </div>
             </div>
 
@@ -494,6 +453,52 @@ export default function MBTITestPage() {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-zinc-800 bg-zinc-900/55 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur sm:p-8">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-zinc-50">200题作答总览</h2>
+              <p className="mt-1 text-sm text-zinc-500">总览已经移到题目下方，方便先专注作答，再在需要时跳转检查。</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-200">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-violet-400" />当前题
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-600 bg-zinc-700/80 px-3 py-1 text-zinc-100">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-zinc-300" />已作答
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950 px-3 py-1 text-zinc-400">
+                <span className="h-2.5 w-2.5 rounded-[4px] bg-zinc-700" />未作答
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950/80 p-4 sm:p-6">
+            <div className="grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-20">
+              {answers.map((answer, index) => {
+                const isAnswered = answer !== null;
+                const isCurrent = index === currentQ;
+
+                return (
+                  <button
+                    key={mbtiQuestions[index].no}
+                    onClick={() => setCurrentQ(index)}
+                    className={`group relative flex aspect-square items-center justify-center rounded-xl border text-[11px] font-semibold transition-all duration-200 sm:text-xs ${
+                      isCurrent
+                        ? 'z-10 scale-105 border-violet-400 bg-violet-500 text-white shadow-[0_0_24px_rgba(139,92,246,0.55)]'
+                        : isAnswered
+                          ? 'border-zinc-600 bg-zinc-700/80 text-zinc-100 hover:border-violet-400 hover:bg-zinc-700'
+                          : 'border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                    }`}
+                  >
+                    <span className="absolute inset-x-2 bottom-1 h-px rounded-full bg-current opacity-15" />
+                    {index + 1}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>

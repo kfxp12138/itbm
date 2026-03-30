@@ -82,9 +82,9 @@ function SandboxContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">加载中...</p>
+      <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">加载中...</p>
         </div>
       </div>
     );
@@ -92,12 +92,12 @@ function SandboxContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+      <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="text-indigo-600 hover:text-indigo-800"
+            className="text-amber-300 hover:text-amber-200"
           >
             返回首页
           </button>
@@ -107,31 +107,30 @@ function SandboxContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md w-full">
-        {/* Sandbox Warning */}
-        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-6">
-          <p className="text-yellow-800 text-sm text-center font-medium">
+    <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
+      <div className="glass-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
+        <div className="mb-6 rounded-[1.25rem] border border-amber-500/25 bg-amber-500/12 p-3">
+          <p className="text-center text-sm font-medium text-amber-200">
             ⚠️ 沙盒模式 — 仅用于开发测试
           </p>
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">模拟支付</h1>
-        <p className="text-gray-500 text-center mb-6">点击下方按钮模拟支付成功</p>
+        <h1 className="mb-2 text-center text-2xl font-bold text-zinc-50">模拟支付</h1>
+        <p className="mb-6 text-center text-zinc-400">点击下方按钮模拟支付成功</p>
 
         {/* Order Info */}
         {orderInfo && (
-          <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+          <div className="glass-card-soft mb-6 space-y-2 rounded-[1.5rem] p-4">
             <div className="flex justify-between">
-              <span className="text-gray-500">订单号</span>
-              <span className="font-mono text-sm text-gray-700">{orderInfo.orderId.slice(0, 8)}...</span>
+              <span className="text-zinc-500">订单号</span>
+              <span className="font-mono text-sm text-zinc-300">{orderInfo.orderId.slice(0, 8)}...</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">测试项目</span>
-              <span className="font-medium text-gray-800">{TEST_NAMES[orderInfo.testType] || orderInfo.testType}</span>
+              <span className="text-zinc-500">测试项目</span>
+              <span className="font-medium text-zinc-100">{TEST_NAMES[orderInfo.testType] || orderInfo.testType}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">订单状态</span>
+              <span className="text-zinc-500">订单状态</span>
               <span className={`font-medium ${orderInfo.isPaid ? 'text-green-600' : 'text-orange-600'}`}>
                 {orderInfo.isPaid ? '已支付' : '待支付'}
               </span>
@@ -144,7 +143,7 @@ function SandboxContent() {
           <button
             onClick={handleConfirm}
             disabled={confirming}
-            className="w-full bg-green-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl border border-emerald-500/30 bg-emerald-500 py-4 text-lg font-bold text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {confirming ? '处理中...' : '✓ 模拟支付成功'}
           </button>
@@ -153,7 +152,7 @@ function SandboxContent() {
         {orderInfo && orderInfo.isPaid && (
           <button
             onClick={() => router.push(`/${orderInfo.testType}/result?orderId=${orderId}`)}
-            className="w-full bg-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-indigo-700 transition-colors"
+            className="w-full rounded-2xl border border-blue-500/30 bg-blue-500 py-4 text-lg font-bold text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
           >
             查看结果
           </button>
@@ -162,7 +161,7 @@ function SandboxContent() {
         {/* Back Link */}
         <button
           onClick={() => router.push('/')}
-          className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+          className="mt-3 w-full text-sm text-zinc-500 transition-colors hover:text-zinc-200"
         >
           返回首页
         </button>
@@ -176,8 +175,8 @@ export default function SandboxPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-            <p className="text-gray-600">加载中...</p>
+          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+            <p className="text-zinc-300">加载中...</p>
           </div>
         </div>
       }

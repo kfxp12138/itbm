@@ -19,15 +19,15 @@ export default function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 border-b border-white/8 bg-black/35 backdrop-blur-xl">
+      <div className="app-container">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform duration-200">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-lg font-bold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition-transform duration-200 group-hover:scale-105">
                 心
               </div>
-              <span className="font-bold text-xl tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">
+              <span className="font-bold text-xl tracking-tight text-zinc-50 transition-colors group-hover:text-violet-200">
                 心理测试平台
               </span>
             </Link>
@@ -39,10 +39,10 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`text-sm font-medium transition-colors duration-200 ${
+                className={`rounded-full px-3 py-2 text-sm font-medium transition-colors duration-200 ${
                   isActive(link.href)
-                    ? "text-blue-600"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "bg-white/8 text-zinc-50"
+                    : "text-zinc-400 hover:text-zinc-100"
                 }`}
               >
                 {link.name}
@@ -50,7 +50,7 @@ export default function Navbar() {
             ))}
             <Link 
               href="/mbti" 
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm hover:shadow-md"
+              className="app-button-primary px-4 py-2 text-sm font-medium"
             >
               开始测试
             </Link>
@@ -60,7 +60,7 @@ export default function Navbar() {
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2.5 min-w-[44px] min-h-[44px] rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-white/8 bg-white/5 p-2.5 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-violet-500"
               aria-expanded="false"
             >
               <span className="sr-only">Open main menu</span>
@@ -80,26 +80,26 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <div className={`md:hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 overflow-hidden"}`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-gray-100 shadow-lg">
+        <div className="space-y-1 border-b border-white/8 bg-zinc-950/95 px-2 pb-3 pt-2 shadow-2xl sm:px-3">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              className={`block rounded-xl px-3 py-2 text-base font-medium transition-colors ${
                 isActive(link.href)
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-white/8 text-zinc-50"
+                  : "text-zinc-400 hover:bg-white/6 hover:text-zinc-100"
               }`}
             >
               {link.name}
             </Link>
           ))}
-          <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
+          <div className="mt-2 border-t border-white/8 pb-2 pt-4">
             <Link 
               href="/mbti" 
               onClick={() => setIsOpen(false)}
-              className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              className="app-button-primary block w-full px-4 py-3 text-center text-base font-medium"
             >
               立即开始
             </Link>

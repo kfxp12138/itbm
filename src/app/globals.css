@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #3b82f6;
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --primary: #8b5cf6;
   --primary-foreground: #ffffff;
+  --surface: rgba(24, 24, 27, 0.82);
+  --surface-soft: rgba(39, 39, 42, 0.58);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --muted: #a1a1aa;
+  --card-shadow: 0 32px 90px rgba(0, 0, 0, 0.38);
 }
 
 @theme inline {
@@ -15,23 +20,126 @@
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
-/* Dark mode support if needed later, keeping it light/clean for now as requested */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-  }
-}
-
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 24%),
+    radial-gradient(circle at 85% 12%, rgba(59, 130, 246, 0.12), transparent 18%),
+    linear-gradient(180deg, #09090b 0%, #111827 46%, #09090b 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-/* Custom scrollbar for a cleaner look */
+a {
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.32);
+  color: #faf5ff;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.09), transparent 24%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(15, 23, 42, 0.96));
+}
+
+.app-shell-module-violet {
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(217, 70, 239, 0.1), transparent 20%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(24, 24, 27, 1));
+}
+
+.app-shell-module-indigo {
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.16), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(59, 130, 246, 0.1), transparent 20%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(15, 23, 42, 1));
+}
+
+.app-shell-module-emerald {
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(20, 184, 166, 0.1), transparent 20%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(6, 78, 59, 0.42));
+}
+
+.app-shell-module-amber {
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 26%),
+    radial-gradient(circle at 84% 16%, rgba(249, 115, 22, 0.1), transparent 20%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(120, 53, 15, 0.42));
+}
+
+.app-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+}
+
+.glass-card {
+  border: 1px solid var(--surface-border);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.glass-card-soft {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--surface-soft);
+  backdrop-filter: blur(16px);
+}
+
+.section-kicker {
+  color: rgba(244, 244, 245, 0.5);
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.app-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.98), rgba(217, 70, 239, 0.92));
+  color: #fff;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.26);
+}
+
+.app-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(24, 24, 27, 0.78);
+  color: #f4f4f5;
+}
+
+.app-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(9, 9, 11, 0.55);
+  color: #fafafa;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.app-input:focus {
+  border-color: rgba(139, 92, 246, 0.55);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

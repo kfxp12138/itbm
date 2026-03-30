@@ -47,15 +47,15 @@ export default function CareerTestPage() {
 
   if (!started) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
+      <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
           <div className="text-4xl text-center mb-4">💼</div>
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">职业性格测试</h1>
-          <div className="space-y-4 text-gray-600 mb-8">
+          <h1 className="mb-4 text-center text-2xl font-bold text-zinc-50">职业性格测试</h1>
+          <div className="mb-8 space-y-4 text-zinc-400">
             <p>本测试基于大五人格模型（BFI-10），通过10道简短的自我评估题目，分析你的五大人格特质，并映射到MBTI类型，为你推荐最适合的职业方向。</p>
-            <div className="bg-emerald-50 rounded-lg p-4">
-              <p className="font-medium text-emerald-800 mb-2">五大人格特质：</p>
-              <ul className="text-sm text-emerald-700 space-y-1">
+            <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 p-4">
+              <p className="mb-2 font-medium text-emerald-200">五大人格特质：</p>
+              <ul className="space-y-1 text-sm text-emerald-100/80">
                 <li>• 开放性 — 对新体验和创意的接受程度</li>
                 <li>• 尽责性 — 做事的条理性和责任感</li>
                 <li>• 外向性 — 社交活跃度和精力来源</li>
@@ -63,11 +63,11 @@ export default function CareerTestPage() {
                 <li>• 神经质 — 情绪稳定性和压力应对</li>
               </ul>
             </div>
-            <p className="text-sm text-gray-500">共10道题，约2分钟完成。请根据直觉作答。</p>
+            <p className="text-sm text-zinc-500">共10道题，约2分钟完成。请根据直觉作答。</p>
           </div>
           <button
             onClick={() => setStarted(true)}
-            className="w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+            className="w-full rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400"
           >
             开始测试
           </button>
@@ -80,28 +80,25 @@ export default function CareerTestPage() {
   const allAnswered = answers.every(a => a !== null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
-        {/* Progress */}
+    <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
+      <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
         <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-500 mb-2">
+          <div className="mb-2 flex justify-between text-sm text-zinc-500">
             <span>第 {currentQ + 1}/10 题</span>
             <span>{question.trait}</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="h-2 w-full rounded-full bg-zinc-800">
             <div
-              className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+              className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
               style={{ width: `${((currentQ + 1) / 10) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Question */}
-        <h2 className="text-base sm:text-lg font-medium text-gray-800 text-center mb-6 sm:mb-8 min-h-[3rem] flex items-center justify-center">
+        <h2 className="mb-6 flex min-h-[3rem] items-center justify-center text-center text-base font-medium text-zinc-100 sm:mb-8 sm:text-lg">
           {question.text}
         </h2>
 
-        {/* Likert Scale */}
         <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4">
           {LIKERT_OPTIONS.map((opt) => (
             <button
@@ -117,17 +114,16 @@ export default function CareerTestPage() {
             </button>
           ))}
         </div>
-        <div className="flex justify-between text-xs text-gray-400 mb-8 px-2">
+        <div className="mb-8 flex justify-between px-2 text-xs text-zinc-500">
           <span>非常不同意</span>
           <span>非常同意</span>
         </div>
 
-        {/* Navigation */}
         <div className="flex gap-4">
           <button
             onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
             disabled={currentQ === 0}
-            className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="app-button-secondary flex-1 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
             上一题
           </button>
@@ -135,7 +131,7 @@ export default function CareerTestPage() {
             <button
               onClick={() => setCurrentQ(currentQ + 1)}
               disabled={answers[currentQ] === null}
-              className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               下一题
             </button>
@@ -143,7 +139,7 @@ export default function CareerTestPage() {
             <button
               onClick={handleSubmit}
               disabled={!allAnswered}
-              className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               查看结果
             </button>

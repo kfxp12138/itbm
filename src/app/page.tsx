@@ -29,35 +29,57 @@ const tests = [
 
 export default function Home() {
   return (
-    <div className="min-h-[calc(100vh-4rem)]">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-6">
-            探索你的内心世界
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            通过科学的心理测评工具，深入了解自己的人格特质、智力水平和职业倾向，找到属于你的独特定位。
-          </p>
-          <Link
-            href="#tests"
-            className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-3 rounded-full text-base font-medium hover:bg-gray-800 transition-colors shadow-lg hover:shadow-xl"
-          >
-            开始探索
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Link>
+    <div className="min-h-[calc(100vh-4rem)] app-shell">
+      <section className="relative overflow-hidden py-20 sm:py-28">
+        <div className="app-container">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="section-kicker">人格 · 智力 · 职业倾向</p>
+              <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-zinc-50 sm:text-6xl sm:leading-[1.05]">
+                不是一堆冰冷题目，而是一次更有质感的自我探索。
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
+                用更沉浸的界面和更清晰的反馈，把 MBTI、IQ 和职业性格三类测试串成一条完整的自我认知旅程。
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="#tests" className="app-button-primary px-8 py-3 text-base font-medium">
+                  开始探索
+                </Link>
+                <Link href="/history" className="app-button-secondary px-8 py-3 text-base font-medium">
+                  查看历史记录
+                </Link>
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] p-6 sm:p-8">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="glass-card-soft rounded-[1.5rem] p-5">
+                  <p className="section-kicker">MBTI</p>
+                  <p className="mt-3 text-2xl font-semibold text-violet-200">200 题五级量表</p>
+                  <p className="mt-2 text-sm leading-7 text-zinc-400">更细的倾向强度，更接近真实状态。</p>
+                </div>
+                <div className="glass-card-soft rounded-[1.5rem] p-5">
+                  <p className="section-kicker">IQ</p>
+                  <p className="mt-3 text-2xl font-semibold text-blue-200">20 分钟推理挑战</p>
+                  <p className="mt-2 text-sm leading-7 text-zinc-400">图形推理、分组作答、即时反馈。</p>
+                </div>
+                <div className="glass-card-soft rounded-[1.5rem] p-5 sm:col-span-2">
+                  <p className="section-kicker">职业画像</p>
+                  <p className="mt-3 text-2xl font-semibold text-emerald-200">人格维度 × 职业建议</p>
+                  <p className="mt-2 text-sm leading-7 text-zinc-400">从大五人格出发，把结果落到可理解、可行动的职业方向上。</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Test Cards */}
       <section id="tests" className="py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+        <div className="app-container">
+          <h2 className="text-center text-2xl font-bold text-zinc-50 sm:text-3xl">
             选择你的测试
           </h2>
-          <p className="text-gray-500 text-center mb-12 max-w-lg mx-auto">
+          <p className="mx-auto mb-12 mt-4 max-w-lg text-center text-zinc-400">
             每项测试都基于经典心理学理论，结果仅供参考与自我探索。
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -65,15 +87,15 @@ export default function Home() {
               <Link
                 key={test.href}
                 href={test.href}
-                className="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="group glass-card rounded-[2rem] p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-white/14"
               >
-                <div className={`w-14 h-14 ${test.bgColor} rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform`}>
+                <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${test.bgColor} text-2xl transition-transform group-hover:scale-110`}>
                   {test.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="mb-3 text-xl font-bold text-zinc-50">
                   {test.title}
                 </h3>
-                <p className="text-gray-500 leading-relaxed mb-6">
+                <p className="mb-6 leading-relaxed text-zinc-400">
                   {test.description}
                 </p>
                 <span className={`inline-flex items-center gap-1 text-sm font-medium bg-gradient-to-r ${test.color} bg-clip-text text-transparent`}>

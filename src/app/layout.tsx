@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
@@ -31,55 +32,55 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="bg-white border-t border-gray-200 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <footer className="border-t border-white/8 bg-black/25 py-14 backdrop-blur-xl">
+          <div className="app-container">
             <div className="md:flex md:justify-between">
               <div className="mb-8 md:mb-0">
                 <span className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-lg font-bold text-white shadow-[0_0_26px_rgba(139,92,246,0.3)]">
                     心
                   </div>
-                  <span className="font-bold text-xl tracking-tight text-gray-900">
+                  <span className="font-bold text-xl tracking-tight text-zinc-50">
                     心理测试平台
                   </span>
                 </span>
-                <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
+                <p className="max-w-xs text-sm leading-relaxed text-zinc-400">
                   专业的在线心理测评平台，提供科学、准确的MBTI、智商及职业性格测试，助你探索潜能，规划未来。
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-16">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">测试项目</h3>
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-200">测试项目</h3>
                   <ul className="space-y-3">
                     <li>
-                      <a href="/mbti" className="text-base text-gray-500 hover:text-blue-600 transition-colors">MBTI人格测试</a>
+                      <Link href="/mbti" className="text-base text-zinc-400 hover:text-violet-300">MBTI人格测试</Link>
                     </li>
                     <li>
-                      <a href="/iq" className="text-base text-gray-500 hover:text-blue-600 transition-colors">IQ智力测试</a>
+                      <Link href="/iq" className="text-base text-zinc-400 hover:text-blue-300">IQ智力测试</Link>
                     </li>
                     <li>
-                      <a href="/career" className="text-base text-gray-500 hover:text-blue-600 transition-colors">职业性格测试</a>
+                      <Link href="/career" className="text-base text-zinc-400 hover:text-emerald-300">职业性格测试</Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">关于我们</h3>
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-200">关于我们</h3>
                   <ul className="space-y-3">
                     <li>
-                      <a href="#" className="text-base text-gray-500 hover:text-blue-600 transition-colors">关于平台</a>
+                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">关于平台</a>
                     </li>
                     <li>
-                      <a href="#" className="text-base text-gray-500 hover:text-blue-600 transition-colors">联系我们</a>
+                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">联系我们</a>
                     </li>
                     <li>
-                      <a href="#" className="text-base text-gray-500 hover:text-blue-600 transition-colors">隐私政策</a>
+                      <a href="#" className="text-base text-zinc-400 hover:text-zinc-100">隐私政策</a>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
-            <div className="mt-12 border-t border-gray-100 pt-8">
-              <p className="text-base text-gray-400 text-center">
+            <div className="mt-12 border-t border-white/8 pt-8">
+              <p className="text-center text-base text-zinc-500">
                 &copy; {new Date().getFullYear()} 心理测试平台. All rights reserved.
               </p>
             </div>

@@ -19,8 +19,6 @@ export default function IQTestPage() {
   const [timeLeft, setTimeLeft] = useState(TEST_DURATION_SECONDS);
 
   const currentSet = Math.floor(currentQuestion / QUESTIONS_PER_SET);
-  const questionInSet = (currentQuestion % QUESTIONS_PER_SET) + 1;
-
   const submitTest = useCallback(() => {
     const { score, correctCount } = calculateIQScore(answers, age);
     const result = {
@@ -72,24 +70,25 @@ export default function IQTestPage() {
 
   if (step === 'age') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">瑞文智力测试</h1>
-          <p className="text-gray-600 text-center mb-8">请输入您的年龄以开始测试</p>
+      <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8">
+          <p className="section-kicker text-center">IQ Test</p>
+          <h1 className="mb-4 mt-4 text-center text-3xl font-bold text-zinc-50">瑞文智力测试</h1>
+          <p className="mb-8 text-center text-zinc-400">请输入您的年龄以开始测试</p>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">年龄</label>
+            <label className="mb-2 block text-sm font-medium text-zinc-300">年龄</label>
             <input
               type="number"
               min={10}
               max={80}
               value={age}
               onChange={(e) => setAge(Math.min(80, Math.max(10, parseInt(e.target.value) || 10)))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg"
+              className="app-input px-4 py-3 text-lg"
             />
           </div>
           <button
             onClick={() => setStep('instructions')}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            className="w-full rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
           >
             下一步
           </button>
@@ -100,10 +99,11 @@ export default function IQTestPage() {
 
   if (step === 'instructions') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">测试说明</h1>
-          <div className="space-y-4 text-gray-600 mb-8">
+      <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-lg rounded-[2rem] p-8">
+          <p className="section-kicker text-center">Instructions</p>
+          <h1 className="mb-6 mt-4 text-center text-3xl font-bold text-zinc-50">测试说明</h1>
+          <div className="mb-8 space-y-4 text-zinc-400">
             <p>本测试是瑞文标准推理测验（Raven&apos;s Progressive Matrices），用于评估您的逻辑推理能力。</p>
             <ul className="list-disc list-inside space-y-2">
               <li>共 60 道图形推理题，分为 A、B、C、D、E 五组</li>
@@ -112,18 +112,18 @@ export default function IQTestPage() {
               <li>时间结束后将自动提交</li>
               <li>可以在各组之间自由切换</li>
             </ul>
-            <p className="font-medium text-gray-800">准备好后，点击开始测试。</p>
+            <p className="font-medium text-zinc-200">准备好后，点击开始测试。</p>
           </div>
           <div className="flex gap-4">
             <button
               onClick={() => setStep('age')}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+              className="app-button-secondary flex-1 py-3 font-medium"
             >
               返回
             </button>
             <button
               onClick={() => setStep('test')}
-              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="flex-1 rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
             >
               开始测试
             </button>
@@ -136,27 +136,27 @@ export default function IQTestPage() {
   const answerCount = getAnswerCount(currentQuestion);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Top bar */}
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-        <div className="text-gray-700 font-medium text-sm sm:text-base">
+    <div className="app-shell-module-indigo min-h-screen flex flex-col">
+      <div className="border-b border-white/8 bg-black/20 px-4 py-3 backdrop-blur-xl">
+        <div className="app-container flex items-center justify-between px-0">
+          <div className="text-sm font-medium text-zinc-200 sm:text-base">
           第 {currentQuestion + 1}/{TOTAL_QUESTIONS} 题 (组 {SETS[currentSet]})
-        </div>
-        <div className={`font-mono text-base sm:text-lg font-bold ${timeLeft <= 60 ? 'text-red-600' : 'text-indigo-600'}`}>
+          </div>
+          <div className={`font-mono text-base font-bold sm:text-lg ${timeLeft <= 60 ? 'text-red-300' : 'text-blue-300'}`}>
           {formatTime(timeLeft)}
+          </div>
         </div>
       </div>
 
-      {/* Set tabs */}
-      <div className="bg-white border-b px-2 sm:px-4 py-2 flex gap-1 sm:gap-2 overflow-x-auto">
+      <div className="app-container flex gap-1 overflow-x-auto px-4 py-3 sm:gap-2">
         {SETS.map((set, index) => (
           <button
             key={set}
             onClick={() => goToSet(index)}
-            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-colors flex-shrink-0 ${
+            className={`flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors sm:px-4 sm:py-2 sm:text-base ${
               currentSet === index
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-blue-500 text-white shadow-[0_0_18px_rgba(59,130,246,0.28)]'
+                : 'border border-white/8 bg-white/6 text-zinc-400 hover:bg-white/10'
             }`}
           >
             {set}
@@ -164,10 +164,9 @@ export default function IQTestPage() {
         ))}
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 p-4 flex flex-col items-center">
-        {/* Question image */}
-        <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6 w-full max-w-2xl">
+      <div className="flex-1 p-4">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
+        <div className="glass-card mb-4 w-full max-w-2xl rounded-[2rem] p-2 sm:mb-6 sm:p-4">
           <div className="relative aspect-square w-full">
             <Image
               src={getQuestionImagePath(currentQuestion)}
@@ -179,16 +178,15 @@ export default function IQTestPage() {
           </div>
         </div>
 
-        {/* Answer buttons */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-w-md w-full mb-4 sm:mb-6">
+        <div className="grid w-full max-w-md grid-cols-3 gap-2 sm:mb-6 sm:gap-3 sm:grid-cols-4">
           {Array.from({ length: answerCount }, (_, i) => (
             <button
               key={i}
               onClick={() => handleAnswerSelect(i)}
-              className={`py-4 rounded-lg font-bold text-lg transition-colors ${
+              className={`rounded-2xl py-4 text-lg font-bold transition-colors ${
                 answers[currentQuestion] === i
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-indigo-100 border border-gray-200'
+                  ? 'bg-blue-500 text-white shadow-[0_0_22px_rgba(59,130,246,0.28)]'
+                  : 'border border-white/8 bg-black/20 text-zinc-200 hover:bg-blue-500/12'
               }`}
             >
               {i + 1}
@@ -196,39 +194,38 @@ export default function IQTestPage() {
           ))}
         </div>
 
-        {/* Navigation */}
-        <div className="flex gap-4 max-w-md w-full">
+        <div className="flex w-full max-w-md gap-4">
           <button
             onClick={() => goToQuestion(currentQuestion - 1)}
             disabled={currentQuestion === 0}
-            className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="app-button-secondary flex-1 py-3 font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
             上一题
           </button>
           {currentQuestion < TOTAL_QUESTIONS - 1 ? (
             <button
               onClick={() => goToQuestion(currentQuestion + 1)}
-              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="flex-1 rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
             >
               下一题
             </button>
           ) : (
             <button
               onClick={submitTest}
-              className="flex-1 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+              className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400"
             >
               完成测试
             </button>
           )}
         </div>
 
-        {/* Submit button (always visible) */}
         <button
           onClick={submitTest}
-          className="mt-6 px-8 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+          className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500 px-8 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400"
         >
           提前交卷
         </button>
+        </div>
       </div>
     </div>
   );

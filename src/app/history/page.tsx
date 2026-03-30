@@ -86,21 +86,26 @@ export default function HistoryPage() {
 
   if (!loaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">加载中...</p>
+      <div className="app-shell flex min-h-screen items-center justify-center px-4">
+        <div className="glass-card rounded-[2rem] px-8 py-10 text-center text-zinc-300">
+          加载中...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="app-shell min-h-screen px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">测试记录</h1>
+          <div>
+            <p className="section-kicker">History</p>
+            <h1 className="mt-3 text-3xl font-bold text-zinc-50">测试记录</h1>
+          </div>
           {entries.length > 0 && (
             <button
               onClick={clearHistory}
-              className="text-sm text-red-500 hover:text-red-700 transition-colors"
+              className="rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-200 hover:bg-red-500/16"
             >
               清除记录
             </button>
@@ -108,12 +113,12 @@ export default function HistoryPage() {
         </div>
 
         {entries.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="glass-card rounded-[2rem] p-12 text-center">
             <div className="text-4xl mb-4">📋</div>
-            <p className="text-gray-500 mb-6">暂无测试记录，去做一个测试吧！</p>
+            <p className="mb-6 text-zinc-400">暂无测试记录，去做一个测试吧！</p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              className="app-button-primary gap-2 px-6 py-3 text-sm font-medium"
             >
               选择测试
             </Link>
@@ -123,7 +128,7 @@ export default function HistoryPage() {
             {entries.map((entry, i) => {
               const config = typeConfig[entry.type];
               const cardContent = (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                <div className="glass-card rounded-[1.75rem] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/12">
                   <div className="flex items-start gap-4">
                     <div className="text-2xl">{config.icon}</div>
                     <div className="flex-1 min-w-0">
@@ -131,16 +136,16 @@ export default function HistoryPage() {
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${config.color}`}>
                           {config.label}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-zinc-500">
                           {new Date(entry.timestamp).toLocaleString('zh-CN')}
                         </span>
                       </div>
-                      <div className="font-bold text-gray-900">{entry.summary}</div>
+                      <div className="font-bold text-zinc-50">{entry.summary}</div>
                       {entry.detail && (
-                        <div className="text-sm text-gray-500 mt-0.5">{entry.detail}</div>
+                        <div className="mt-0.5 text-sm text-zinc-400">{entry.detail}</div>
                       )}
                       {entry.href ? (
-                        <div className="text-sm text-violet-600 mt-2 font-medium">查看该次结果概览 →</div>
+                        <div className="mt-2 text-sm font-medium text-violet-300">查看该次结果概览 →</div>
                       ) : null}
                     </div>
                   </div>

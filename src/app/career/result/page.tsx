@@ -55,9 +55,9 @@ function CareerResultContent() {
 
   if (verifying) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">验证支付中...</p>
+      <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">验证支付中...</p>
         </div>
       </div>
     );
@@ -65,9 +65,9 @@ function CareerResultContent() {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">加载中...</p>
+      <div className="app-shell-module-emerald flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">加载中...</p>
         </div>
       </div>
     );
@@ -82,63 +82,59 @@ function CareerResultContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-8 px-4">
+    <div className="app-shell-module-emerald min-h-screen px-4 py-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* MBTI Type */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          <p className="text-gray-500 mb-2">你的MBTI类型</p>
-          <div className="text-3xl sm:text-5xl font-bold text-emerald-600 mb-2">{result.mbtiType}</div>
-          <div className="text-xl text-gray-700">{result.mbtiTypeName}</div>
+        <div className="glass-card rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-500 mb-2">你的MBTI类型</p>
+          <div className="mb-2 text-3xl font-bold text-emerald-300 sm:text-5xl">{result.mbtiType}</div>
+          <div className="text-xl text-zinc-200">{result.mbtiTypeName}</div>
         </div>
 
-        {/* FFM Scores */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">大五人格分析</h2>
+        <div className="glass-card rounded-[2rem] p-8">
+          <h2 className="mb-6 text-xl font-bold text-zinc-50">大五人格分析</h2>
           <div className="space-y-5">
             {result.ffmScores.map((score) => (
               <div key={score.trait}>
                 <div className="flex justify-between mb-1">
-                  <span className="font-medium text-gray-700">{score.trait}</span>
-                  <span className="text-emerald-600 font-bold">{score.percentage}%</span>
+                  <span className="font-medium text-zinc-200">{score.trait}</span>
+                  <span className="font-bold text-emerald-300">{score.percentage}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="h-3 w-full rounded-full bg-zinc-800">
                   <div
                     className="bg-gradient-to-r from-emerald-400 to-teal-500 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${score.percentage}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">{traitDescriptions[score.trait]}</p>
+                <p className="mt-1 text-xs text-zinc-500">{traitDescriptions[score.trait]}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Career Recommendations */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">推荐职业方向</h2>
+        <div className="glass-card rounded-[2rem] p-8">
+          <h2 className="mb-6 text-xl font-bold text-zinc-50">推荐职业方向</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {result.careers.map((career) => (
               <div
                 key={career}
-                className="bg-emerald-50 rounded-xl p-4 text-center hover:bg-emerald-100 transition-colors"
+                className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center transition-colors hover:bg-emerald-500/16"
               >
-                <span className="text-emerald-800 font-medium">{career}</span>
+                <span className="font-medium text-emerald-100">{career}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-4">
           <button
             onClick={() => router.push('/career')}
-            className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+            className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400"
           >
             重新测试
           </button>
           <button
             onClick={() => router.push('/')}
-            className="flex-1 bg-white text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors border border-gray-200"
+            className="app-button-secondary flex-1 py-3 font-medium"
           >
             返回首页
           </button>
@@ -153,8 +149,8 @@ export default function CareerResultPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-            <p className="text-gray-600">加载中...</p>
+          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+            <p className="text-zinc-300">加载中...</p>
           </div>
         </div>
       }

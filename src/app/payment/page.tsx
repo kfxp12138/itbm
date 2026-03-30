@@ -76,46 +76,47 @@ function PaymentContent() {
 
   if (!isValidTestType) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">加载中...</p>
+      <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">加载中...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">确认支付</h1>
-        <p className="text-gray-500 text-center mb-6">完成支付后查看测试结果</p>
+    <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
+      <div className="glass-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
+        <p className="section-kicker text-center">Payment</p>
+        <h1 className="mb-2 mt-4 text-center text-2xl font-bold text-zinc-50">确认支付</h1>
+        <p className="mb-6 text-center text-zinc-400">完成支付后查看测试结果</p>
 
         {/* Test Info */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-6">
+        <div className="glass-card-soft mb-6 rounded-[1.5rem] p-4">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">测试项目</span>
-            <span className="font-medium text-gray-800">{TEST_NAMES[testType] || testType}</span>
+            <span className="text-zinc-400">测试项目</span>
+            <span className="font-medium text-zinc-100">{TEST_NAMES[testType] || testType}</span>
           </div>
           <div className="flex justify-between items-center mt-2">
-            <span className="text-gray-600">支付金额</span>
-            <span className="text-xl font-bold text-indigo-600">{TEST_PRICES[testType] || '¥9.99'}</span>
+            <span className="text-zinc-400">支付金额</span>
+            <span className="text-xl font-bold text-amber-300">{TEST_PRICES[testType] || '¥9.99'}</span>
           </div>
         </div>
 
         {/* Payment Method */}
         <div className="mb-6">
-          <p className="text-sm font-medium text-gray-700 mb-3">选择支付方式</p>
+          <p className="mb-3 text-sm font-medium text-zinc-300">选择支付方式</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setSelectedMethod('wechat')}
               className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
                 selectedMethod === 'wechat'
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-gray-200 hover:border-green-300'
-              }`}
+                  ? 'border-emerald-400 bg-emerald-500/12'
+                  : 'border-white/8 bg-black/20 hover:border-emerald-400/40'
+               }`}
             >
               <span className="text-2xl">💬</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'wechat' ? 'text-green-700' : 'text-gray-600'}`}>
+              <span className={`text-sm font-medium ${selectedMethod === 'wechat' ? 'text-emerald-200' : 'text-zinc-400'}`}>
                 微信支付
               </span>
             </button>
@@ -123,12 +124,12 @@ function PaymentContent() {
               onClick={() => setSelectedMethod('alipay')}
               className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
                 selectedMethod === 'alipay'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}
+                  ? 'border-blue-400 bg-blue-500/12'
+                  : 'border-white/8 bg-black/20 hover:border-blue-400/40'
+               }`}
             >
               <span className="text-2xl">💳</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-blue-700' : 'text-gray-600'}`}>
+              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-blue-200' : 'text-zinc-400'}`}>
                 支付宝
               </span>
             </button>
@@ -137,7 +138,7 @@ function PaymentContent() {
 
         {/* Email Input */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-zinc-300">
             邮箱（可选，用于接收结果）
           </label>
           <input
@@ -145,7 +146,7 @@ function PaymentContent() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="app-input px-4 py-3"
           />
         </div>
 
@@ -153,7 +154,7 @@ function PaymentContent() {
         <button
           onClick={handleConfirm}
           disabled={submitting}
-          className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-2xl border border-amber-500/30 bg-amber-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? '处理中...' : '确认支付'}
         </button>
@@ -161,7 +162,7 @@ function PaymentContent() {
         {/* Back Link */}
         <button
           onClick={() => router.back()}
-          className="w-full mt-3 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+          className="mt-3 w-full text-sm text-zinc-500 transition-colors hover:text-zinc-200"
         >
           返回
         </button>
@@ -175,8 +176,8 @@ export default function PaymentPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-            <p className="text-gray-600">加载中...</p>
+          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+            <p className="text-zinc-300">加载中...</p>
           </div>
         </div>
       }

@@ -62,9 +62,9 @@ function IQResultContent() {
 
   if (verifying) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">验证支付中...</p>
+      <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">验证支付中...</p>
         </div>
       </div>
     );
@@ -72,9 +72,9 @@ function IQResultContent() {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <p className="text-gray-600">加载中...</p>
+      <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
+        <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+          <p className="text-zinc-300">加载中...</p>
         </div>
       </div>
     );
@@ -92,62 +92,60 @@ function IQResultContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">测试结果</h1>
-        <p className="text-gray-500 text-center mb-8">瑞文智力测试</p>
+    <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
+      <div className="glass-card w-full max-w-md rounded-[2rem] p-5 sm:p-8">
+        <p className="section-kicker text-center">IQ Result</p>
+        <h1 className="mb-2 mt-4 text-center text-2xl font-bold text-zinc-50">测试结果</h1>
+        <p className="mb-8 text-center text-zinc-400">瑞文智力测试</p>
 
         {/* IQ Score */}
         <div className="text-center mb-8">
-          <div className={`text-5xl sm:text-7xl font-bold ${getScoreColor(result.score)}`}>
-            {result.score}
-          </div>
-          <div className="text-gray-500 mt-2">IQ 分数</div>
+            <div className={`text-5xl sm:text-7xl font-bold ${getScoreColor(result.score).replace('600', '300')}`}>
+              {result.score}
+            </div>
+            <div className="mt-2 text-zinc-500">IQ 分数</div>
         </div>
 
         {/* Level badge */}
         <div className="flex justify-center mb-6">
           <span className={`px-4 py-2 rounded-full text-lg font-medium ${
-            result.score >= 120 ? 'bg-indigo-100 text-indigo-700' :
-            result.score >= 90 ? 'bg-green-100 text-green-700' :
-            'bg-yellow-100 text-yellow-700'
+            result.score >= 120 ? 'border border-blue-500/25 bg-blue-500/12 text-blue-200' :
+            result.score >= 90 ? 'border border-emerald-500/25 bg-emerald-500/12 text-emerald-200' :
+            'border border-amber-500/25 bg-amber-500/12 text-amber-200'
           }`}>
             {level}
           </span>
         </div>
 
-        {/* Description */}
-        <p className="text-gray-600 text-center mb-8">{description}</p>
+        <p className="mb-8 text-center text-zinc-400">{description}</p>
 
-        {/* Stats */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-8 space-y-3">
+        <div className="glass-card-soft mb-8 space-y-3 rounded-[1.5rem] p-4">
           <div className="flex justify-between">
-            <span className="text-gray-500">正确题数</span>
-            <span className="font-medium text-gray-800">{result.correctCount}/60</span>
+            <span className="text-zinc-500">正确题数</span>
+            <span className="font-medium text-zinc-100">{result.correctCount}/60</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">测试年龄</span>
-            <span className="font-medium text-gray-800">{result.age} 岁</span>
+            <span className="text-zinc-500">测试年龄</span>
+            <span className="font-medium text-zinc-100">{result.age} 岁</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">测试时间</span>
-            <span className="font-medium text-gray-800">
+            <span className="text-zinc-500">测试时间</span>
+            <span className="font-medium text-zinc-100">
               {new Date(result.timestamp).toLocaleString('zh-CN')}
             </span>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-4">
           <button
             onClick={() => router.push('/iq')}
-            className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            className="flex-1 rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
           >
             重新测试
           </button>
           <button
             onClick={() => router.push('/')}
-            className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+            className="app-button-secondary flex-1 py-3 font-medium"
           >
             返回首页
           </button>
@@ -162,8 +160,8 @@ export default function IQResultPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-            <p className="text-gray-600">加载中...</p>
+          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
+            <p className="text-zinc-300">加载中...</p>
           </div>
         </div>
       }

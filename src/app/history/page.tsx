@@ -8,6 +8,7 @@ interface HistoryEntry {
   timestamp: number;
   summary: string;
   detail: string;
+  href?: string;
 }
 
 export default function HistoryPage() {
@@ -25,6 +26,7 @@ export default function HistoryPage() {
           timestamp: r.timestamp,
           summary: `MBTI: ${r.type}`,
           detail: r.type,
+          href: `/mbti/result?historyTs=${r.timestamp}`,
         });
       });
     } catch { /* empty */ }
@@ -120,11 +122,8 @@ export default function HistoryPage() {
           <div className="space-y-3">
             {entries.map((entry, i) => {
               const config = typeConfig[entry.type];
-              return (
-                <div
-                  key={`${entry.type}-${entry.timestamp}-${i}`}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow"
-                >
+              const cardContent = (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <div className="text-2xl">{config.icon}</div>
                     <div className="flex-1 min-w-0">
@@ -140,9 +139,20 @@ export default function HistoryPage() {
                       {entry.detail && (
                         <div className="text-sm text-gray-500 mt-0.5">{entry.detail}</div>
                       )}
+                      {entry.href ? (
+                        <div className="text-sm text-violet-600 mt-2 font-medium">查看该次结果概览 →</div>
+                      ) : null}
                     </div>
                   </div>
                 </div>
+              );
+
+              return entry.href ? (
+                <Link key={`${entry.type}-${entry.timestamp}-${i}`} href={entry.href} className="block">
+                  {cardContent}
+                </Link>
+              ) : (
+                <div key={`${entry.type}-${entry.timestamp}-${i}`}>{cardContent}</div>
               );
             })}
           </div>

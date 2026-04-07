@@ -15,11 +15,11 @@ interface MBTIDraft {
 }
 
 const SCALE_OPTIONS: Array<{ value: MBTIAnswerValue; tone: string; size: string }> = [
-  { value: 1, tone: '非常符合', size: 'h-14 w-14 sm:h-16 sm:w-16' },
-  { value: 2, tone: '比较符合', size: 'h-12 w-12 sm:h-14 sm:w-14' },
-  { value: 3, tone: '中立', size: 'h-10 w-10 sm:h-12 sm:w-12' },
-  { value: 4, tone: '比较符合', size: 'h-12 w-12 sm:h-14 sm:w-14' },
-  { value: 5, tone: '非常符合', size: 'h-14 w-14 sm:h-16 sm:w-16' },
+  { value: 1, tone: '非常符合', size: 'h-11 w-11 sm:h-16 sm:w-16' },
+  { value: 2, tone: '比较符合', size: 'h-10 w-10 sm:h-14 sm:w-14' },
+  { value: 3, tone: '中立', size: 'h-8 w-8 sm:h-12 sm:w-12' },
+  { value: 4, tone: '比较符合', size: 'h-10 w-10 sm:h-14 sm:w-14' },
+  { value: 5, tone: '非常符合', size: 'h-11 w-11 sm:h-16 sm:w-16' },
 ];
 
 function createEmptyAnswers(): Array<MBTIAnswerValue | null> {
@@ -342,41 +342,43 @@ export default function MBTITestPage() {
           <div className="px-6 py-8 sm:px-10 sm:py-10">
             <div className="grid grid-cols-2 gap-3 sm:gap-5">
               <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4 text-left sm:rounded-3xl sm:px-6 sm:py-8">
-                <p className="text-[15px] font-medium leading-7 text-slate-900 sm:text-2xl sm:leading-10">{question.leftLabel}</p>
+                <p className="text-[15px] font-medium leading-6 text-slate-900 sm:text-2xl sm:leading-10">{question.leftLabel}</p>
               </div>
               <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 text-right sm:rounded-3xl sm:px-6 sm:py-8">
-                <p className="text-[15px] font-medium leading-7 text-slate-900 sm:text-2xl sm:leading-10">{question.rightLabel}</p>
+                <p className="text-[15px] font-medium leading-6 text-slate-900 sm:text-2xl sm:leading-10">{question.rightLabel}</p>
               </div>
             </div>
 
             <div className="mt-8 rounded-[2rem] border border-slate-200 bg-slate-50/80 p-4 sm:mt-10 sm:p-5">
               <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 sm:p-6">
                 <div className="relative mx-auto max-w-3xl">
-                  <div className="absolute left-[10%] right-[10%] top-7 h-px bg-slate-200 sm:top-8" />
-                  <div className="relative grid grid-cols-5 items-start gap-1.5 sm:gap-4">
+                  <div className="absolute left-[12%] right-[12%] top-5 h-px bg-slate-200 sm:left-[10%] sm:right-[10%] sm:top-8" />
+                  <div className="relative flex items-start justify-between gap-1 sm:gap-4">
                     {SCALE_OPTIONS.map((option) => {
                       const isSelected = currentAnswer === option.value;
                       const isLeft = option.value < 3;
                       const isNeutral = option.value === 3;
 
                       return (
-                        <div key={option.value} className="flex flex-col items-center gap-3 text-center">
+                        <div key={option.value} className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center sm:gap-3">
                           <button
                             onClick={() => handleAnswer(option.value)}
                             className={`mx-auto flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
                               isSelected
                                 ? isNeutral
-                                  ? 'scale-110 border-slate-300 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.15)]'
+                                  ? 'border-slate-300 bg-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.12)] sm:scale-110 sm:shadow-[0_10px_24px_rgba(15,23,42,0.15)]'
                                   : isLeft
-                                    ? 'scale-110 border-violet-300 bg-violet-500 text-white shadow-[0_12px_28px_rgba(139,92,246,0.25)]'
-                                    : 'scale-110 border-fuchsia-300 bg-fuchsia-500 text-white shadow-[0_12px_28px_rgba(217,70,239,0.22)]'
-                                : 'border-slate-200 bg-white text-slate-400 hover:-translate-y-1 hover:border-slate-300 hover:bg-slate-50'
+                                    ? 'border-violet-300 bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(139,92,246,0.25)]'
+                                    : 'border-fuchsia-300 bg-fuchsia-500 text-white shadow-[0_10px_22px_rgba(217,70,239,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(217,70,239,0.22)]'
+                                : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:bg-slate-50 sm:hover:-translate-y-1'
                             }`}
                             aria-label={`选择第 ${option.value} 档`}
                           >
                             {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
                           </button>
-                          <p className={`text-[10px] font-medium leading-4 sm:text-xs ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>{option.tone}</p>
+                          <p className={`min-h-8 text-[9px] font-medium leading-4 sm:min-h-0 sm:text-xs ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>
+                            {option.tone}
+                          </p>
                         </div>
                       );
                     })}

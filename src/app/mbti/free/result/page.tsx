@@ -1,8 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getMBTITypeDescription } from '@/lib/mbti-scoring';
 import { normalizeFreeMBTIResult, type MBTIFreeResult } from '@/lib/mbti-free-scoring';
 
 function parseFreeResult(raw: string | null): MBTIFreeResult | null {
@@ -68,13 +67,9 @@ function FreeResultContent() {
     return () => window.clearTimeout(timer);
   }, [historyTs]);
 
-  const primaryType = useMemo(() => (result ? getMBTITypeDescription(result.type) : undefined), [result]);
-  const nearbyTypes = useMemo(
-    () => (result?.nearbyTypes ?? []).map((type) => ({ type, info: getMBTITypeDescription(type) })),
-    [result]
-  );
+  const nearbyTypes = result?.nearbyTypes ?? [];
 
-  if (!result || !primaryType) {
+  if (!result) {
     return (
       <div className="app-shell-module-violet flex min-h-screen items-center justify-center px-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
@@ -100,9 +95,8 @@ function FreeResultContent() {
               <span>快速结果</span>
             </div>
             <h1 className="mt-8 text-6xl font-bold tracking-[-0.08em] text-fuchsia-700 sm:text-[7rem]">{result.type}</h1>
-            <p className="mt-4 text-2xl font-medium text-slate-900">{primaryType.epithet}</p>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-slate-600 sm:text-base">
-              这是基于 20 题快速版得到的初步判断。它可以帮助你快速定位一个主类型，但精细程度不等同于 200 题完整版。
+              这是 20 题免费版给出的结果，仅展示当前主类型与可能接近的类型。
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -116,16 +110,16 @@ function FreeResultContent() {
               </div>
               <div className="glass-card-soft rounded-[1.5rem] p-5">
                 <p className="section-kicker justify-center">结果定位</p>
-                <p className="mt-3 text-base font-semibold text-slate-900">快速判断版本</p>
+                <p className="mt-3 text-base font-semibold text-slate-900">免费 20 题版</p>
               </div>
             </div>
           </div>
         </section>
 
         <section className="glass-card rounded-[2rem] p-6 sm:p-8">
-          <p className="section-kicker">你的主类型</p>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900">{primaryType.type} · {primaryType.epithet}</h2>
-          <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">{primaryType.description}</p>
+          <p className="section-kicker">主类型</p>
+          <h2 className="mt-3 text-3xl font-semibold text-slate-900">{result.type}</h2>
+          <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">本页不提供类型评价，仅展示结果代码。</p>
         </section>
 
         <section className="glass-card rounded-[2rem] p-6 sm:p-8">
@@ -138,16 +132,15 @@ function FreeResultContent() {
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {nearbyTypes.length > 0 ? (
-              nearbyTypes.map(({ type, info }) => (
+              nearbyTypes.map((type) => (
                 <div key={type} className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="text-2xl font-semibold text-fuchsia-700">{type}</p>
-                  <p className="mt-2 text-sm font-medium text-slate-900">{info?.epithet ?? '相邻类型'}</p>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{info?.description ?? '这一类型与你当前结果的部分维度比较接近。'}</p>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">作为相邻类型展示，不附带解释。</p>
                 </div>
               ))
             ) : (
               <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-5 py-6 text-sm leading-7 text-slate-600 sm:col-span-3">
-                当前四个维度的差异比较明显，因此这次快速版没有给出特别接近的相邻类型。
+                本次结果未生成相邻类型。
               </div>
             )}
           </div>
@@ -155,9 +148,9 @@ function FreeResultContent() {
 
         <section className="glass-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">下一步</p>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900">想看更细的倾向强度和完整解析？</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-slate-900">继续查看其他版本</h2>
           <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">
-            20 题免费版适合做快速判断；如果你想看四个维度的强弱、完整的人格说明和更稳定的结果，可以继续做 200 题完整版。
+            你可以重新做免费版，或者进入 200 题完整版查看更完整的测试结果。
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button onClick={() => router.push('/mbti')} className="app-button-primary justify-center px-6 py-3 text-sm font-medium">

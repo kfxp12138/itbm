@@ -15,11 +15,11 @@ interface MBTIFreeDraft {
 }
 
 const SCALE_OPTIONS: Array<{ value: MBTIAnswerValue; label: string; size: string }> = [
-  { value: 1, label: '非常符合', size: 'h-11 w-11 sm:h-16 sm:w-16' },
+  { value: 1, label: '非常符合', size: 'h-10 w-10 sm:h-16 sm:w-16' },
   { value: 2, label: '比较符合', size: 'h-10 w-10 sm:h-14 sm:w-14' },
-  { value: 3, label: '中立', size: 'h-8 w-8 sm:h-12 sm:w-12' },
+  { value: 3, label: '中立', size: 'h-10 w-10 sm:h-12 sm:w-12' },
   { value: 4, label: '比较符合', size: 'h-10 w-10 sm:h-14 sm:w-14' },
-  { value: 5, label: '非常符合', size: 'h-11 w-11 sm:h-16 sm:w-16' },
+  { value: 5, label: '非常符合', size: 'h-10 w-10 sm:h-16 sm:w-16' },
 ];
 
 function createEmptyAnswers(): Array<MBTIAnswerValue | null> {
@@ -251,39 +251,41 @@ export default function MBTIFreePage() {
             <div className="mt-8 rounded-[2rem] border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
               <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 sm:p-6">
                 <div className="relative mx-auto max-w-3xl">
-                  <div className="absolute left-[12%] right-[12%] top-5 h-px bg-slate-200 sm:left-[10%] sm:right-[10%] sm:top-8" />
-                  <div className="relative flex items-start justify-between gap-1 sm:gap-4">
+                  <div className="absolute left-1/2 top-6 h-px w-[calc(100%-5rem)] -translate-x-1/2 -translate-y-1/2 bg-slate-200 sm:left-[10%] sm:right-[10%] sm:w-auto sm:translate-x-0 sm:top-8" />
+                  <div className="relative grid grid-cols-5 gap-1 sm:gap-4">
                     {SCALE_OPTIONS.map((option) => {
                       const isSelected = currentAnswer === option.value;
                       const isLeft = option.value < 3;
                       const isNeutral = option.value === 3;
 
                       return (
-                        <div key={option.value} className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center sm:gap-3">
-                          <button
-                            onClick={() => {
-                              setAnswers((previous) => {
-                                const next = [...previous];
-                                next[currentQ] = option.value;
-                                return next;
-                              });
+                        <div key={option.value} className="flex min-w-0 flex-col items-center gap-2 text-center sm:gap-3">
+                          <div className="flex h-12 w-full items-center justify-center sm:h-16">
+                            <button
+                              onClick={() => {
+                                setAnswers((previous) => {
+                                  const next = [...previous];
+                                  next[currentQ] = option.value;
+                                  return next;
+                                });
 
-                              if (currentQ < totalQuestions - 1) {
-                                window.setTimeout(() => setCurrentQ((previous) => Math.min(previous + 1, totalQuestions - 1)), 160);
-                              }
-                            }}
-                            className={`mx-auto flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
-                              isSelected
-                                ? isNeutral
-                                  ? 'border-slate-300 bg-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.12)] sm:scale-110 sm:shadow-[0_10px_24px_rgba(15,23,42,0.15)]'
-                                  : isLeft
-                                    ? 'border-fuchsia-300 bg-fuchsia-500 text-white shadow-[0_10px_22px_rgba(217,70,239,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(217,70,239,0.22)]'
-                                    : 'border-violet-300 bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(139,92,246,0.22)]'
-                                : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:bg-slate-50 sm:hover:-translate-y-1'
-                            }`}
-                          >
-                            {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
-                          </button>
+                                if (currentQ < totalQuestions - 1) {
+                                  window.setTimeout(() => setCurrentQ((previous) => Math.min(previous + 1, totalQuestions - 1)), 160);
+                                }
+                              }}
+                              className={`mx-auto shrink-0 flex items-center justify-center rounded-full border transition-all duration-300 ${option.size} ${
+                                isSelected
+                                  ? isNeutral
+                                    ? 'border-slate-300 bg-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.12)] sm:scale-110 sm:shadow-[0_10px_24px_rgba(15,23,42,0.15)]'
+                                    : isLeft
+                                      ? 'border-fuchsia-300 bg-fuchsia-500 text-white shadow-[0_10px_22px_rgba(217,70,239,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(217,70,239,0.22)]'
+                                      : 'border-violet-300 bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.18)] sm:scale-110 sm:shadow-[0_12px_28px_rgba(139,92,246,0.22)]'
+                                  : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:bg-slate-50 sm:hover:-translate-y-1'
+                              }`}
+                            >
+                              {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-current sm:h-3 sm:w-3" /> : null}
+                            </button>
+                          </div>
                           <p className={`min-h-8 text-[9px] font-medium leading-4 sm:min-h-0 sm:text-xs ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>
                             {option.label}
                           </p>

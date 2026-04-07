@@ -2,7 +2,22 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getMBTITypeDescription } from '@/lib/mbti-scoring';
 import { normalizeFreeMBTIResult, type MBTIFreeResult } from '@/lib/mbti-free-scoring';
+
+function getOneLineDescription(type: string): string | null {
+  const info = getMBTITypeDescription(type);
+  if (!info?.description) {
+    return null;
+  }
+
+  const firstSentence = info.description
+    .split(/(?<=[。！？!?])/u)
+    .map((item) => item.trim())
+    .find(Boolean);
+
+  return firstSentence ?? null;
+}
 
 function parseFreeResult(raw: string | null): MBTIFreeResult | null {
   if (!raw) {
@@ -68,6 +83,7 @@ function FreeResultContent() {
   }, [historyTs]);
 
   const nearbyTypes = result?.nearbyTypes ?? [];
+  const primaryDescription = result ? getOneLineDescription(result.type) : null;
 
   if (!result) {
     return (
@@ -119,7 +135,9 @@ function FreeResultContent() {
         <section className="glass-card rounded-[2rem] p-6 sm:p-8">
           <p className="section-kicker">主类型</p>
           <h2 className="mt-3 text-3xl font-semibold text-slate-900">{result.type}</h2>
-          <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">本页不提供类型评价，仅展示结果代码。</p>
+          <p className="mt-4 text-sm leading-8 text-slate-600 sm:text-base">
+            {primaryDescription ?? '这是你本次免费版测试里最接近的 MBTI 类型。'}
+          </p>
         </section>
 
         <section className="glass-card rounded-[2rem] p-6 sm:p-8">
@@ -135,12 +153,14 @@ function FreeResultContent() {
               nearbyTypes.map((type) => (
                 <div key={type} className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="text-2xl font-semibold text-fuchsia-700">{type}</p>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">作为相邻类型展示，不附带解释。</p>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    {getOneLineDescription(type) ?? '这一类型也与你当前结果比较接近。'}
+                  </p>
                 </div>
               ))
             ) : (
               <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-5 py-6 text-sm leading-7 text-slate-600 sm:col-span-3">
-                本次结果未生成相邻类型。
+                这次结果相对更集中，所以没有列出特别接近的相邻类型。
               </div>
             )}
           </div>

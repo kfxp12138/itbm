@@ -20,6 +20,8 @@ export const WECHAT_CONFIG = {
   serialNo: process.env.WECHAT_SERIAL_NO || '',
   privateKey: process.env.WECHAT_PRIVATE_KEY || '',
   notifyUrl: process.env.WECHAT_NOTIFY_URL || '',
+  publicKeyId: process.env.WECHAT_PUBLIC_KEY_ID || '',
+  publicKey: process.env.WECHAT_PUBLIC_KEY || '',
 };
 
 export const ALIPAY_CONFIG = {
@@ -49,4 +51,17 @@ export function formatPrice(cents: number): string {
 
 export function getTestName(testType: string): string {
   return TEST_NAMES[testType] || testType;
+}
+
+export function getWechatNativeConfigErrors(): string[] {
+  const requiredEntries: Array<[string, string]> = [
+    ['WECHAT_APP_ID', WECHAT_CONFIG.appId],
+    ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],
+    ['WECHAT_API_KEY', WECHAT_CONFIG.apiKey],
+    ['WECHAT_NOTIFY_URL', WECHAT_CONFIG.notifyUrl],
+  ];
+
+  return requiredEntries
+    .filter(([, value]) => !value.trim())
+    .map(([name]) => name);
 }

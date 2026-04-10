@@ -92,6 +92,30 @@ export function updateOrderStatus(
   db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 }
 
+export function markOrderPaidIfPending(
+  id: string,
+  extra?: { transactionId?: string; paymentMethod?: Order['payment_method'] }
+): boolean {
+  const db = getDb();
+  const updates: string[] = ['status = ?', 'paid_at = unixepoch()'];
+  const params: (string | number)[] = ['paid'];
+
+  if (extra?.transactionId) {
+    updates.push('transaction_id = ?');
+    params.push(extra.transactionId);
+  }
+
+  if (extra?.paymentMethod) {
+    updates.push('payment_method = ?');
+    params.push(extra.paymentMethod);
+  }
+
+  params.push(id, 'pending');
+
+  const result = db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ? AND status = ?`).run(...params);
+  return result.changes > 0;
+}
+
 export function isOrderPaid(id: string): boolean {
   const order = getOrder(id);
   return order?.status === 'paid';

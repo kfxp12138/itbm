@@ -1,7 +1,29 @@
 'use client';
 
-import { Suspense, useState, useLayoutEffect } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+
+type PaymentMethod = 'wechat' | 'alipay';
+
+interface NativePaymentSession {
+  amountDisplay: string;
+  codeUrl: string;
+  expiresAt?: string;
+  orderId: string;
+}
+
+interface CreatePaymentResponse {
+  amount?: number;
+  amountDisplay?: string;
+  codeUrl?: string;
+  error?: string;
+  expiresAt?: string;
+  message?: string;
+  mode?: 'sandbox' | 'production';
+  orderId?: string;
+  paymentMethod?: PaymentMethod;
+  redirectUrl?: string;
+}
 
 const TEST_NAMES: Record<string, string> = {
   mbti: 'MBTI人格测试',
@@ -23,9 +45,13 @@ function PaymentContent() {
   // Validate testType synchronously
   const isValidTestType = ['mbti', 'iq', 'career'].includes(testType);
 
-  const [selectedMethod, setSelectedMethod] = useState<'wechat' | 'alipay'>('wechat');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('wechat');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [resultData] = useState<string | null>(() => {
     if (typeof window !== 'undefined' && testType && isValidTestType) {
       return localStorage.getItem(`${testType}_latest_result`);
@@ -40,9 +66,129 @@ function PaymentContent() {
     }
   }, [testType, isValidTestType, router]);
 
+  useEffect(() => {
+    if (!nativePayment?.codeUrl) {
+      setQrCodeDataUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    import('qrcode')
+      .then((QRCode) =>
+        QRCode.toDataURL(nativePayment.codeUrl, {
+          margin: 1,
+          width: 280,
+        })
+      )
+      .then((dataUrl) => {
+        if (!cancelled) {
+          setQrCodeDataUrl(dataUrl);
+        }
+      })
+      .catch((error) => {
+        console.error('QR code generation error:', error);
+        if (!cancelled) {
+          setQrCodeDataUrl(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nativePayment]);
+
+  useEffect(() => {
+    if (!nativePayment?.orderId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const checkPaymentStatus = async () => {
+      try {
+        const response = await fetch(`/api/payment/verify?orderId=${nativePayment.orderId}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as { isPaid?: boolean };
+
+        if (!cancelled && data.isPaid) {
+          router.push(`/${testType}/result?orderId=${nativePayment.orderId}`);
+        }
+      } catch (error) {
+        console.error('Payment status polling error:', error);
+      }
+    };
+
+    checkPaymentStatus().catch((error) => console.error('Initial payment status check failed:', error));
+    const intervalId = window.setInterval(() => {
+      checkPaymentStatus().catch((error) => console.error('Payment status polling failed:', error));
+    }, 3000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [nativePayment, router, testType]);
+
+  const handleMethodChange = (method: PaymentMethod) => {
+    setSelectedMethod(method);
+    setNativePayment(null);
+    setPaymentError(null);
+    setCopySuccess(false);
+  };
+
+  const handleCopyCodeUrl = async () => {
+    if (!nativePayment?.codeUrl || !navigator.clipboard) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(nativePayment.codeUrl);
+      setCopySuccess(true);
+      window.setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('Copy code_url failed:', error);
+    }
+  };
+
+  const checkPaymentNow = async () => {
+    if (!nativePayment?.orderId) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/payment/verify?orderId=${nativePayment.orderId}`, {
+        cache: 'no-store',
+      });
+      const data = (await response.json()) as { error?: string; isPaid?: boolean };
+
+      if (!response.ok) {
+        setPaymentError(data.error || '支付状态查询失败');
+        return;
+      }
+
+      if (data.isPaid) {
+        router.push(`/${testType}/result?orderId=${nativePayment.orderId}`);
+        return;
+      }
+
+      setPaymentError('暂未收到支付成功通知，请完成支付后稍候自动跳转。');
+    } catch (error) {
+      console.error('Manual payment verify error:', error);
+      setPaymentError('支付状态查询失败，请稍后重试。');
+    }
+  };
+
   const handleConfirm = async () => {
     if (submitting) return;
     setSubmitting(true);
+    setPaymentError(null);
 
     try {
       const response = await fetch('/api/payment/create', {
@@ -56,20 +202,29 @@ function PaymentContent() {
         }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as CreatePaymentResponse;
 
       if (data.mode === 'sandbox' && data.redirectUrl) {
         router.push(data.redirectUrl);
-      } else if (data.mode === 'production') {
-        alert(data.message || '生产环境支付接口待接入');
-        setSubmitting(false);
-      } else {
-        alert(data.error || '创建订单失败');
-        setSubmitting(false);
+        return;
       }
+
+      if (data.mode === 'production' && data.paymentMethod === 'wechat' && data.codeUrl && data.orderId && data.amountDisplay) {
+        setNativePayment({
+          amountDisplay: data.amountDisplay,
+          codeUrl: data.codeUrl,
+          expiresAt: data.expiresAt,
+          orderId: data.orderId,
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      setPaymentError(data.error || data.message || '创建订单失败');
+      setSubmitting(false);
     } catch (error) {
       console.error('Payment error:', error);
-      alert('网络错误，请重试');
+      setPaymentError('网络错误，请重试');
       setSubmitting(false);
     }
   };
@@ -106,9 +261,9 @@ function PaymentContent() {
         {/* Payment Method */}
         <div className="mb-6">
           <p className="mb-3 text-sm font-medium text-slate-700">选择支付方式</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <button
-              onClick={() => setSelectedMethod('wechat')}
+              onClick={() => handleMethodChange('wechat')}
               className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
                 selectedMethod === 'wechat'
                   ? 'border-emerald-300 bg-emerald-50'
@@ -120,20 +275,8 @@ function PaymentContent() {
                 微信支付
               </span>
             </button>
-            <button
-              onClick={() => setSelectedMethod('alipay')}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
-                selectedMethod === 'alipay'
-                  ? 'border-blue-300 bg-blue-50'
-                  : 'border-slate-200 bg-white hover:border-blue-200'
-               }`}
-            >
-              <span className="text-2xl">💳</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-blue-700' : 'text-slate-600'}`}>
-                支付宝
-              </span>
-            </button>
           </div>
+          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信原生扫码支付，支付宝通道暂未开放。</p>
         </div>
 
         {/* Email Input */}
@@ -150,13 +293,71 @@ function PaymentContent() {
           />
         </div>
 
+        {paymentError ? (
+          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+            {paymentError}
+          </div>
+        ) : null}
+
+        {nativePayment ? (
+          <div className="mb-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-5 text-center">
+            <p className="text-sm font-medium text-emerald-700">请使用微信扫码完成支付</p>
+            <p className="mt-2 text-xs leading-6 text-emerald-800">
+              订单号：{nativePayment.orderId}
+              <br />
+              金额：{nativePayment.amountDisplay}
+            </p>
+            <div className="mt-4 flex justify-center">
+              {qrCodeDataUrl ? (
+                <img
+                  alt="微信支付二维码"
+                  className="rounded-2xl border border-emerald-100 bg-white p-3 shadow-sm"
+                  height={280}
+                  src={qrCodeDataUrl}
+                  width={280}
+                />
+              ) : (
+                <div className="flex h-[280px] w-[280px] items-center justify-center rounded-2xl border border-emerald-100 bg-white p-6 text-sm text-slate-500">
+                  正在生成二维码...
+                </div>
+              )}
+            </div>
+            <p className="mt-4 text-xs leading-6 text-slate-600">推荐直接使用微信扫码支付；下方链接仅作为备用方式保留。</p>
+            <div className="mt-4 space-y-3">
+              <a
+                className="block rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
+                href={nativePayment.codeUrl}
+              >
+                打开微信支付链接
+              </a>
+              <button
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
+                onClick={handleCopyCodeUrl}
+                type="button"
+              >
+                {copySuccess ? '支付链接已复制' : '复制支付链接'}
+              </button>
+              <button
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
+                onClick={checkPaymentNow}
+                type="button"
+              >
+                我已完成支付，立即检查
+              </button>
+            </div>
+            {nativePayment.expiresAt ? (
+              <p className="mt-4 text-xs text-slate-500">二维码有效期至：{new Date(nativePayment.expiresAt).toLocaleString('zh-CN')}</p>
+            ) : null}
+          </div>
+        ) : null}
+
         {/* Confirm Button */}
         <button
           onClick={handleConfirm}
           disabled={submitting}
           className="w-full rounded-2xl border border-amber-500/30 bg-amber-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? '处理中...' : '确认支付'}
+          {submitting ? '处理中...' : nativePayment ? '重新获取支付二维码' : '确认支付'}
         </button>
 
         {/* Back Link */}

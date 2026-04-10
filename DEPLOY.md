@@ -57,7 +57,7 @@ npm run start
 ```bash
 # 支付模式
 #   sandbox  = 沙盒模式，点击「模拟支付成功」即可跳过真实支付，用于开发测试
-#   production = 生产模式，走真实微信/支付宝支付流程
+#   production = 生产模式，当前仓库仅接入真实微信原生扫码支付流程
 # 👉 首次部署建议先用 sandbox 跑通流程，确认无误后再改为 production
 PAYMENT_MODE=sandbox
 
@@ -101,35 +101,29 @@ WECHAT_MCH_ID=<你的商户号>
 # API 密钥（V2）
 # 👉 商户平台 → 账户中心 → API安全 → 设置APIv2密钥
 # 👉 32位字符串，自己设置的
+# 👉 当前仓库的微信 Native 支付流程已改为 API v2，下单签名与回调验签都会使用这个密钥
 WECHAT_API_KEY=<你设置的32位API密钥>
-
-# API V3 密钥
-# 👉 商户平台 → 账户中心 → API安全 → 设置APIv3密钥
-# 👉 32位字符串，自己设置的
-WECHAT_API_V3_KEY=<你设置的32位APIv3密钥>
-
-# 商户API证书序列号
-# 👉 商户平台 → 账户中心 → API安全 → 申请API证书 → 查看证书序列号
-# 👉 格式示例：1234567890ABCDEF1234567890ABCDEF12345678
-WECHAT_SERIAL_NO=<你的证书序列号>
-
-# 商户API私钥（PEM 格式的内容，不是文件路径）
-# 👉 申请API证书时下载的 apiclient_key.pem 文件内容
-# 👉 把整个文件内容粘贴在这里（包括 BEGIN/END 行），或者用 \n 连接成一行
-WECHAT_PRIVATE_KEY=<apiclient_key.pem的完整内容>
 
 # 支付结果异步通知地址
 # 👉 ⚠️ 必须替换 your-domain.com 为你的实际域名
 # 👉 ⚠️ 必须是 HTTPS 地址，且公网可访问
 # 👉 微信支付会在用户付款成功后，主动请求这个地址通知你
 WECHAT_NOTIFY_URL=https://<你的域名>/api/payment/callback/wechat
+
+# 以下 V3 相关变量在当前 API v2 方案中不再参与支付主链路
+# 仅在你未来切回 API v3 时才需要重新配置
+# WECHAT_API_V3_KEY=<你设置的32位APIv3密钥>
+# WECHAT_SERIAL_NO=<你的证书序列号>
+# WECHAT_PRIVATE_KEY=<apiclient_key.pem的完整内容>
+# WECHAT_PUBLIC_KEY_ID=<微信支付公钥ID>
+# WECHAT_PUBLIC_KEY=<微信支付公钥PEM内容>
 ```
 
-### 3.4 支付宝配置
+### 3.4 支付宝配置（预留，当前生产流程未启用）
 
 > 获取方式：登录 [支付宝开放平台](https://open.alipay.com/) → 开发设置
 >
-> ⚠️ 需要已认证的企业支付宝开发者账号。
+> ⚠️ 当前代码仅完成微信原生扫码支付接入；以下支付宝变量仍为后续扩展预留，未在当前生产链路中启用。
 
 ```bash
 # 支付宝应用 AppID

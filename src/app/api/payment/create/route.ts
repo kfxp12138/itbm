@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { createOrder } from '@/lib/db';
-import { getTestPrice, isSandboxMode, formatPrice } from '@/lib/payment-config';
+import { createWechatNativeOrder } from '@/lib/wechat-pay';
+import { formatPrice, getTestName, getTestPrice, getWechatNativeConfigErrors, isSandboxMode } from '@/lib/payment-config';
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const [firstIp] = forwarded.split(',');
+    if (firstIp?.trim()) {
+      return firstIp.trim();
+    }
+  }
+
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp?.trim()) {
+    return realIp.trim();
+  }
+
+  return '127.0.0.1';
+}
 
 interface CreatePaymentRequest {
   testType: 'mbti' | 'iq' | 'career';
@@ -34,6 +52,56 @@ export async function POST(request: NextRequest) {
     const orderId = uuidv4();
     const amount = getTestPrice(testType);
 
+    if (!isSandboxMode() && paymentMethod === 'alipay') {
+      return NextResponse.json(
+        {
+          error: '当前生产环境仅开放微信原生扫码支付，支付宝暂未开放。',
+          mode: 'production',
+        },
+        { status: 501 }
+      );
+    }
+
+    if (!isSandboxMode() && paymentMethod === 'wechat') {
+      const configErrors = getWechatNativeConfigErrors();
+
+      if (configErrors.length > 0) {
+        return NextResponse.json(
+          {
+            error: `微信支付配置不完整：${configErrors.join('、')}`,
+            mode: 'production',
+          },
+          { status: 400 }
+        );
+      }
+
+      const nativeOrder = await createWechatNativeOrder({
+        description: `${getTestName(testType)}结果解锁`,
+        outTradeNo: orderId,
+        productId: orderId,
+        spbillCreateIp: getClientIp(request),
+        total: amount,
+      });
+
+      createOrder({
+        id: orderId,
+        test_type: testType,
+        amount,
+        email,
+        result_data: resultData,
+      });
+
+      return NextResponse.json({
+        orderId,
+        amount,
+        amountDisplay: formatPrice(amount),
+        codeUrl: nativeOrder.codeUrl,
+        expiresAt: nativeOrder.expiresAt,
+        mode: 'production',
+        paymentMethod,
+      });
+    }
+
     // Create order in DB
     createOrder({
       id: orderId,
@@ -53,14 +121,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Production mode - not yet implemented
     return NextResponse.json(
       {
         orderId,
         amount,
         amountDisplay: formatPrice(amount),
         mode: 'production',
-        message: '生产环境支付接口待接入',
+        message: '当前仅接入微信原生扫码支付，支付宝暂未开放。',
       },
       { status: 501 }
     );

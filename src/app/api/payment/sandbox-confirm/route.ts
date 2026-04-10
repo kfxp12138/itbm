@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getOrder, updateOrderStatus } from '@/lib/db';
+import { getOrder, markOrderPaidIfPending } from '@/lib/db';
 import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
 import { sendTestResultEmail, TestType } from '@/lib/send-email';
 
@@ -43,11 +43,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update order status to paid
-    updateOrderStatus(orderId, 'paid');
+    const wasMarkedPaid = markOrderPaidIfPending(orderId);
 
     // Send email if configured and email exists
-    if (order.email && RESEND_CONFIG.apiKey) {
+    if (wasMarkedPaid && order.email && RESEND_CONFIG.apiKey) {
       try {
         const resultData = order.result_data ? JSON.parse(order.result_data) : null;
         if (resultData) {

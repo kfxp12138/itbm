@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { clearAllPendingResults } from '@/lib/client-result-storage';
 
 interface HistoryEntry {
   type: 'mbti' | 'mbti-free' | 'iq' | 'career';
@@ -97,6 +98,7 @@ export default function HistoryPage() {
     localStorage.removeItem('mbti_free_draft_v1');
     localStorage.removeItem('iq_latest_result');
     localStorage.removeItem('career_latest_result');
+    clearAllPendingResults();
     setEntries([]);
   };
 

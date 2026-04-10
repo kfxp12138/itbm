@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getIQDescription } from '@/lib/iq-scoring';
+import { persistPaidResult } from '@/lib/client-result-storage';
 
 interface IQResult {
   timestamp: number;
@@ -21,39 +22,29 @@ function IQResultContent() {
 
   useEffect(() => {
     const verifyAndLoad = async () => {
-      if (orderId) {
-        setVerifying(true);
-        try {
-          const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
-          const data = await response.json();
+      if (!orderId) {
+        router.push('/iq');
+        return;
+      }
 
-          if (!data.isPaid) {
-            router.push('/payment?testType=iq');
-            return;
-          }
+      setVerifying(true);
+      try {
+        const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
+        const data = (await response.json()) as { isPaid?: boolean; resultData?: string; testType?: string };
 
-
-          // Try to use resultData from API, fallback to localStorage
-          if (data.resultData) {
-            setResult(JSON.parse(data.resultData));
-          } else {
-            const stored = localStorage.getItem('iq_latest_result');
-            if (stored) {
-              setResult(JSON.parse(stored));
-            }
-          }
-        } catch (error) {
-          console.error('Verify error:', error);
+        if (!data.isPaid || !data.resultData || data.testType !== 'iq') {
           router.push('/payment?testType=iq');
-        } finally {
-          setVerifying(false);
+          return;
         }
-      } else {
-        // No orderId - fallback to localStorage (backward compatible)
-        const stored = localStorage.getItem('iq_latest_result');
-        if (stored) {
-          setResult(JSON.parse(stored));
-        }
+
+        const parsed = JSON.parse(data.resultData) as IQResult;
+        persistPaidResult('iq', parsed, parsed);
+        setResult(parsed);
+      } catch (error) {
+        console.error('Verify error:', error);
+        router.push('/payment?testType=iq');
+      } finally {
+        setVerifying(false);
       }
     };
 

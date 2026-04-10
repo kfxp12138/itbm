@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { SETS, QUESTIONS_PER_SET, TEST_DURATION_SECONDS, getQuestionImagePath, getAnswerCount } from '@/data/iq-data';
 import { calculateIQScore } from '@/lib/iq-scoring';
+import { savePendingResult } from '@/lib/client-result-storage';
 
 type Step = 'age' | 'instructions' | 'test';
 
@@ -55,10 +56,7 @@ export default function IQTestPage() {
         correctCount,
         age,
       };
-      const existing = JSON.parse(localStorage.getItem('iq_results') || '[]');
-      existing.push(result);
-      localStorage.setItem('iq_results', JSON.stringify(existing));
-      localStorage.setItem('iq_latest_result', JSON.stringify(result));
+      savePendingResult('iq', result);
       router.push('/payment?testType=iq');
     } catch (error) {
       console.error('IQ submit error:', error);

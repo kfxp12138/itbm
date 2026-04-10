@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getMBTITypeDescription, normalizeMBTIResult, type MBTIResult } from '@/lib/mbti-scoring';
 import type { MBTIType } from '@/data/mbti-types';
+import { persistPaidResult } from '@/lib/client-result-storage';
 
 type MBTITheme = {
   groupLabel: string;
@@ -185,25 +186,22 @@ function MBTIResultContent() {
   useEffect(() => {
     const loadLocalResult = () => {
       const historyResult = loadHistoryResult(historyTs);
-      if (historyResult) {
-        setResult(historyResult);
-        setTypeInfo(getMBTITypeDescription(historyResult.type));
-        return true;
-      }
-
-      const parsed = parseResultPayload(localStorage.getItem('mbti_latest_result'));
-      if (!parsed) {
+      if (!historyResult) {
         return false;
       }
 
-      setResult(parsed);
-      setTypeInfo(getMBTITypeDescription(parsed.type));
+      setResult(historyResult);
+      setTypeInfo(getMBTITypeDescription(historyResult.type));
       return true;
     };
 
     const verifyAndLoad = async () => {
       if (!orderId) {
-        loadLocalResult();
+        if (historyTs && loadLocalResult()) {
+          return;
+        }
+
+        router.push('/mbti');
         return;
       }
 
@@ -211,27 +209,27 @@ function MBTIResultContent() {
 
       try {
         const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
-        const data = (await response.json()) as { isPaid?: boolean; resultData?: string };
+        const data = (await response.json()) as { isPaid?: boolean; resultData?: string; testType?: string };
 
-        if (!data.isPaid) {
+        if (!data.isPaid || data.testType !== 'mbti') {
           router.push('/payment?testType=mbti');
           return;
         }
 
         const parsed = parseResultPayload(data.resultData ?? null);
         if (parsed) {
+          persistPaidResult('mbti', parsed, {
+            timestamp: Date.now(),
+            ...parsed,
+          });
           setResult(parsed);
           setTypeInfo(getMBTITypeDescription(parsed.type));
           return;
         }
 
-        if (!loadLocalResult()) {
-          router.push('/payment?testType=mbti');
-        }
+        router.push('/payment?testType=mbti');
       } catch {
-        if (!loadLocalResult()) {
-          router.push('/payment?testType=mbti');
-        }
+        router.push('/payment?testType=mbti');
       } finally {
         setVerifying(false);
       }

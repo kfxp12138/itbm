@@ -1,7 +1,9 @@
 'use client';
 
-import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import QRCode from 'qrcode';
+import { readPendingResultRaw } from '@/lib/client-result-storage';
 
 type PaymentMethod = 'wechat' | 'alipay';
 
@@ -52,12 +54,13 @@ function PaymentContent() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [resultData] = useState<string | null>(() => {
-    if (typeof window !== 'undefined' && testType && isValidTestType) {
-      return localStorage.getItem(`${testType}_latest_result`);
+  const resultData = useMemo(() => {
+    if (testType === 'mbti' || testType === 'iq' || testType === 'career') {
+      return readPendingResultRaw(testType);
     }
+
     return null;
-  });
+  }, [testType]);
 
   // Redirect if invalid - using useLayoutEffect to run before paint
   useLayoutEffect(() => {
@@ -74,13 +77,10 @@ function PaymentContent() {
 
     let cancelled = false;
 
-    import('qrcode')
-      .then((QRCode) =>
-        QRCode.toDataURL(nativePayment.codeUrl, {
-          margin: 1,
-          width: 280,
-        })
-      )
+    QRCode.toDataURL(nativePayment.codeUrl, {
+      margin: 1,
+      width: 280,
+    })
       .then((dataUrl) => {
         if (!cancelled) {
           setQrCodeDataUrl(dataUrl);
@@ -187,6 +187,12 @@ function PaymentContent() {
 
   const handleConfirm = async () => {
     if (submitting) return;
+
+    if (!resultData) {
+      setPaymentError('未找到待支付的测试结果，请重新完成测试后再发起支付。');
+      return;
+    }
+
     setSubmitting(true);
     setPaymentError(null);
 

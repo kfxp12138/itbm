@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { CareerResult } from '@/lib/career-scoring';
+import { persistPaidResult } from '@/lib/client-result-storage';
 
 function parseCareerResult(raw: string | null): CareerResult | null {
   if (!raw) {
@@ -26,42 +27,39 @@ function CareerResultContent() {
 
   useEffect(() => {
     const verifyAndLoad = async () => {
-      if (orderId) {
-        setVerifying(true);
-        try {
-          const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
-          const data = await response.json();
+      if (!orderId) {
+        router.push('/career');
+        return;
+      }
 
-          if (!data.isPaid) {
-            router.push('/payment?testType=career');
-            return;
-          }
+      setVerifying(true);
+      try {
+        const response = await fetch(`/api/payment/verify?orderId=${orderId}`);
+        const data = (await response.json()) as { isPaid?: boolean; resultData?: string; testType?: string };
 
-
-          // Try to use resultData from API, fallback to localStorage
-          if (data.resultData) {
-            const parsed = parseCareerResult(data.resultData);
-            if (parsed) {
-              setResult(parsed);
-            }
-          } else {
-            const parsed = parseCareerResult(localStorage.getItem('career_latest_result'));
-            if (parsed) {
-              setResult(parsed);
-            }
-          }
-        } catch (error) {
-          console.error('Verify error:', error);
+        if (!data.isPaid || !data.resultData || data.testType !== 'career') {
           router.push('/payment?testType=career');
-        } finally {
-          setVerifying(false);
+          return;
         }
-      } else {
-        // No orderId - fallback to localStorage (backward compatible)
-        const parsed = parseCareerResult(localStorage.getItem('career_latest_result'));
-        if (parsed) {
-          setResult(parsed);
+
+        const parsed = parseCareerResult(data.resultData);
+        if (!parsed) {
+          router.push('/payment?testType=career');
+          return;
         }
+
+        persistPaidResult('career', parsed, {
+          timestamp: Date.now(),
+          mbtiType: parsed.mbtiType,
+          ffmScores: parsed.ffmScores,
+          careers: parsed.careers,
+        });
+        setResult(parsed);
+      } catch (error) {
+        console.error('Verify error:', error);
+        router.push('/payment?testType=career');
+      } finally {
+        setVerifying(false);
       }
     };
 

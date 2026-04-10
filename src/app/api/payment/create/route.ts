@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
 import { createOrder } from '@/lib/db';
 import { createWechatNativeOrder } from '@/lib/wechat-pay';
 import { formatPrice, getTestName, getTestPrice, getWechatNativeConfigErrors, isSandboxMode } from '@/lib/payment-config';
@@ -28,6 +28,12 @@ interface CreatePaymentRequest {
   resultData?: string;
 }
 
+function createShortOrderId(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = randomBytes(6).toString('hex').toUpperCase();
+  return `ORD${timestamp}${random}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: CreatePaymentRequest = await request.json();
@@ -49,7 +55,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const orderId = uuidv4();
+    if (!resultData?.trim()) {
+      return NextResponse.json(
+        { error: '未找到待支付的测试结果，请重新完成测试后再发起支付。' },
+        { status: 400 }
+      );
+    }
+
+    const orderId = createShortOrderId();
     const amount = getTestPrice(testType);
 
     if (!isSandboxMode() && paymentMethod === 'alipay') {

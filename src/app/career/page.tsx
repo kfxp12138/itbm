@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { careerQuestions } from '@/data/career-data';
 import { calculateCareerResult } from '@/lib/career-scoring';
+import { savePendingResult } from '@/lib/client-result-storage';
 
 const LIKERT_OPTIONS = [
   { value: 1, label: '非常不同意', color: 'bg-red-500', hoverColor: 'hover:bg-red-400', size: 'w-11 h-11 sm:w-12 sm:h-12' },
@@ -32,25 +33,8 @@ export default function CareerTestPage() {
   const handleSubmit = () => {
     const validAnswers = answers.map(a => a ?? 3);
     const result = calculateCareerResult(validAnswers);
-    const entry = {
-      timestamp: Date.now(),
-      mbtiType: result.mbtiType,
-      ffmScores: result.ffmScores,
-      careers: result.careers,
-    };
-    let existing: unknown = [];
-
-    try {
-      existing = JSON.parse(localStorage.getItem('career_results') || '[]');
-    } catch {
-      existing = [];
-    }
-
-    const history = Array.isArray(existing) ? existing : [];
-    history.push(entry);
-    localStorage.setItem('career_results', JSON.stringify(history));
-    localStorage.setItem('career_latest_result', JSON.stringify(result));
-    router.push('/career/result');
+    savePendingResult('career', result);
+    router.push('/payment?testType=career');
   };
 
   if (!started) {
@@ -149,7 +133,7 @@ export default function CareerTestPage() {
               disabled={!allAnswered}
               className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              查看结果
+              前往支付
             </button>
           )}
         </div>

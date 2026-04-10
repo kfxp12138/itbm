@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MBTI_DIMENSIONS, mbtiQuestions } from '@/data/mbti-questions';
 import { calculateMBTIResult, type MBTIAnswerValue } from '@/lib/mbti-scoring';
+import { savePendingResult } from '@/lib/client-result-storage';
 
 const MBTI_DRAFT_KEY = 'mbti_draft_v2';
 const SECTION_SIZE = 50;
@@ -142,23 +143,7 @@ export default function MBTITestPage() {
 
   const handleSubmit = () => {
     const result = calculateMBTIResult(answers);
-    const historyEntry = {
-      timestamp: Date.now(),
-      ...result,
-    };
-
-    let existing: unknown = [];
-    try {
-      existing = JSON.parse(localStorage.getItem('mbti_results') || '[]');
-    } catch {
-      existing = [];
-    }
-
-    const history = Array.isArray(existing) ? existing : [];
-    history.push(historyEntry);
-
-    localStorage.setItem('mbti_results', JSON.stringify(history));
-    localStorage.setItem('mbti_latest_result', JSON.stringify(result));
+    savePendingResult('mbti', result);
     localStorage.removeItem(MBTI_DRAFT_KEY);
     setDraft(null);
     router.push('/payment?testType=mbti');

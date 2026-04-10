@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { SETS, QUESTIONS_PER_SET, TEST_DURATION_SECONDS, getQuestionImagePath, getAnswerCount } from '@/data/iq-data';
@@ -9,30 +9,84 @@ import { calculateIQScore } from '@/lib/iq-scoring';
 type Step = 'age' | 'instructions' | 'test';
 
 const TOTAL_QUESTIONS = SETS.length * QUESTIONS_PER_SET;
+const MIN_AGE = 10;
+const MAX_AGE = 80;
+
+function parseAgeInput(value: string): number | null {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isInteger(parsed) || parsed < MIN_AGE || parsed > MAX_AGE) {
+    return null;
+  }
+
+  return parsed;
+}
 
 export default function IQTestPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('age');
   const [age, setAge] = useState<number>(25);
+  const [ageInput, setAgeInput] = useState('25');
+  const [ageError, setAgeError] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(TOTAL_QUESTIONS).fill(null));
   const [timeLeft, setTimeLeft] = useState(TEST_DURATION_SECONDS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
 
   const currentSet = Math.floor(currentQuestion / QUESTIONS_PER_SET);
   const submitTest = useCallback(() => {
-    const { score, correctCount } = calculateIQScore(answers, age);
-    const result = {
-      timestamp: Date.now(),
-      score,
-      correctCount,
-      age,
-    };
-    const existing = JSON.parse(localStorage.getItem('iq_results') || '[]');
-    existing.push(result);
-    localStorage.setItem('iq_results', JSON.stringify(existing));
-    localStorage.setItem('iq_latest_result', JSON.stringify(result));
-    router.push('/payment?testType=iq');
+    if (submitLockRef.current) {
+      return;
+    }
+
+    submitLockRef.current = true;
+    setIsSubmitting(true);
+
+    try {
+      const { score, correctCount } = calculateIQScore(answers, age);
+      const result = {
+        timestamp: Date.now(),
+        score,
+        correctCount,
+        age,
+      };
+      const existing = JSON.parse(localStorage.getItem('iq_results') || '[]');
+      existing.push(result);
+      localStorage.setItem('iq_results', JSON.stringify(existing));
+      localStorage.setItem('iq_latest_result', JSON.stringify(result));
+      router.push('/payment?testType=iq');
+    } catch (error) {
+      console.error('IQ submit error:', error);
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+    }
   }, [answers, age, router]);
+
+  const handleAgeChange = (value: string) => {
+    if (/^\d*$/.test(value)) {
+      setAgeInput(value);
+      setAgeError(null);
+    }
+  };
+
+  const goToInstructions = () => {
+    const parsedAge = parseAgeInput(ageInput);
+
+    if (parsedAge === null) {
+      setAgeError(`请输入 ${MIN_AGE} - ${MAX_AGE} 岁之间的整数年龄`);
+      return;
+    }
+
+    setAge(parsedAge);
+    setAgeInput(String(parsedAge));
+    setAgeError(null);
+    setStep('instructions');
+  };
 
   useEffect(() => {
     if (step !== 'test') return;
@@ -78,16 +132,23 @@ export default function IQTestPage() {
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-slate-700">年龄</label>
             <input
-              type="number"
-              min={10}
-              max={80}
-              value={age}
-              onChange={(e) => setAge(Math.min(80, Math.max(10, parseInt(e.target.value) || 10)))}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={ageInput}
+              onChange={(e) => handleAgeChange(e.target.value)}
               className="app-input px-4 py-3 text-lg"
+              placeholder="请输入 10 - 80 岁"
+              aria-invalid={ageError ? 'true' : 'false'}
             />
+            {ageError ? (
+              <p className="mt-2 text-sm text-red-500">{ageError}</p>
+            ) : (
+              <p className="mt-2 text-sm text-slate-500">支持直接输入年龄，不再只能用上下调节。</p>
+            )}
           </div>
           <button
-            onClick={() => setStep('instructions')}
+            onClick={goToInstructions}
             className="w-full rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
           >
             下一步
@@ -212,18 +273,22 @@ export default function IQTestPage() {
           ) : (
             <button
               onClick={submitTest}
+              disabled={isSubmitting}
+              aria-disabled={isSubmitting}
               className="flex-1 rounded-2xl border border-emerald-500/30 bg-emerald-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] transition-colors hover:bg-emerald-400"
             >
-              完成测试
+              {isSubmitting ? '提交中...' : '完成测试'}
             </button>
           )}
         </div>
 
         <button
           onClick={submitTest}
-          className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500 px-8 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400"
+          disabled={isSubmitting}
+          aria-disabled={isSubmitting}
+          className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500 px-8 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          提前交卷
+          {isSubmitting ? '提交中...' : '提前交卷'}
         </button>
         </div>
       </div>

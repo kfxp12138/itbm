@@ -44,10 +44,10 @@ export default function Home() {
             <div>
               <p className="section-kicker">人格 · 智力 · 职业倾向</p>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 sm:text-6xl sm:leading-[1.05]">
-                用更清晰的测试流程，认识你的性格、能力与职业倾向。
+                礼至在线潜能测试 三步测出你的潜能地图：性格 × 智商 × 职业
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                你可以先做 20 题免费 MBTI 快速版，也可以直接进入 200 题完整版，再配合 IQ 与职业测试补全自己的画像。
+                先做 20 题免费 MBTI 快速定位，再深入 200 题完整版，最后用 IQ 与职业测试补全画像——每一步都清晰，每一份报告都实用。
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="#tests" className="app-button-primary px-8 py-3 text-base font-medium">

@@ -25,10 +25,13 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-lg font-bold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition-transform duration-200 group-hover:scale-105">
-                心
+                礼
               </div>
-              <span className="font-bold text-xl tracking-tight text-slate-900 transition-colors group-hover:text-violet-700">
-                心理测试平台
+              <span className="flex flex-col leading-tight text-slate-900 transition-colors group-hover:text-violet-700">
+                <span className="font-bold text-lg tracking-tight">礼至测途</span>
+                <span className="hidden text-xs font-medium text-slate-500 lg:block">
+                  在线潜能测试平台
+                </span>
               </span>
             </Link>
           </div>

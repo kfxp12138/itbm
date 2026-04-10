@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             tenRulesToLive: data.tenRulesToLive,
           })
         );
-        filename = `xinli-report-mbti-${timestamp}.pdf`;
+        filename = `lizhice-report-mbti-${timestamp}.pdf`;
         break;
       }
       case 'iq': {
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
             timestamp: data.timestamp,
           })
         );
-        filename = `xinli-report-iq-${timestamp}.pdf`;
+        filename = `lizhice-report-iq-${timestamp}.pdf`;
         break;
       }
       case 'career': {
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
             careers: data.careers,
           })
         );
-        filename = `xinli-report-career-${timestamp}.pdf`;
+        filename = `lizhice-report-career-${timestamp}.pdf`;
         break;
       }
       default:

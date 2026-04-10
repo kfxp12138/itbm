@@ -188,7 +188,7 @@ const traitDescriptions: Record<string, string> = {
 function Footer({ pageNum }: { pageNum: number }) {
   return (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>心理测试平台 — xinli-test.com</Text>
+      <Text style={styles.footerText}>礼至测途-在线潜能测试平台</Text>
       <Text style={styles.pageNumber}>第 {pageNum} 页</Text>
     </View>
   );

@@ -50,7 +50,7 @@ export default function CareerTestPage() {
     history.push(entry);
     localStorage.setItem('career_results', JSON.stringify(history));
     localStorage.setItem('career_latest_result', JSON.stringify(result));
-    router.push('/payment?testType=career');
+    router.push('/career/result');
   };
 
   if (!started) {

@@ -94,7 +94,7 @@ function generateEmailHtml(testType: TestType, resultData: MBTIResultData | IQRe
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">心理测试平台</h1>
+        <h1 style="color: white; margin: 0; font-size: 24px;">礼至测途-在线潜能测试平台</h1>
         <p style="color: #e0e7ff; margin: 10px 0 0 0;">您的${testName}报告已生成</p>
       </div>
       
@@ -111,8 +111,8 @@ function generateEmailHtml(testType: TestType, resultData: MBTIResultData | IQRe
       
       <div style="background: #f3f4f6; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: none;">
         <p style="margin: 0; color: #9ca3af; font-size: 14px;">
-          心理测试平台 — xinli-test.com<br>
-          如有疑问，请联系客服
+          礼至测途-在线潜能测试平台<br>
+          湖南礼至文化传播有限公司 · 湘ICP备2024048825号
         </p>
       </div>
     </body>
@@ -211,11 +211,11 @@ export async function POST(request: NextRequest) {
     const { data, error } = await resend.emails.send({
       from: RESEND_CONFIG.fromEmail,
       to: to,
-      subject: `你的${testName}测试报告 — 心理测试平台`,
+      subject: `你的${testName}测试报告 — 礼至测途-在线潜能测试平台`,
       html: generateEmailHtml(testType, resultData),
       attachments: [
         {
-          filename: `xinli-report-${testType}.pdf`,
+          filename: `lizhice-report-${testType}.pdf`,
           content: pdfBuffer,
         },
       ],

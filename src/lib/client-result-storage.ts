@@ -2,6 +2,16 @@
 
 export type PaidTestType = 'mbti' | 'iq' | 'career';
 
+export type StoredPaymentMethod = 'wechat' | 'alipay';
+
+export interface ActivePaymentSession {
+  amountDisplay: string;
+  codeUrl: string;
+  expiresAt?: string;
+  orderId: string;
+  paymentMethod: StoredPaymentMethod;
+}
+
 const HISTORY_KEYS: Record<PaidTestType, string> = {
   mbti: 'mbti_results',
   iq: 'iq_results',
@@ -18,6 +28,12 @@ const PENDING_KEYS: Record<PaidTestType, string> = {
   mbti: 'mbti_pending_result',
   iq: 'iq_pending_result',
   career: 'career_pending_result',
+};
+
+const ACTIVE_PAYMENT_KEYS: Record<PaidTestType, string> = {
+  mbti: 'mbti_active_payment',
+  iq: 'iq_active_payment',
+  career: 'career_active_payment',
 };
 
 interface TimestampedEntry {
@@ -66,6 +82,44 @@ export function clearAllPendingResults(): void {
   });
 }
 
+export function readActivePaymentSession(testType: PaidTestType): ActivePaymentSession | null {
+  try {
+    const raw = sessionStorage.getItem(ACTIVE_PAYMENT_KEYS[testType]);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<ActivePaymentSession>;
+    if (
+      typeof parsed !== 'object' ||
+      typeof parsed?.amountDisplay !== 'string' ||
+      typeof parsed.codeUrl !== 'string' ||
+      typeof parsed.orderId !== 'string' ||
+      (parsed.paymentMethod !== 'wechat' && parsed.paymentMethod !== 'alipay')
+    ) {
+      return null;
+    }
+
+    return {
+      amountDisplay: parsed.amountDisplay,
+      codeUrl: parsed.codeUrl,
+      expiresAt: typeof parsed.expiresAt === 'string' ? parsed.expiresAt : undefined,
+      orderId: parsed.orderId,
+      paymentMethod: parsed.paymentMethod,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveActivePaymentSession(testType: PaidTestType, payload: ActivePaymentSession): void {
+  sessionStorage.setItem(ACTIVE_PAYMENT_KEYS[testType], JSON.stringify(payload));
+}
+
+export function clearActivePaymentSession(testType: PaidTestType): void {
+  sessionStorage.removeItem(ACTIVE_PAYMENT_KEYS[testType]);
+}
+
 export function persistPaidResult<TLatest, THistory extends TimestampedEntry>(
   testType: PaidTestType,
   latestResult: TLatest,
@@ -82,4 +136,5 @@ export function persistPaidResult<TLatest, THistory extends TimestampedEntry>(
 
   localStorage.setItem(latestKey, JSON.stringify(latestResult));
   clearPendingResult(testType);
+  clearActivePaymentSession(testType);
 }

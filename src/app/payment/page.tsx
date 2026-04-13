@@ -3,16 +3,18 @@
 import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
-import { readPendingResultRaw } from '@/lib/client-result-storage';
+import {
+  clearActivePaymentSession,
+  readActivePaymentSession,
+  readPendingResultRaw,
+  saveActivePaymentSession,
+  type ActivePaymentSession,
+  type PaidTestType,
+} from '@/lib/client-result-storage';
 
 type PaymentMethod = 'wechat' | 'alipay';
 
-interface NativePaymentSession {
-  amountDisplay: string;
-  codeUrl: string;
-  expiresAt?: string;
-  orderId: string;
-}
+type NativePaymentSession = ActivePaymentSession;
 
 interface CreatePaymentResponse {
   amount?: number;
@@ -43,6 +45,7 @@ function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const testType = searchParams.get('testType') || '';
+  const paidTestType = isValidPaidTestType(testType) ? testType : null;
 
   // Validate testType synchronously
   const isValidTestType = ['mbti', 'iq', 'career'].includes(testType);
@@ -68,6 +71,20 @@ function PaymentContent() {
       router.push('/');
     }
   }, [testType, isValidTestType, router]);
+
+  useEffect(() => {
+    if (!paidTestType || nativePayment) {
+      return;
+    }
+
+    const restoredPayment = readActivePaymentSession(paidTestType);
+    if (!restoredPayment) {
+      return;
+    }
+
+    setSelectedMethod(restoredPayment.paymentMethod);
+    setNativePayment(restoredPayment);
+  }, [nativePayment, paidTestType]);
 
   useEffect(() => {
     if (!nativePayment?.codeUrl) {
@@ -118,6 +135,9 @@ function PaymentContent() {
         const data = (await response.json()) as { isPaid?: boolean };
 
         if (!cancelled && data.isPaid) {
+          if (paidTestType) {
+            clearActivePaymentSession(paidTestType);
+          }
           router.push(`/${testType}/result?orderId=${nativePayment.orderId}`);
         }
       } catch (error) {
@@ -134,9 +154,12 @@ function PaymentContent() {
       cancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [nativePayment, router, testType]);
+  }, [nativePayment, paidTestType, router, testType]);
 
   const handleMethodChange = (method: PaymentMethod) => {
+    if (paidTestType) {
+      clearActivePaymentSession(paidTestType);
+    }
     setSelectedMethod(method);
     setNativePayment(null);
     setPaymentError(null);
@@ -174,6 +197,9 @@ function PaymentContent() {
       }
 
       if (data.isPaid) {
+        if (paidTestType) {
+          clearActivePaymentSession(paidTestType);
+        }
         router.push(`/${testType}/result?orderId=${nativePayment.orderId}`);
         return;
       }
@@ -216,12 +242,19 @@ function PaymentContent() {
       }
 
       if (data.mode === 'production' && data.paymentMethod === 'wechat' && data.codeUrl && data.orderId && data.amountDisplay) {
-        setNativePayment({
+        const nextPaymentSession: NativePaymentSession = {
           amountDisplay: data.amountDisplay,
           codeUrl: data.codeUrl,
           expiresAt: data.expiresAt,
           orderId: data.orderId,
-        });
+          paymentMethod: data.paymentMethod,
+        };
+
+        if (paidTestType) {
+          saveActivePaymentSession(paidTestType, nextPaymentSession);
+        }
+
+        setNativePayment(nextPaymentSession);
         setSubmitting(false);
         return;
       }
@@ -376,6 +409,10 @@ function PaymentContent() {
       </div>
     </div>
   );
+}
+
+function isValidPaidTestType(value: string): value is PaidTestType {
+  return value === 'mbti' || value === 'iq' || value === 'career';
 }
 
 export default function PaymentPage() {

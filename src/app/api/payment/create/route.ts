@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
         test_type: testType,
         amount,
         email,
+        payment_method: paymentMethod,
         result_data: resultData,
       });
 
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
       test_type: testType,
       amount,
       email,
+      payment_method: paymentMethod,
       result_data: resultData,
     });
 

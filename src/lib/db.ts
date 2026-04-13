@@ -31,6 +31,17 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
     CREATE INDEX IF NOT EXISTS idx_orders_test_type ON orders(test_type);
   `);
+
+  ensureOrdersColumn(db, 'payment_method', "ALTER TABLE orders ADD COLUMN payment_method TEXT CHECK(payment_method IN ('wechat', 'alipay'))");
+}
+
+function ensureOrdersColumn(db: Database.Database, columnName: string, alterSql: string) {
+  const columns = db.prepare("PRAGMA table_info('orders')").all() as Array<{ name?: string }>;
+  const hasColumn = columns.some((column) => column.name === columnName);
+
+  if (!hasColumn) {
+    db.exec(alterSql);
+  }
 }
 
 export interface Order {
@@ -51,14 +62,22 @@ export function createOrder(params: {
   test_type: Order['test_type'];
   amount: number;
   email?: string;
+  payment_method?: Order['payment_method'];
   result_data?: string;
 }): Order {
   const db = getDb();
   const stmt = db.prepare(`
-    INSERT INTO orders (id, test_type, amount, email, result_data)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO orders (id, test_type, amount, payment_method, email, result_data)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
-  stmt.run(params.id, params.test_type, params.amount, params.email || null, params.result_data || null);
+  stmt.run(
+    params.id,
+    params.test_type,
+    params.amount,
+    params.payment_method || null,
+    params.email || null,
+    params.result_data || null
+  );
   return getOrder(params.id)!;
 }
 

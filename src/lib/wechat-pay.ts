@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'crypto';
 import { WECHAT_CONFIG } from '@/lib/payment-config';
 
 const WECHAT_API_BASE_URL = 'https://api.mch.weixin.qq.com';
+const WECHAT_ORDER_QUERY_PATH = '/pay/orderquery';
 const WECHAT_UNIFIED_ORDER_PATH = '/pay/unifiedorder';
 const WECHAT_SIGN_TYPE = 'MD5';
 
@@ -23,6 +24,20 @@ interface WechatUnifiedOrderResponse {
   return_msg?: string;
 }
 
+interface WechatOrderQueryResponse {
+  appid?: string;
+  err_code?: string;
+  err_code_des?: string;
+  mch_id?: string;
+  out_trade_no?: string;
+  result_code?: string;
+  return_code?: string;
+  return_msg?: string;
+  total_fee?: string;
+  trade_state?: string;
+  transaction_id?: string;
+}
+
 export interface WechatPaymentNotification {
   appid: string;
   mch_id: string;
@@ -36,6 +51,15 @@ export interface WechatPaymentNotification {
 export interface WechatNativeOrderResult {
   codeUrl: string;
   expiresAt: string;
+}
+
+export interface WechatOrderQueryResult {
+  appId?: string;
+  mchId?: string;
+  outTradeNo?: string;
+  totalFee?: number;
+  tradeState?: string;
+  transactionId?: string;
 }
 
 type WechatSignableValue = number | string | undefined;
@@ -152,6 +176,60 @@ export async function createWechatNativeOrder(payload: WechatNativeOrderPayload)
   return {
     codeUrl: data.code_url,
     expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+  };
+}
+
+export async function queryWechatOrderByOutTradeNo(outTradeNo: string): Promise<WechatOrderQueryResult | null> {
+  const requestParams: Record<string, WechatSignableValue> = {
+    appid: WECHAT_CONFIG.appId,
+    mch_id: WECHAT_CONFIG.mchId,
+    nonce_str: createNonce(),
+    out_trade_no: outTradeNo,
+    sign_type: WECHAT_SIGN_TYPE,
+  };
+
+  const requestBody = buildXml({
+    ...Object.fromEntries(buildSignableEntries(requestParams)),
+    sign: createWechatV2Signature(requestParams),
+  });
+
+  const response = await fetch(`${WECHAT_API_BASE_URL}${WECHAT_ORDER_QUERY_PATH}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'User-Agent': 'lizhi-cedition-next-app/1.0',
+    },
+    body: requestBody,
+  });
+
+  const responseText = await response.text();
+  if (!response.ok) {
+    throw new Error(`微信支付查单失败: ${response.status} ${responseText}`);
+  }
+
+  const data = parseWechatXml(responseText) as WechatOrderQueryResponse & Record<string, string>;
+
+  if (data.return_code !== 'SUCCESS') {
+    return null;
+  }
+
+  if (!verifyWechatV2Signature(data)) {
+    throw new Error('微信支付查单响应验签失败');
+  }
+
+  if (data.result_code !== 'SUCCESS' || data.trade_state !== 'SUCCESS') {
+    return null;
+  }
+
+  const totalFee = Number(data.total_fee);
+
+  return {
+    appId: data.appid,
+    mchId: data.mch_id,
+    outTradeNo: data.out_trade_no,
+    totalFee: Number.isFinite(totalFee) ? totalFee : undefined,
+    tradeState: data.trade_state,
+    transactionId: data.transaction_id,
   };
 }
 

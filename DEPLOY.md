@@ -57,7 +57,7 @@ npm run start
 ```bash
 # 支付模式
 #   sandbox  = 沙盒模式，点击「模拟支付成功」即可跳过真实支付，用于开发测试
-#   production = 生产模式，当前仓库仅接入真实微信原生扫码支付流程
+#   production = 生产模式，当前仓库接入真实 ZPAY 聚合支付流程
 # 👉 首次部署建议先用 sandbox 跑通流程，确认无误后再改为 production
 PAYMENT_MODE=sandbox
 
@@ -81,78 +81,32 @@ PRICE_IQ=1999
 PRICE_CAREER=999
 ```
 
-### 3.3 微信支付配置
+### 3.3 ZPAY 聚合支付配置
 
-> 获取方式：登录 [微信支付商户平台](https://pay.weixin.qq.com/) → 账户中心 → API安全
+> 获取方式：登录 [ZPAY 商户后台](https://7-pay.cn/doc.html)
 >
-> ⚠️ 需要已认证的企业微信支付商户号。个人无法申请。
+> ⚠️ 当前生产链路通过 ZPAY 同时支持微信与支付宝扫码支付。
 
 ```bash
-# 微信公众号/小程序的 AppID
-# 👉 在微信公众平台 (mp.weixin.qq.com) → 开发 → 基本配置 中获取
-# 👉 格式示例：wx1234567890abcdef
-WECHAT_APP_ID=<你的微信AppID>
+# 商户 PID
+ZPAY_PID=<你的ZPAY_PID>
 
-# 微信支付商户号
-# 👉 在微信支付商户平台 (pay.weixin.qq.com) → 账户中心 → 商户信息 中获取
-# 👉 格式示例：1234567890
-WECHAT_MCH_ID=<你的商户号>
-
-# API 密钥（V2）
-# 👉 商户平台 → 账户中心 → API安全 → 设置APIv2密钥
-# 👉 32位字符串，自己设置的
-# 👉 当前仓库的微信 Native 支付流程已改为 API v2，下单签名与回调验签都会使用这个密钥
-WECHAT_API_KEY=<你设置的32位API密钥>
-
-# 支付结果异步通知地址
-# 👉 ⚠️ 必须替换 your-domain.com 为你的实际域名
-# 👉 ⚠️ 必须是 HTTPS 地址，且公网可访问
-# 👉 微信支付会在用户付款成功后，主动请求这个地址通知你
-WECHAT_NOTIFY_URL=https://<你的域名>/api/payment/callback/wechat
-
-# 以下 V3 相关变量在当前 API v2 方案中不再参与支付主链路
-# 仅在你未来切回 API v3 时才需要重新配置
-# WECHAT_API_V3_KEY=<你设置的32位APIv3密钥>
-# WECHAT_SERIAL_NO=<你的证书序列号>
-# WECHAT_PRIVATE_KEY=<apiclient_key.pem的完整内容>
-# WECHAT_PUBLIC_KEY_ID=<微信支付公钥ID>
-# WECHAT_PUBLIC_KEY=<微信支付公钥PEM内容>
-```
-
-### 3.4 支付宝配置（预留，当前生产流程未启用）
-
-> 获取方式：登录 [支付宝开放平台](https://open.alipay.com/) → 开发设置
->
-> ⚠️ 当前代码仅完成微信原生扫码支付接入；以下支付宝变量仍为后续扩展预留，未在当前生产链路中启用。
-
-```bash
-# 支付宝应用 AppID
-# 👉 在支付宝开放平台 → 我的应用 → 应用详情 中获取
-# 👉 格式示例：2021001234567890
-ALIPAY_APP_ID=<你的支付宝AppID>
-
-# 应用私钥（RSA2 格式）
-# 👉 在支付宝开放平台 → 开发设置 → 接口加签方式 中生成/上传
-# 👉 使用支付宝提供的「密钥生成工具」生成 RSA2(SHA256) 密钥对
-# 👉 把「应用私钥」的完整内容粘贴在这里
-ALIPAY_PRIVATE_KEY=<你的应用私钥>
-
-# 支付宝公钥（不是你的应用公钥！）
-# 👉 上传应用公钥后，支付宝会返回一个「支付宝公钥」，用于验签
-# 👉 在支付宝开放平台 → 开发设置 → 接口加签方式 → 查看支付宝公钥
-ALIPAY_PUBLIC_KEY=<支付宝返回的公钥>
+# 商户 KEY
+# 👉 用于下单签名和异步通知验签
+ZPAY_KEY=<你的ZPAY_KEY>
 
 # 支付结果异步通知地址
 # 👉 ⚠️ 必须替换为你的实际域名，必须 HTTPS，公网可访问
-ALIPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/alipay
+# 👉 ⚠️ 该地址不能自己拼接查询参数
+ZPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/zpay
 
-# 支付完成后的前端跳转地址
-# 👉 ⚠️ 替换为你的实际域名
-# 👉 用户在支付宝付款成功后，浏览器会跳转到这个页面
-ALIPAY_RETURN_URL=https://<你的域名>/payment
+# 浏览器支付完成返回地址
+# 👉 ⚠️ 该地址不能自己拼接查询参数
+# 👉 支付完成后 ZPAY 会自动把订单参数附加到这个地址上
+ZPAY_RETURN_URL=https://<你的域名>/payment/return
 ```
 
-### 3.5 邮件服务（Resend）
+### 3.4 邮件服务（Resend）
 
 > 获取方式：注册 [Resend](https://resend.com/) → API Keys → Create API Key
 >
@@ -284,7 +238,7 @@ journalctl -u xinli-test -f
 
 ## 六、SSL/HTTPS 配置（免费证书）
 
-> ⚠️ 微信支付和支付宝的回调通知地址必须是 HTTPS。不配置 SSL 则无法接收支付结果。
+> ⚠️ ZPAY 的异步通知地址必须是 HTTPS。不配置 SSL 则无法稳定接收支付结果。
 
 ```bash
 # 安装 certbot（如果还没装）
@@ -394,7 +348,7 @@ sudo apt install fonts-noto-cjk
 
 ### 4. 支付回调收不到通知
 检查清单：
-- [ ] `.env` 中的 `WECHAT_NOTIFY_URL` / `ALIPAY_NOTIFY_URL` 是否用了你的真实域名（不是 your-domain.com）
+- [ ] `.env` 中的 `ZPAY_NOTIFY_URL` / `ZPAY_RETURN_URL` 是否用了你的真实域名（不是 your-domain.com）
 - [ ] 域名是否已解析到服务器 IP
 - [ ] HTTPS 是否配置成功（回调地址必须是 https://）
 - [ ] Nginx 是否正确代理到 Next.js（`nginx -t` 检查语法）
@@ -434,4 +388,4 @@ sudo chown -R www-data:www-data /var/www/xinli-test/unified-test-app/data
 - [ ] 测试记录页面能看到历史记录
 - [ ] 手机上打开网站，布局正常、按钮可点击
 
-全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的微信/支付宝密钥，重新构建部署即可上线。
+全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的 ZPAY 商户参数，重新构建部署即可上线。

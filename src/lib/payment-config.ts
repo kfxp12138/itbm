@@ -32,6 +32,13 @@ export const ALIPAY_CONFIG = {
   returnUrl: process.env.ALIPAY_RETURN_URL || '',
 };
 
+export const ZPAY_CONFIG = {
+  key: process.env.ZPAY_KEY || '',
+  notifyUrl: process.env.ZPAY_NOTIFY_URL || '',
+  pid: process.env.ZPAY_PID || '',
+  returnUrl: process.env.ZPAY_RETURN_URL || '',
+};
+
 export const RESEND_CONFIG = {
   apiKey: process.env.RESEND_API_KEY || '',
   fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@example.com',
@@ -59,6 +66,19 @@ export function getWechatNativeConfigErrors(): string[] {
     ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],
     ['WECHAT_API_KEY', WECHAT_CONFIG.apiKey],
     ['WECHAT_NOTIFY_URL', WECHAT_CONFIG.notifyUrl],
+  ];
+
+  return requiredEntries
+    .filter(([, value]) => !value.trim())
+    .map(([name]) => name);
+}
+
+export function getZpayConfigErrors(): string[] {
+  const requiredEntries: Array<[string, string]> = [
+    ['ZPAY_PID', ZPAY_CONFIG.pid],
+    ['ZPAY_KEY', ZPAY_CONFIG.key],
+    ['ZPAY_NOTIFY_URL', ZPAY_CONFIG.notifyUrl],
+    ['ZPAY_RETURN_URL', ZPAY_CONFIG.returnUrl],
   ];
 
   return requiredEntries

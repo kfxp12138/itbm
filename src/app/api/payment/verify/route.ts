@@ -1,24 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrder, markOrderPaidIfPending } from '@/lib/db';
-import { isSandboxMode, WECHAT_CONFIG } from '@/lib/payment-config';
-import { queryWechatOrderByOutTradeNo } from '@/lib/wechat-pay';
+import { isSandboxMode, ZPAY_CONFIG } from '@/lib/payment-config';
+import { getZpayChannelByPaymentMethod, parseZpayAmountToCents, queryZpayOrderByOutTradeNo } from '@/lib/zpay';
 
-function canQueryWechatOrderStatus(): boolean {
-  return Boolean(WECHAT_CONFIG.appId && WECHAT_CONFIG.mchId && WECHAT_CONFIG.apiKey);
+function canQueryZpayOrderStatus(): boolean {
+  return Boolean(ZPAY_CONFIG.pid && ZPAY_CONFIG.key);
 }
 
-async function reconcilePendingWechatOrder(orderId: string) {
-  const providerOrder = await queryWechatOrderByOutTradeNo(orderId);
+async function reconcilePendingZpayOrder(orderId: string) {
+  const providerOrder = await queryZpayOrderByOutTradeNo(orderId);
   if (!providerOrder) {
-    return false;
-  }
-
-  if (
-    providerOrder.outTradeNo !== orderId ||
-    providerOrder.tradeState !== 'SUCCESS' ||
-    providerOrder.appId !== WECHAT_CONFIG.appId ||
-    providerOrder.mchId !== WECHAT_CONFIG.mchId
-  ) {
     return false;
   }
 
@@ -27,13 +18,23 @@ async function reconcilePendingWechatOrder(orderId: string) {
     return latestOrder?.status === 'paid';
   }
 
-  if (providerOrder.totalFee !== latestOrder.amount) {
+  const expectedType = latestOrder.payment_method ? getZpayChannelByPaymentMethod(latestOrder.payment_method) : undefined;
+  const providerAmount = parseZpayAmountToCents(providerOrder.money);
+
+  if (
+    providerOrder.outTradeNo !== orderId ||
+    providerOrder.status !== 1 ||
+    providerOrder.pid !== ZPAY_CONFIG.pid ||
+    providerAmount == null ||
+    providerAmount !== latestOrder.amount ||
+    (expectedType != null && providerOrder.type != null && providerOrder.type !== expectedType)
+  ) {
     return false;
   }
 
   markOrderPaidIfPending(orderId, {
-    paymentMethod: 'wechat',
-    transactionId: providerOrder.transactionId,
+    paymentMethod: latestOrder.payment_method,
+    transactionId: providerOrder.tradeNo,
   });
 
   return getOrder(orderId)?.status === 'paid';
@@ -59,16 +60,16 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const isPendingWechatOrder = order.status === 'pending' && (order.payment_method === 'wechat' || order.payment_method == null);
+  const isPendingZpayOrder = order.status === 'pending' && (order.payment_method === 'wechat' || order.payment_method === 'alipay' || order.payment_method == null);
 
-  if (!isSandboxMode() && isPendingWechatOrder && canQueryWechatOrderStatus()) {
+  if (!isSandboxMode() && isPendingZpayOrder && canQueryZpayOrderStatus()) {
     try {
-      const reconciled = await reconcilePendingWechatOrder(orderId);
+      const reconciled = await reconcilePendingZpayOrder(orderId);
       if (reconciled) {
         order = getOrder(orderId);
       }
     } catch (error) {
-      console.error('WeChat payment reconciliation failed:', error);
+      console.error('ZPAY payment reconciliation failed:', error);
     }
   }
 

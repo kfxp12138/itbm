@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
-import { createOrder } from '@/lib/db';
-import { createWechatNativeOrder } from '@/lib/wechat-pay';
-import { formatPrice, getTestName, getTestPrice, getWechatNativeConfigErrors, isSandboxMode } from '@/lib/payment-config';
+import { createOrder, updateOrderStatus } from '@/lib/db';
+import { formatPrice, getTestName, getTestPrice, getZpayConfigErrors, isSandboxMode } from '@/lib/payment-config';
+import { createZpayOrder, getZpayChannelByPaymentMethod } from '@/lib/zpay';
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -65,36 +65,18 @@ export async function POST(request: NextRequest) {
     const orderId = createShortOrderId();
     const amount = getTestPrice(testType);
 
-    if (!isSandboxMode() && paymentMethod === 'alipay') {
-      return NextResponse.json(
-        {
-          error: '当前生产环境仅开放微信原生扫码支付，支付宝暂未开放。',
-          mode: 'production',
-        },
-        { status: 501 }
-      );
-    }
-
-    if (!isSandboxMode() && paymentMethod === 'wechat') {
-      const configErrors = getWechatNativeConfigErrors();
+    if (!isSandboxMode()) {
+      const configErrors = getZpayConfigErrors();
 
       if (configErrors.length > 0) {
         return NextResponse.json(
           {
-            error: `微信支付配置不完整：${configErrors.join('、')}`,
+            error: `ZPAY 配置不完整：${configErrors.join('、')}`,
             mode: 'production',
           },
           { status: 400 }
         );
       }
-
-      const nativeOrder = await createWechatNativeOrder({
-        description: `${getTestName(testType)}结果解锁`,
-        outTradeNo: orderId,
-        productId: orderId,
-        spbillCreateIp: getClientIp(request),
-        total: amount,
-      });
 
       createOrder({
         id: orderId,
@@ -105,15 +87,29 @@ export async function POST(request: NextRequest) {
         result_data: resultData,
       });
 
-      return NextResponse.json({
-        orderId,
-        amount,
-        amountDisplay: formatPrice(amount),
-        codeUrl: nativeOrder.codeUrl,
-        expiresAt: nativeOrder.expiresAt,
-        mode: 'production',
-        paymentMethod,
-      });
+      try {
+        const nativeOrder = await createZpayOrder({
+          clientIp: getClientIp(request),
+          description: `${getTestName(testType)}结果解锁`,
+          notifyUrl: undefined,
+          outTradeNo: orderId,
+          total: amount,
+          type: getZpayChannelByPaymentMethod(paymentMethod),
+        });
+
+        return NextResponse.json({
+          orderId,
+          amount,
+          amountDisplay: formatPrice(amount),
+          codeUrl: nativeOrder.codeUrl,
+          expiresAt: nativeOrder.expiresAt,
+          mode: 'production',
+          paymentMethod,
+        });
+      } catch (error) {
+        updateOrderStatus(orderId, 'failed');
+        throw error;
+      }
     }
 
     // Create order in DB
@@ -142,7 +138,7 @@ export async function POST(request: NextRequest) {
         amount,
         amountDisplay: formatPrice(amount),
         mode: 'production',
-        message: '当前仅接入微信原生扫码支付，支付宝暂未开放。',
+        message: '当前生产环境支付通道暂不可用。',
       },
       { status: 501 }
     );

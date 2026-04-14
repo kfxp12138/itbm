@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
@@ -45,15 +46,28 @@ function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const testType = searchParams.get('testType') || '';
+  const orderIdFromQuery = searchParams.get('orderId') || '';
+  const methodFromQuery = searchParams.get('method');
   const paidTestType = isValidPaidTestType(testType) ? testType : null;
+  const restoredMethodFromQuery: PaymentMethod = methodFromQuery === 'alipay' ? 'alipay' : 'wechat';
+  const initialPaymentSession = paidTestType
+    ? readActivePaymentSession(paidTestType) || (orderIdFromQuery
+      ? {
+          amountDisplay: TEST_PRICES[testType] || '¥9.99',
+          codeUrl: '',
+          orderId: orderIdFromQuery,
+          paymentMethod: restoredMethodFromQuery,
+        }
+      : null)
+    : null;
 
   // Validate testType synchronously
   const isValidTestType = ['mbti', 'iq', 'career'].includes(testType);
 
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('wechat');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(initialPaymentSession?.paymentMethod || 'wechat');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(null);
+  const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(initialPaymentSession);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -73,22 +87,7 @@ function PaymentContent() {
   }, [testType, isValidTestType, router]);
 
   useEffect(() => {
-    if (!paidTestType || nativePayment) {
-      return;
-    }
-
-    const restoredPayment = readActivePaymentSession(paidTestType);
-    if (!restoredPayment) {
-      return;
-    }
-
-    setSelectedMethod(restoredPayment.paymentMethod);
-    setNativePayment(restoredPayment);
-  }, [nativePayment, paidTestType]);
-
-  useEffect(() => {
     if (!nativePayment?.codeUrl) {
-      setQrCodeDataUrl(null);
       return;
     }
 
@@ -164,6 +163,7 @@ function PaymentContent() {
     setNativePayment(null);
     setPaymentError(null);
     setCopySuccess(false);
+    setQrCodeDataUrl(null);
   };
 
   const handleCopyCodeUrl = async () => {
@@ -241,7 +241,7 @@ function PaymentContent() {
         return;
       }
 
-      if (data.mode === 'production' && data.paymentMethod === 'wechat' && data.codeUrl && data.orderId && data.amountDisplay) {
+      if (data.mode === 'production' && data.paymentMethod && data.codeUrl && data.orderId && data.amountDisplay) {
         const nextPaymentSession: NativePaymentSession = {
           amountDisplay: data.amountDisplay,
           codeUrl: data.codeUrl,
@@ -254,6 +254,7 @@ function PaymentContent() {
           saveActivePaymentSession(paidTestType, nextPaymentSession);
         }
 
+        setQrCodeDataUrl(null);
         setNativePayment(nextPaymentSession);
         setSubmitting(false);
         return;
@@ -314,8 +315,21 @@ function PaymentContent() {
                 微信支付
               </span>
             </button>
+            <button
+              onClick={() => handleMethodChange('alipay')}
+              className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
+                selectedMethod === 'alipay'
+                  ? 'border-sky-300 bg-sky-50'
+                  : 'border-slate-200 bg-white hover:border-sky-200'
+               }`}
+            >
+              <span className="text-2xl">🅰️</span>
+              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-sky-700' : 'text-slate-600'}`}>
+                支付宝
+              </span>
+            </button>
           </div>
-          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信原生扫码支付，支付宝通道暂未开放。</p>
+          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上已切换到 ZPAY 通道，可选择微信或支付宝扫码完成支付。</p>
         </div>
 
         {/* Email Input */}
@@ -340,16 +354,20 @@ function PaymentContent() {
 
         {nativePayment ? (
           <div className="mb-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-5 text-center">
-            <p className="text-sm font-medium text-emerald-700">请使用微信扫码完成支付</p>
+            <p className="text-sm font-medium text-emerald-700">
+              {nativePayment.codeUrl
+                ? `请使用${nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}扫码完成支付`
+                : '正在确认这笔订单的支付状态'}
+            </p>
             <p className="mt-2 text-xs leading-6 text-emerald-800">
               订单号：{nativePayment.orderId}
               <br />
               金额：{nativePayment.amountDisplay}
             </p>
             <div className="mt-4 flex justify-center">
-              {qrCodeDataUrl ? (
-                <img
-                  alt="微信支付二维码"
+              {nativePayment.codeUrl && qrCodeDataUrl ? (
+                <Image
+                  alt={`${nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}支付二维码`}
                   className="rounded-2xl border border-emerald-100 bg-white p-3 shadow-sm"
                   height={280}
                   src={qrCodeDataUrl}
@@ -357,25 +375,33 @@ function PaymentContent() {
                 />
               ) : (
                 <div className="flex h-[280px] w-[280px] items-center justify-center rounded-2xl border border-emerald-100 bg-white p-6 text-sm text-slate-500">
-                  正在生成二维码...
+                  {nativePayment.codeUrl ? '正在生成二维码...' : '正在轮询支付结果；若你刚刚完成付款，请点下方按钮立即检查。'}
                 </div>
               )}
             </div>
-            <p className="mt-4 text-xs leading-6 text-slate-600">推荐直接使用微信扫码支付；下方链接仅作为备用方式保留。</p>
+            {nativePayment.codeUrl ? (
+              <p className="mt-4 text-xs leading-6 text-slate-600">推荐直接使用{nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}扫码支付；下方链接仅作为备用方式保留。</p>
+            ) : (
+              <p className="mt-4 text-xs leading-6 text-slate-600">如果这是从支付完成页返回的新会话，页面会继续按订单号检查结果；也可以重新发起一笔支付。</p>
+            )}
             <div className="mt-4 space-y-3">
-              <a
-                className="block rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
-                href={nativePayment.codeUrl}
-              >
-                打开微信支付链接
-              </a>
-              <button
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
-                onClick={handleCopyCodeUrl}
-                type="button"
-              >
-                {copySuccess ? '支付链接已复制' : '复制支付链接'}
-              </button>
+              {nativePayment.codeUrl ? (
+                <>
+                  <a
+                    className="block rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
+                    href={nativePayment.codeUrl}
+                  >
+                    打开{nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}支付链接
+                  </a>
+                  <button
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
+                    onClick={handleCopyCodeUrl}
+                    type="button"
+                  >
+                    {copySuccess ? '支付链接已复制' : '复制支付链接'}
+                  </button>
+                </>
+              ) : null}
               <button
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
                 onClick={checkPaymentNow}

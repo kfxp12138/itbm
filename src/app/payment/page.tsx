@@ -1,9 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import QRCode from 'qrcode';
 import {
   clearActivePaymentSession,
   readActivePaymentSession,
@@ -22,15 +20,11 @@ interface CreatePaymentResponse {
   amountDisplay?: string;
   error?: string;
   expiresAt?: string;
-  fallbackUrl?: string;
   h5Url?: string;
   message?: string;
   mode?: 'sandbox' | 'production';
   orderId?: string;
-  payUrl?: string;
   paymentMethod?: PaymentMethod;
-  qrCodeUrl?: string;
-  qrImageUrl?: string;
   redirectUrl?: string;
 }
 
@@ -82,8 +76,6 @@ function PaymentContent() {
   const [submitting, setSubmitting] = useState(false);
   const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(initialPaymentSession);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
-  const [copySuccess, setCopySuccess] = useState(false);
   const [h5Redirecting, setH5Redirecting] = useState(false);
   const resultData = useMemo(() => {
     if (testType === 'mbti' || testType === 'iq' || testType === 'career') {
@@ -93,13 +85,7 @@ function PaymentContent() {
     return null;
   }, [testType]);
 
-  const qrContentUrl = nativePayment?.qrCodeUrl || nativePayment?.fallbackUrl || null;
-  const paymentOpenUrl = nativePayment
-    ? (shouldPreferH5
-      ? nativePayment.h5Url || nativePayment.fallbackUrl || nativePayment.qrCodeUrl || null
-      : nativePayment.fallbackUrl || nativePayment.qrCodeUrl || (!browserInfo.isWeChat ? nativePayment.h5Url : undefined) || null)
-    : null;
-  const paymentCopyUrl = nativePayment?.h5Url || nativePayment?.fallbackUrl || nativePayment?.qrCodeUrl || null;
+  const paymentOpenUrl = nativePayment?.h5Url || null;
 
   // Redirect if invalid - using useLayoutEffect to run before paint
   useLayoutEffect(() => {
@@ -107,34 +93,6 @@ function PaymentContent() {
       router.push('/');
     }
   }, [testType, isValidTestType, router]);
-
-  useEffect(() => {
-    if (!qrContentUrl) {
-      return;
-    }
-
-    let cancelled = false;
-
-    QRCode.toDataURL(qrContentUrl, {
-      margin: 1,
-      width: 280,
-    })
-      .then((dataUrl) => {
-        if (!cancelled) {
-          setQrCodeDataUrl(dataUrl);
-        }
-      })
-      .catch((error) => {
-        console.error('QR code generation error:', error);
-        if (!cancelled) {
-          setQrCodeDataUrl(null);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [qrContentUrl]);
 
   useEffect(() => {
     if (!nativePayment?.orderId) {
@@ -184,23 +142,7 @@ function PaymentContent() {
     setSelectedMethod(method);
     setNativePayment(null);
     setPaymentError(null);
-    setCopySuccess(false);
     setH5Redirecting(false);
-    setQrCodeDataUrl(null);
-  };
-
-  const handleCopyCodeUrl = async () => {
-    if (!paymentCopyUrl || !navigator.clipboard) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(paymentCopyUrl);
-      setCopySuccess(true);
-      window.setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
-      console.error('Copy code_url failed:', error);
-    }
   };
 
   const handleOpenH5Payment = () => {
@@ -277,19 +219,15 @@ function PaymentContent() {
         const nextPaymentSession: NativePaymentSession = {
           amountDisplay: data.amountDisplay,
           expiresAt: data.expiresAt,
-          fallbackUrl: data.fallbackUrl,
           h5Url: data.h5Url,
           orderId: data.orderId,
           paymentMethod: data.paymentMethod,
-          qrCodeUrl: data.qrCodeUrl,
-          qrImageUrl: data.qrImageUrl,
         };
 
         if (paidTestType) {
           saveActivePaymentSession(paidTestType, nextPaymentSession);
         }
 
-        setQrCodeDataUrl(null);
         setNativePayment(nextPaymentSession);
         setSubmitting(false);
 
@@ -357,7 +295,7 @@ function PaymentContent() {
               </span>
             </button>
           </div>
-          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信支付，请使用微信扫码完成支付。</p>
+          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信 H5 支付。</p>
         </div>
 
         {/* Email Input */}
@@ -386,56 +324,25 @@ function PaymentContent() {
               {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat
                 ? (h5Redirecting ? '正在跳转到微信 H5 支付' : '请在浏览器中完成微信支付')
                 : browserInfo.isWeChat && nativePayment.h5Url
-                  ? '当前微信内无法直接拉起 H5 支付'
-                  : qrContentUrl
-                    ? '请使用微信完成支付'
-                : '正在确认这笔订单的支付状态'}
+                  ? '当前微信内暂不支持此 H5 支付链路'
+                  : nativePayment.h5Url
+                    ? '请打开微信 H5 支付链接完成支付'
+                    : '正在确认这笔订单的支付状态'}
             </p>
             <p className="mt-2 text-xs leading-6 text-emerald-800">
               订单号：{nativePayment.orderId}
               <br />
               金额：{nativePayment.amountDisplay}
             </p>
-            <div className="mt-4 flex justify-center">
-              {qrCodeDataUrl ? (
-                <Image
-                  alt="微信支付二维码"
-                  className="rounded-2xl border border-emerald-100 bg-white p-3 shadow-sm"
-                  height={280}
-                  src={qrCodeDataUrl}
-                  width={280}
-                />
-              ) : nativePayment.qrImageUrl ? (
-                <Image
-                  alt="微信支付二维码"
-                  className="rounded-2xl border border-emerald-100 bg-white p-3 shadow-sm"
-                  height={280}
-                  src={nativePayment.qrImageUrl}
-                  width={280}
-                />
-              ) : (
-                <div className="flex h-[280px] w-[280px] items-center justify-center rounded-2xl border border-emerald-100 bg-white p-6 text-sm text-slate-500">
-                  {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat
-                    ? '移动端会优先跳转到微信 H5 支付；若未跳转，可点击下方按钮重新打开。'
-                    : browserInfo.isWeChat && nativePayment.h5Url
-                      ? '微信内无法直接拉起 H5 支付，请复制链接后在系统浏览器中打开，或改用电脑扫码。'
-                      : qrContentUrl
-                        ? '正在生成二维码...'
-                        : '正在轮询支付结果；若你刚刚完成付款，请点下方按钮立即检查。'}
-                </div>
-              )}
-            </div>
             {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">当前设备将优先拉起微信 H5 支付；如果支付页未正常打开，可使用下方按钮重新进入。</p>
+              <p className="mt-4 text-xs leading-6 text-slate-600">当前设备会优先拉起微信 H5 支付；若未自动跳转，可点击下方按钮重新打开。</p>
             ) : browserInfo.isWeChat && nativePayment.h5Url ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">微信内不支持当前 H5 支付链路。请复制下方支付链接并在系统浏览器中打开，或改用电脑扫码支付。</p>
-            ) : qrContentUrl ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">请使用微信扫码支付；下方链接仅作为备用方式保留。</p>
+              <p className="mt-4 text-xs leading-6 text-slate-600">当前页面只保留 H5 支付，请在系统浏览器中重新打开本页后再完成支付。</p>
             ) : (
               <p className="mt-4 text-xs leading-6 text-slate-600">如果这是从支付完成页返回的新会话，页面会继续按订单号检查结果；也可以重新发起一笔支付。</p>
             )}
             <div className="mt-4 space-y-3">
-              {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat ? (
+              {paymentOpenUrl && !browserInfo.isWeChat ? (
                 <button
                   className="w-full rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
                   onClick={handleOpenH5Payment}
@@ -443,27 +350,6 @@ function PaymentContent() {
                 >
                   {h5Redirecting ? '正在跳转支付...' : '打开微信 H5 支付'}
                 </button>
-              ) : null}
-              {paymentOpenUrl || paymentCopyUrl ? (
-                <>
-                  {paymentOpenUrl && (!nativePayment.h5Url || !browserInfo.isWeChat || !shouldPreferH5) ? (
-                    <a
-                      className="block rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
-                      href={paymentOpenUrl}
-                    >
-                      打开微信支付链接
-                    </a>
-                  ) : null}
-                  {paymentCopyUrl ? (
-                    <button
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
-                      onClick={handleCopyCodeUrl}
-                      type="button"
-                    >
-                      {copySuccess ? '支付链接已复制' : '复制支付链接'}
-                    </button>
-                  ) : null}
-                </>
               ) : null}
               <button
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"
@@ -474,7 +360,7 @@ function PaymentContent() {
               </button>
             </div>
             {nativePayment.expiresAt ? (
-              <p className="mt-4 text-xs text-slate-500">二维码有效期至：{new Date(nativePayment.expiresAt).toLocaleString('zh-CN')}</p>
+              <p className="mt-4 text-xs text-slate-500">支付有效期至：{new Date(nativePayment.expiresAt).toLocaleString('zh-CN')}</p>
             ) : null}
           </div>
         ) : null}
@@ -485,7 +371,7 @@ function PaymentContent() {
           disabled={submitting}
           className="w-full rounded-2xl border border-amber-500/30 bg-amber-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? '处理中...' : nativePayment ? '重新获取支付二维码' : '确认支付'}
+          {submitting ? '处理中...' : nativePayment ? '重新获取 H5 支付链接' : '确认支付'}
         </button>
 
         {/* Back Link */}

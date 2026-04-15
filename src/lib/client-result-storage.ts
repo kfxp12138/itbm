@@ -7,12 +7,9 @@ export type StoredPaymentMethod = 'wechat' | 'alipay';
 export interface ActivePaymentSession {
   amountDisplay: string;
   expiresAt?: string;
-  fallbackUrl?: string;
   h5Url?: string;
   orderId: string;
   paymentMethod: StoredPaymentMethod;
-  qrCodeUrl?: string;
-  qrImageUrl?: string;
 }
 
 const HISTORY_KEYS: Record<PaidTestType, string> = {
@@ -108,14 +105,11 @@ export function readActivePaymentSession(testType: PaidTestType): ActivePaymentS
     return {
       amountDisplay: parsed.amountDisplay,
       expiresAt: typeof parsed.expiresAt === 'string' ? parsed.expiresAt : undefined,
-      fallbackUrl: typeof parsed.fallbackUrl === 'string' ? parsed.fallbackUrl : undefined,
-      h5Url: typeof parsed.h5Url === 'string' ? parsed.h5Url : undefined,
+      h5Url: typeof parsed.h5Url === 'string'
+        ? parsed.h5Url
+        : legacyCodeUrl,
       orderId: parsed.orderId,
       paymentMethod: parsed.paymentMethod,
-      qrCodeUrl: typeof parsed.qrCodeUrl === 'string'
-        ? parsed.qrCodeUrl
-        : legacyCodeUrl,
-      qrImageUrl: typeof parsed.qrImageUrl === 'string' ? parsed.qrImageUrl : undefined,
     };
   } catch {
     return null;

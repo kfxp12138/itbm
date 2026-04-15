@@ -18,12 +18,8 @@ interface ZpayCreateOrderParams {
 
 export interface ZpayCreateOrderResult {
   expiresAt?: string;
-  fallbackUrl?: string;
   h5Url?: string;
   orderId?: string;
-  payUrl?: string;
-  qrCodeUrl?: string;
-  qrImageUrl?: string;
   tradeNo?: string;
 }
 
@@ -150,22 +146,13 @@ export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<Zp
 
   const record = data as Record<string, unknown>;
   const h5Url = typeof record.payurl2 === 'string' ? record.payurl2.trim() : '';
-  const payUrl = typeof record.payurl === 'string' ? record.payurl.trim() : '';
-  const qrCodeUrl = typeof record.qrcode === 'string' ? record.qrcode.trim() : '';
-  const qrImageUrl = typeof record.img === 'string' ? record.img.trim() : '';
-  const fallbackUrl = payUrl || qrCodeUrl || qrImageUrl;
-
-  if (!h5Url && !fallbackUrl) {
-    throw new Error('ZPAY 下单成功，但未返回可用支付链接');
+  if (!h5Url) {
+    throw new Error('ZPAY 下单成功，但未返回 H5 支付链接');
   }
 
   return {
-    fallbackUrl: fallbackUrl || undefined,
     h5Url: h5Url || undefined,
     orderId: typeof record.O_id === 'string' ? record.O_id : undefined,
-    payUrl: payUrl || undefined,
-    qrCodeUrl: qrCodeUrl || undefined,
-    qrImageUrl: qrImageUrl || undefined,
     tradeNo: typeof record.trade_no === 'string' ? record.trade_no : undefined,
   };
 }

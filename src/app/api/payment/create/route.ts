@@ -78,9 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate paymentMethod
-    if (paymentMethod !== 'wechat') {
-      return NextResponse.json(
-        { error: '当前仅开放微信支付，请使用微信扫码支付。' },
+      if (paymentMethod !== 'wechat') {
+        return NextResponse.json(
+        { error: '当前仅开放微信 H5 支付。' },
         { status: 400 }
       );
     }
@@ -133,13 +133,9 @@ export async function POST(request: NextRequest) {
           amount,
           amountDisplay: formatPrice(amount),
           expiresAt: nativeOrder.expiresAt,
-          fallbackUrl: nativeOrder.fallbackUrl,
           h5Url: nativeOrder.h5Url,
           mode: 'production',
           paymentMethod,
-          payUrl: nativeOrder.payUrl,
-          qrCodeUrl: nativeOrder.qrCodeUrl,
-          qrImageUrl: nativeOrder.qrImageUrl,
         });
       } catch (error) {
         updateOrderStatus(orderId, 'failed');

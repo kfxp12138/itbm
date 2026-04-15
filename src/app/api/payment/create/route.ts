@@ -46,6 +46,11 @@ function getClientIp(request: NextRequest): string {
   return '127.0.0.1';
 }
 
+function getZpayDevice(request: NextRequest): string {
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+  return /android|iphone|ipad|ipod|mobile|windows phone/.test(userAgent) ? 'mobile' : 'pc';
+}
+
 interface CreatePaymentRequest {
   testType: 'mbti' | 'iq' | 'career';
   paymentMethod: 'wechat';
@@ -115,6 +120,7 @@ export async function POST(request: NextRequest) {
       try {
         const nativeOrder = await createZpayOrder({
           clientIp: getClientIp(request),
+          device: getZpayDevice(request),
           description: `${getTestName(testType)}结果解锁`,
           notifyUrl: undefined,
           outTradeNo: orderId,
@@ -126,10 +132,14 @@ export async function POST(request: NextRequest) {
           orderId,
           amount,
           amountDisplay: formatPrice(amount),
-          codeUrl: nativeOrder.codeUrl,
           expiresAt: nativeOrder.expiresAt,
+          fallbackUrl: nativeOrder.fallbackUrl,
+          h5Url: nativeOrder.h5Url,
           mode: 'production',
           paymentMethod,
+          payUrl: nativeOrder.payUrl,
+          qrCodeUrl: nativeOrder.qrCodeUrl,
+          qrImageUrl: nativeOrder.qrImageUrl,
         });
       } catch (error) {
         updateOrderStatus(orderId, 'failed');

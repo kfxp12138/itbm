@@ -100,7 +100,7 @@ ZPAY_KEY=<你的ZPAY_KEY>
 # 👉 ⚠️ 该地址不能自己拼接查询参数
 ZPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/zpay
 
-# 浏览器支付完成返回地址
+# 浏览器支付完成返回地址（H5 支付建议配置）
 # 👉 ⚠️ 该地址不能自己拼接查询参数
 # 👉 支付完成后 ZPAY 会自动把订单参数附加到这个地址上
 ZPAY_RETURN_URL=https://<你的域名>/payment/return
@@ -357,7 +357,7 @@ sudo apt install fonts-noto-cjk
 
 ### 4. 支付回调收不到通知
 检查清单：
-- [ ] `.env` 中的 `ZPAY_NOTIFY_URL` / `ZPAY_RETURN_URL` 是否用了你的真实域名（不是 your-domain.com）
+- [ ] `.env` 中的 `ZPAY_NOTIFY_URL` 是否用了你的真实域名；H5 回跳需要同时检查 `ZPAY_RETURN_URL`
 - [ ] 域名是否已解析到服务器 IP
 - [ ] HTTPS 是否配置成功（回调地址必须是 https://）
 - [ ] Nginx 是否正确代理到 Next.js（`nginx -t` 检查语法）

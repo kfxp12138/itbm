@@ -7,6 +7,7 @@ export type ZpayChannel = 'wxpay' | 'alipay';
 
 interface ZpayCreateOrderParams {
   clientIp: string;
+  device?: string;
   description: string;
   notifyUrl?: string;
   outTradeNo: string;
@@ -16,11 +17,13 @@ interface ZpayCreateOrderParams {
 }
 
 export interface ZpayCreateOrderResult {
-  codeUrl: string;
   expiresAt?: string;
+  fallbackUrl?: string;
+  h5Url?: string;
   orderId?: string;
   payUrl?: string;
-  qrcode?: string;
+  qrCodeUrl?: string;
+  qrImageUrl?: string;
   tradeNo?: string;
 }
 
@@ -107,7 +110,7 @@ export function getZpayChannelByPaymentMethod(paymentMethod: 'wechat' | 'alipay'
 
 export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<ZpayCreateOrderResult> {
   const payload = {
-    device: 'pc',
+    device: params.device || 'pc',
     clientip: params.clientIp,
     money: formatZpayAmount(params.total),
     name: params.description,
@@ -146,19 +149,23 @@ export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<Zp
   assertZpaySuccessCode(data);
 
   const record = data as Record<string, unknown>;
-  const codeUrlCandidates = [record.qrcode, record.payurl, record.payurl2, record.img]
-    .map((value) => (typeof value === 'string' ? value.trim() : ''))
-    .filter(Boolean);
+  const h5Url = typeof record.payurl2 === 'string' ? record.payurl2.trim() : '';
+  const payUrl = typeof record.payurl === 'string' ? record.payurl.trim() : '';
+  const qrCodeUrl = typeof record.qrcode === 'string' ? record.qrcode.trim() : '';
+  const qrImageUrl = typeof record.img === 'string' ? record.img.trim() : '';
+  const fallbackUrl = payUrl || qrCodeUrl || qrImageUrl;
 
-  if (codeUrlCandidates.length === 0) {
+  if (!h5Url && !fallbackUrl) {
     throw new Error('ZPAY 下单成功，但未返回可用支付链接');
   }
 
   return {
-    codeUrl: codeUrlCandidates[0],
+    fallbackUrl: fallbackUrl || undefined,
+    h5Url: h5Url || undefined,
     orderId: typeof record.O_id === 'string' ? record.O_id : undefined,
-    payUrl: typeof record.payurl === 'string' ? record.payurl : undefined,
-    qrcode: typeof record.qrcode === 'string' ? record.qrcode : undefined,
+    payUrl: payUrl || undefined,
+    qrCodeUrl: qrCodeUrl || undefined,
+    qrImageUrl: qrImageUrl || undefined,
     tradeNo: typeof record.trade_no === 'string' ? record.trade_no : undefined,
   };
 }

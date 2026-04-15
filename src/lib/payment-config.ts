@@ -84,7 +84,6 @@ export function getZpayConfigErrors(): string[] {
     ['ZPAY_PID', ZPAY_CONFIG.pid],
     ['ZPAY_KEY', ZPAY_CONFIG.key],
     ['ZPAY_NOTIFY_URL', ZPAY_CONFIG.notifyUrl],
-    ['ZPAY_RETURN_URL', ZPAY_CONFIG.returnUrl],
   ];
 
   return requiredEntries

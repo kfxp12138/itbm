@@ -6,10 +6,13 @@ export type StoredPaymentMethod = 'wechat' | 'alipay';
 
 export interface ActivePaymentSession {
   amountDisplay: string;
-  codeUrl: string;
   expiresAt?: string;
+  fallbackUrl?: string;
+  h5Url?: string;
   orderId: string;
   paymentMethod: StoredPaymentMethod;
+  qrCodeUrl?: string;
+  qrImageUrl?: string;
 }
 
 const HISTORY_KEYS: Record<PaidTestType, string> = {
@@ -90,10 +93,12 @@ export function readActivePaymentSession(testType: PaidTestType): ActivePaymentS
     }
 
     const parsed = JSON.parse(raw) as Partial<ActivePaymentSession>;
+    const legacyCodeUrl = typeof (parsed as { codeUrl?: unknown }).codeUrl === 'string'
+      ? (parsed as { codeUrl: string }).codeUrl
+      : undefined;
     if (
       typeof parsed !== 'object' ||
       typeof parsed?.amountDisplay !== 'string' ||
-      typeof parsed.codeUrl !== 'string' ||
       typeof parsed.orderId !== 'string' ||
       (parsed.paymentMethod !== 'wechat' && parsed.paymentMethod !== 'alipay')
     ) {
@@ -102,10 +107,15 @@ export function readActivePaymentSession(testType: PaidTestType): ActivePaymentS
 
     return {
       amountDisplay: parsed.amountDisplay,
-      codeUrl: parsed.codeUrl,
       expiresAt: typeof parsed.expiresAt === 'string' ? parsed.expiresAt : undefined,
+      fallbackUrl: typeof parsed.fallbackUrl === 'string' ? parsed.fallbackUrl : undefined,
+      h5Url: typeof parsed.h5Url === 'string' ? parsed.h5Url : undefined,
       orderId: parsed.orderId,
       paymentMethod: parsed.paymentMethod,
+      qrCodeUrl: typeof parsed.qrCodeUrl === 'string'
+        ? parsed.qrCodeUrl
+        : legacyCodeUrl,
+      qrImageUrl: typeof parsed.qrImageUrl === 'string' ? parsed.qrImageUrl : undefined,
     };
   } catch {
     return null;

@@ -39,9 +39,15 @@ export const ZPAY_CONFIG = {
   returnUrl: process.env.ZPAY_RETURN_URL || '',
 };
 
-export const RESEND_CONFIG = {
-  apiKey: process.env.RESEND_API_KEY || '',
-  fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@example.com',
+export const EMAIL_CONFIG = {
+  fromEmail: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@example.com',
+  host: process.env.SMTP_HOST || '',
+  pass: process.env.SMTP_PASS || '',
+  port: parseInt(process.env.SMTP_PORT || '465', 10),
+  secure: (process.env.SMTP_SECURE || '').trim()
+    ? process.env.SMTP_SECURE === 'true'
+    : parseInt(process.env.SMTP_PORT || '465', 10) === 465,
+  user: process.env.SMTP_USER || '',
 };
 
 export function isSandboxMode(): boolean {
@@ -84,4 +90,15 @@ export function getZpayConfigErrors(): string[] {
   return requiredEntries
     .filter(([, value]) => !value.trim())
     .map(([name]) => name);
+}
+
+export function isEmailServiceConfigured(): boolean {
+  return Boolean(
+    EMAIL_CONFIG.host.trim()
+      && EMAIL_CONFIG.user.trim()
+      && EMAIL_CONFIG.pass.trim()
+      && EMAIL_CONFIG.fromEmail.trim()
+      && Number.isFinite(EMAIL_CONFIG.port)
+      && EMAIL_CONFIG.port > 0
+  );
 }

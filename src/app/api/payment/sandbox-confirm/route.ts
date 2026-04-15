@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getOrder, markOrderPaidIfPending } from '@/lib/db';
-import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
+import { isEmailServiceConfigured, isSandboxMode } from '@/lib/payment-config';
 import { sendTestResultEmail, TestType } from '@/lib/send-email';
 
 interface SandboxConfirmRequest {
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const wasMarkedPaid = markOrderPaidIfPending(orderId);
 
     // Send email if configured and email exists
-    if (wasMarkedPaid && order.email && RESEND_CONFIG.apiKey) {
+    if (wasMarkedPaid && order.email && isEmailServiceConfigured()) {
       try {
         const resultData = order.result_data ? JSON.parse(order.result_data) : null;
         if (resultData) {

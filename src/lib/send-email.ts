@@ -1,9 +1,9 @@
-import { Resend } from 'resend';
 import { renderToBuffer } from '@react-pdf/renderer';
 import type { DocumentProps } from '@react-pdf/renderer';
+import nodemailer from 'nodemailer';
 import React from 'react';
 import { registerFonts } from '@/lib/pdf-fonts';
-import { RESEND_CONFIG, TEST_NAMES } from '@/lib/payment-config';
+import { EMAIL_CONFIG, TEST_NAMES, isEmailServiceConfigured } from '@/lib/payment-config';
 import { MBTIReport } from '@/components/pdf/MBTIReport';
 import { IQReport } from '@/components/pdf/IQReport';
 import { CareerReport } from '@/components/pdf/CareerReport';
@@ -13,6 +13,24 @@ import { mbtiCareers } from '@/data/career-data';
 
 // Register fonts on module load
 registerFonts();
+
+function createTransporter() {
+  return nodemailer.createTransport({
+    auth: {
+      pass: EMAIL_CONFIG.pass,
+      user: EMAIL_CONFIG.user,
+    },
+    host: EMAIL_CONFIG.host,
+    port: EMAIL_CONFIG.port,
+    requireTLS: !EMAIL_CONFIG.secure,
+    secure: EMAIL_CONFIG.secure,
+    tls: {
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: true,
+      servername: EMAIL_CONFIG.host,
+    },
+  });
+}
 
 // Full data interfaces (what PDF components expect)
 export interface MBTIResultData {
@@ -191,8 +209,7 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
   const { to, testType, orderId } = params;
   const { resultData } = params;
 
-  // Check if Resend is configured
-  if (!RESEND_CONFIG.apiKey) {
+  if (!isEmailServiceConfigured()) {
     return { success: false, error: '邮件服务未配置' };
   }
 
@@ -275,12 +292,10 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
 
     const testName = TEST_NAMES[testType] || testType;
 
-    // Initialize Resend client
-    const resend = new Resend(RESEND_CONFIG.apiKey);
+    const transporter = createTransporter();
 
-    // Send email with PDF attachment
-    const { data, error } = await resend.emails.send({
-      from: RESEND_CONFIG.fromEmail,
+    const info = await transporter.sendMail({
+      from: EMAIL_CONFIG.fromEmail,
       to: to,
       subject: `你的${testName}测试报告 — 礼至测途-在线潜能测试平台`,
       html: generateEmailHtml(testType, enrichedData),
@@ -288,17 +303,13 @@ export async function sendTestResultEmail(params: SendEmailParams): Promise<Send
         {
           filename: `lizhice-report-${testType}.pdf`,
           content: pdfBuffer,
+          contentType: 'application/pdf',
         },
       ],
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return { success: false, error: '邮件发送失败' };
-    }
-
-    console.log(`Email sent successfully to ${to}, messageId: ${data?.id}, orderId: ${orderId}`);
-    return { success: true, messageId: data?.id };
+    console.log(`Email sent successfully to ${to}, messageId: ${info.messageId}, orderId: ${orderId}`);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('Email send error:', error);
     return { success: false, error: '邮件发送失败' };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrder, markOrderPaidIfPending } from '@/lib/db';
-import { isSandboxMode, RESEND_CONFIG, ZPAY_CONFIG } from '@/lib/payment-config';
+import { isEmailServiceConfigured, isSandboxMode, ZPAY_CONFIG } from '@/lib/payment-config';
 import { sendTestResultEmail, type TestType } from '@/lib/send-email';
 import { getZpayChannelByPaymentMethod, parseZpayAmountToCents, readZpayCallbackParams, verifyZpaySignature } from '@/lib/zpay';
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       transactionId: payment.trade_no,
     });
 
-    if (wasMarkedPaid && order.email && order.result_data && RESEND_CONFIG.apiKey) {
+    if (wasMarkedPaid && order.email && order.result_data && isEmailServiceConfigured()) {
       try {
         const resultData = JSON.parse(order.result_data);
         sendTestResultEmail({

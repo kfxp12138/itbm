@@ -106,24 +106,33 @@ ZPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/zpay
 ZPAY_RETURN_URL=https://<你的域名>/payment/return
 ```
 
-### 3.4 邮件服务（Resend）
+### 3.4 邮件服务（SMTP / 服务器邮箱）
 
-> 获取方式：注册 [Resend](https://resend.com/) → API Keys → Create API Key
+> 当前项目已改为标准 SMTP 发信，适配常见服务器邮箱 / 企业邮箱。
 >
-> 免费额度：每月 3000 封，每天 100 封。
+> 你提供的 SMTP 参数可直接用于发送测试报告邮件；IMAP 仅影响收信，不参与本项目发信流程。
 
 ```bash
-# Resend API Key
-# 👉 在 resend.com → API Keys 页面创建
-# 👉 格式示例：re_1234567890abcdefg
-# 👉 如果暂时不需要邮件功能，留空即可（发送邮件时会返回「邮件服务未配置」）
-RESEND_API_KEY=<你的Resend API Key>
+# SMTP 服务器地址（按你的邮箱服务商实际提供的地址填写）
+SMTP_HOST=smtp.larksuite.com
 
-# 发件人邮箱地址
-# 👉 ⚠️ 替换为你的实际域名
-# 👉 需要先在 Resend 后台验证你的域名（Resend → Domains → Add Domain）
-# 👉 如果还没验证域名，可以用 Resend 提供的测试地址：onboarding@resend.dev
-RESEND_FROM_EMAIL=noreply@<你的域名>
+# SMTP 端口
+# 465 = SSL 直连；587 = STARTTLS
+SMTP_PORT=465
+
+# 是否启用 SSL
+SMTP_SECURE=true
+
+# SMTP 登录邮箱
+SMTP_USER=info@hn1jia1.com
+
+# SMTP 授权码 / 应用密码
+# 👉 如果暂时不需要邮件功能，留空即可（发送邮件时会返回「邮件服务未配置」）
+SMTP_PASS=<你的SMTP授权码>
+
+# 发件人邮箱
+# 👉 一般与 SMTP_USER 一致
+SMTP_FROM_EMAIL=info@hn1jia1.com
 ```
 
 ---
@@ -384,7 +393,7 @@ sudo chown -R www-data:www-data /var/www/xinli-test/unified-test-app/data
 - [ ] 做一个 MBTI 测试 → 跳转到支付页面
 - [ ] 沙盒模式下点击「模拟支付成功」→ 能看到测试结果
 - [ ] 结果页面能下载 PDF
-- [ ] 填写邮箱后能收到邮件（需要先配置 Resend）
+- [ ] 填写邮箱后能收到邮件（需要先配置 SMTP）
 - [ ] 测试记录页面能看到历史记录
 - [ ] 手机上打开网站，布局正常、按钮可点击
 

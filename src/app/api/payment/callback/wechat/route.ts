@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrder, markOrderPaidIfPending } from '@/lib/db';
-import { isSandboxMode, RESEND_CONFIG } from '@/lib/payment-config';
+import { isEmailServiceConfigured, isSandboxMode } from '@/lib/payment-config';
 import {
   buildWechatCallbackFailureResponse,
   buildWechatCallbackSuccessResponse,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       transactionId: payment.transaction_id || undefined,
     });
 
-    if (wasMarkedPaid && order.email && order.result_data && RESEND_CONFIG.apiKey) {
+    if (wasMarkedPaid && order.email && order.result_data && isEmailServiceConfigured()) {
       try {
         const resultData = JSON.parse(order.result_data);
         sendTestResultEmail({

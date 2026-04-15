@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getIQDescription } from '@/lib/iq-scoring';
+import { getIQDescription, getIQPopulationRange, IQ_POPULATION_RANGES } from '@/lib/iq-scoring';
 import { persistPaidResult } from '@/lib/client-result-storage';
 
 interface IQResult {
@@ -55,7 +55,8 @@ function IQResultContent() {
     return (
       <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">验证支付中...</p>
+          <p className="section-kicker justify-center">IQ Result</p>
+          <p className="mt-4 text-lg font-medium text-slate-900">验证支付中...</p>
         </div>
       </div>
     );
@@ -65,82 +66,135 @@ function IQResultContent() {
     return (
       <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-zinc-300">加载中...</p>
+          <p className="section-kicker justify-center">IQ Result</p>
+          <p className="mt-4 text-lg font-medium text-slate-900">加载中...</p>
         </div>
       </div>
     );
   }
 
   const { level, description } = getIQDescription(result.score);
+  const popStat = getIQPopulationRange(result.score);
 
   const getScoreColor = (score: number) => {
     if (score >= 130) return 'text-purple-600';
     if (score >= 120) return 'text-indigo-600';
     if (score >= 110) return 'text-blue-600';
-    if (score >= 90) return 'text-green-600';
-    if (score >= 80) return 'text-yellow-600';
+    if (score >= 90) return 'text-emerald-600';
+    if (score >= 80) return 'text-amber-600';
     return 'text-orange-600';
   };
 
+  const getBadgeColor = (score: number) => {
+    if (score >= 120) return 'border-indigo-200 bg-indigo-50 text-indigo-700';
+    if (score >= 90) return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    return 'border-amber-200 bg-amber-50 text-amber-700';
+  };
+
+  const heroGlowClass = 'bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.14),_transparent_36%),radial-gradient(circle_at_80%_18%,_rgba(139,92,246,0.08),_transparent_24%)]';
+
   return (
-    <div className="app-shell-module-indigo flex min-h-screen items-center justify-center p-4">
-      <div className="glass-card w-full max-w-md rounded-[2rem] p-5 sm:p-8">
-        <p className="section-kicker text-center">IQ Result</p>
-        <h1 className="mb-2 mt-4 text-center text-2xl font-bold text-zinc-50">测试结果</h1>
-        <p className="mb-8 text-center text-zinc-400">瑞文智力测试</p>
-
-        {/* IQ Score */}
-        <div className="text-center mb-8">
-            <div className={`text-5xl sm:text-7xl font-bold ${getScoreColor(result.score).replace('600', '300')}`}>
-              {result.score}
+    <div className="app-shell-module-indigo px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-4xl space-y-8">
+        
+        <section className="glass-card relative overflow-hidden rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14">
+          <div className={`absolute inset-0 ${heroGlowClass}`} />
+          <div className="relative text-center">
+            <div className="flex flex-col items-center gap-3">
+              <p className="section-kicker justify-center">IQ 测试结果</p>
+              <div className={`rounded-full border px-4 py-1.5 text-xs font-medium tracking-wider ${getBadgeColor(result.score)}`}>
+                {level}
+              </div>
             </div>
-            <div className="mt-2 text-zinc-500">IQ 分数</div>
-        </div>
+            
+            <h1 className={`mt-8 text-7xl font-bold tracking-tight sm:text-[8rem] ${getScoreColor(result.score)}`}>
+              {result.score}
+            </h1>
+            <p className="mt-4 text-xl font-medium text-slate-900 sm:text-2xl">您的 IQ 分数</p>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">{description}</p>
 
-        {/* Level badge */}
-        <div className="flex justify-center mb-6">
-          <span className={`px-4 py-2 rounded-full text-lg font-medium ${
-            result.score >= 120 ? 'border border-blue-500/25 bg-blue-500/12 text-blue-200' :
-            result.score >= 90 ? 'border border-emerald-500/25 bg-emerald-500/12 text-emerald-200' :
-            'border border-amber-500/25 bg-amber-500/12 text-amber-200'
-          }`}>
-            {level}
-          </span>
-        </div>
-
-        <p className="mb-8 text-center text-zinc-400">{description}</p>
-
-        <div className="glass-card-soft mb-8 space-y-3 rounded-[1.5rem] p-4">
-          <div className="flex justify-between">
-            <span className="text-zinc-500">正确题数</span>
-            <span className="font-medium text-zinc-100">{result.correctCount}/60</span>
+            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 px-4 py-5">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-indigo-400">正确题数</p>
+                <p className="mt-2 text-xl font-semibold text-indigo-900">{result.correctCount} / 60</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white px-4 py-5">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">测试年龄</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900">{result.age} 岁</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white px-4 py-5">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">测试时间</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900 mt-3">
+                  {new Date(result.timestamp).toLocaleDateString('zh-CN')}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span className="text-zinc-500">测试年龄</span>
-            <span className="font-medium text-zinc-100">{result.age} 岁</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-zinc-500">测试时间</span>
-            <span className="font-medium text-zinc-100">
-              {new Date(result.timestamp).toLocaleString('zh-CN')}
-            </span>
-          </div>
-        </div>
+        </section>
 
-        <div className="flex gap-4">
+        <section className="glass-card rounded-[2rem] p-6 sm:p-8">
+          <div className="mb-8 text-center sm:text-left">
+            <p className="section-kicker">人群分布</p>
+            <h2 className="mt-3 text-2xl font-bold text-slate-900">您的分数在人群中的大致位置</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              智商（IQ）分数的平均值为 100，标准差为 15。根据正态分布模型，您的分数处于 <span className="font-semibold text-indigo-600">
+                {popStat.min === 0 ? `< ${popStat.max + 1}` : popStat.max === 200 ? `≥ ${popStat.min}` : `${popStat.min} - ${popStat.max}`}
+              </span> 区间，该区间大约占总人群的 <span className="font-semibold text-indigo-600">{popStat.percent}</span>。
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {IQ_POPULATION_RANGES.map((range, idx) => {
+              const isCurrent = result.score >= range.min && result.score <= range.max;
+              return (
+                <div 
+                  key={idx} 
+                  className={`relative flex items-center justify-between rounded-2xl border p-4 transition-colors sm:p-5 ${
+                    isCurrent 
+                      ? 'border-indigo-300 bg-indigo-50 shadow-sm' 
+                      : 'border-slate-100 bg-white/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-16 text-sm font-bold sm:w-24 sm:text-base ${isCurrent ? 'text-indigo-700' : 'text-slate-600'}`}>
+                      {range.min === 0 ? `< ${range.max + 1}` : range.max === 200 ? `≥ ${range.min}` : `${range.min} - ${range.max}`}
+                    </div>
+                    <div className={`text-sm font-medium sm:text-base ${isCurrent ? 'text-indigo-900' : 'text-slate-700'}`}>
+                      {range.label}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {isCurrent && (
+                      <span className="hidden rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 sm:inline-block">
+                        您的区间
+                      </span>
+                    )}
+                    <div className={`w-12 text-right text-sm sm:w-16 sm:text-base ${isCurrent ? 'font-bold text-indigo-600' : 'text-slate-500'}`}>
+                      {range.percent}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
             onClick={() => router.push('/iq')}
-            className="flex-1 rounded-2xl border border-blue-500/30 bg-blue-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.28)] transition-colors hover:bg-blue-400"
+            className="app-button-primary flex-1 rounded-2xl border border-indigo-200 bg-indigo-600 px-5 py-4 text-white transition-colors hover:bg-indigo-500"
           >
             重新测试
           </button>
           <button
             onClick={() => router.push('/')}
-            className="app-button-secondary flex-1 py-3 font-medium"
+            className="app-button-secondary flex-1 justify-center py-4"
           >
             返回首页
           </button>
         </div>
+
       </div>
     </div>
   );
@@ -150,9 +204,10 @@ export default function IQResultPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center p-4">
+        <div className="app-shell-module-indigo flex min-h-screen items-center justify-center px-4">
           <div className="glass-card w-full max-w-md rounded-[2rem] p-8 text-center">
-            <p className="text-zinc-300">加载中...</p>
+            <p className="section-kicker justify-center">IQ Result</p>
+            <p className="mt-4 text-lg font-medium text-slate-900">加载中...</p>
           </div>
         </div>
       }

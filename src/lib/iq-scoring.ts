@@ -30,3 +30,24 @@ export function getIQDescription(score: number): { level: string; description: s
   if (score >= 80) return { level: '中下', description: '你的智力水平略低于平均，但仍在正常范围内。' };
   return { level: '偏低', description: '你的测试成绩偏低，可能受到测试环境或状态的影响。' };
 }
+
+export interface IQRangeStat {
+  min: number;
+  max: number;
+  label: string;
+  percent: string;
+}
+
+export const IQ_POPULATION_RANGES: IQRangeStat[] = [
+  { min: 130, max: 200, label: '非常优秀', percent: '2.2%' },
+  { min: 120, max: 129, label: '优秀', percent: '6.7%' },
+  { min: 110, max: 119, label: '中上', percent: '16.1%' },
+  { min: 90, max: 109, label: '中等', percent: '50%' },
+  { min: 80, max: 89, label: '中下', percent: '16.1%' },
+  { min: 70, max: 79, label: '边缘', percent: '6.7%' },
+  { min: 0, max: 69, label: '需关注', percent: '2.2%' },
+];
+
+export function getIQPopulationRange(score: number): IQRangeStat {
+  return IQ_POPULATION_RANGES.find(range => score >= range.min && score <= range.max) || IQ_POPULATION_RANGES[IQ_POPULATION_RANGES.length - 1];
+}

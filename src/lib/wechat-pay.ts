@@ -15,15 +15,6 @@ interface WechatNativeOrderPayload {
   notifyUrl?: string;
 }
 
-interface WechatJsapiOrderPayload {
-  description: string;
-  notifyUrl?: string;
-  openId: string;
-  outTradeNo: string;
-  spbillCreateIp: string;
-  total: number;
-}
-
 interface WechatUnifiedOrderResponse {
   code_url?: string;
   err_code?: string;
@@ -60,21 +51,6 @@ export interface WechatPaymentNotification {
 export interface WechatNativeOrderResult {
   codeUrl: string;
   expiresAt: string;
-}
-
-export interface WechatJsapiInvokeParams {
-  appId: string;
-  nonceStr: string;
-  package: string;
-  paySign: string;
-  signType: 'MD5';
-  timeStamp: string;
-}
-
-export interface WechatJsapiOrderResult {
-  expiresAt: string;
-  invokeParams: WechatJsapiInvokeParams;
-  prepayId: string;
 }
 
 export interface WechatOrderQueryResult {
@@ -169,16 +145,6 @@ async function requestWechatUnifiedOrder(params: Record<string, WechatSignableVa
   return parseWechatXml(responseText) as WechatUnifiedOrderResponse & Record<string, string>;
 }
 
-function createWechatJsapiPaySign(params: Omit<WechatJsapiInvokeParams, 'paySign'>): string {
-  return createWechatV2Signature({
-    appId: params.appId,
-    nonceStr: params.nonceStr,
-    package: params.package,
-    signType: params.signType,
-    timeStamp: params.timeStamp,
-  });
-}
-
 function verifyWechatV2Signature(params: Record<string, string>): boolean {
   const providedSign = params.sign;
   if (!providedSign) {
@@ -216,50 +182,6 @@ export async function createWechatNativeOrder(payload: WechatNativeOrderPayload)
   return {
     codeUrl: data.code_url,
     expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-  };
-}
-
-export async function createWechatJsapiOrder(payload: WechatJsapiOrderPayload): Promise<WechatJsapiOrderResult> {
-  const requestParams: Record<string, WechatSignableValue> = {
-    appid: WECHAT_CONFIG.appId,
-    body: payload.description,
-    device_info: 'WEB',
-    mch_id: WECHAT_CONFIG.mchId,
-    nonce_str: createNonce(),
-    notify_url: payload.notifyUrl || WECHAT_CONFIG.notifyUrl,
-    openid: payload.openId,
-    out_trade_no: payload.outTradeNo,
-    sign_type: WECHAT_SIGN_TYPE,
-    spbill_create_ip: payload.spbillCreateIp,
-    total_fee: payload.total,
-    trade_type: 'JSAPI',
-  };
-
-  const data = await requestWechatUnifiedOrder(requestParams);
-
-  if (data.return_code !== 'SUCCESS') {
-    throw new Error(`微信支付通信失败: ${data.return_msg || '未知错误'}`);
-  }
-
-  if (data.result_code !== 'SUCCESS' || !data.prepay_id) {
-    throw new Error(`微信支付业务失败: ${data.err_code_des || data.return_msg || data.err_code || '未知错误'}`);
-  }
-
-  const invokeParamsBase: Omit<WechatJsapiInvokeParams, 'paySign'> = {
-    appId: WECHAT_CONFIG.appId,
-    nonceStr: createNonce(),
-    package: `prepay_id=${data.prepay_id}`,
-    signType: 'MD5',
-    timeStamp: Math.floor(Date.now() / 1000).toString(),
-  };
-
-  return {
-    expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    invokeParams: {
-      ...invokeParamsBase,
-      paySign: createWechatJsapiPaySign(invokeParamsBase),
-    },
-    prepayId: data.prepay_id,
   };
 }
 

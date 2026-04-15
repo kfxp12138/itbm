@@ -8,14 +8,6 @@ export interface ActivePaymentSession {
   amountDisplay: string;
   expiresAt?: string;
   h5Url?: string;
-  jsapiParams?: {
-    appId: string;
-    nonceStr: string;
-    package: string;
-    paySign: string;
-    signType: 'MD5';
-    timeStamp: string;
-  };
   orderId: string;
   paymentMethod: StoredPaymentMethod;
   wechatInAppUrl?: string;
@@ -117,16 +109,6 @@ export function readActivePaymentSession(testType: PaidTestType): ActivePaymentS
       h5Url: typeof parsed.h5Url === 'string'
         ? parsed.h5Url
         : legacyCodeUrl,
-      jsapiParams: typeof parsed.jsapiParams === 'object'
-        && parsed.jsapiParams !== null
-        && typeof parsed.jsapiParams.appId === 'string'
-        && typeof parsed.jsapiParams.nonceStr === 'string'
-        && typeof parsed.jsapiParams.package === 'string'
-        && typeof parsed.jsapiParams.paySign === 'string'
-        && parsed.jsapiParams.signType === 'MD5'
-        && typeof parsed.jsapiParams.timeStamp === 'string'
-        ? parsed.jsapiParams
-        : undefined,
       orderId: parsed.orderId,
       paymentMethod: parsed.paymentMethod,
       wechatInAppUrl: typeof parsed.wechatInAppUrl === 'string' ? parsed.wechatInAppUrl : undefined,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   clearActivePaymentSession,
@@ -10,25 +10,6 @@ import {
   type ActivePaymentSession,
   type PaidTestType,
 } from '@/lib/client-result-storage';
-
-declare global {
-  interface Window {
-    WeixinJSBridge?: {
-      invoke: (
-        method: 'getBrandWCPayRequest',
-        params: {
-          appId: string;
-          nonceStr: string;
-          package: string;
-          paySign: string;
-          signType: 'MD5';
-          timeStamp: string;
-        },
-        callback: (result: { err_msg?: string }) => void
-      ) => void;
-    };
-  }
-}
 
 type PaymentMethod = 'wechat';
 
@@ -40,21 +21,11 @@ interface CreatePaymentResponse {
   error?: string;
   expiresAt?: string;
   h5Url?: string;
-  jsapiParams?: {
-    appId: string;
-    nonceStr: string;
-    package: string;
-    paySign: string;
-    signType: 'MD5';
-    timeStamp: string;
-  };
   message?: string;
   mode?: 'sandbox' | 'production';
   orderId?: string;
-  oauthUrl?: string;
   paymentMethod?: PaymentMethod;
   redirectUrl?: string;
-  requiresWechatOAuth?: boolean;
   wechatInAppUrl?: string;
 }
 
@@ -88,7 +59,6 @@ function PaymentContent() {
     };
   }, []);
   const shouldPreferH5 = browserInfo.isMobile && !browserInfo.isWeChat;
-  const shouldResumeWechatAuth = browserInfo.isWeChat && searchParams.get('wechatAuth') === '1';
   const initialPaymentSession = paidTestType
     ? readActivePaymentSession(paidTestType) || (orderIdFromQuery
       ? {
@@ -108,8 +78,6 @@ function PaymentContent() {
   const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(initialPaymentSession);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentRedirecting, setPaymentRedirecting] = useState(false);
-  const wechatAuthResumedRef = useRef(false);
-  const handleConfirmRef = useRef<() => Promise<void>>(async () => {});
   const resultData = useMemo(() => {
     if (testType === 'mbti' || testType === 'iq' || testType === 'career') {
       return readPendingResultRaw(testType);
@@ -121,8 +89,6 @@ function PaymentContent() {
   const paymentOpenUrl = browserInfo.isWeChat
     ? (nativePayment?.wechatInAppUrl || null)
     : (nativePayment?.h5Url || null);
-
-  const hasJsapiParams = Boolean(nativePayment?.jsapiParams);
 
   // Redirect if invalid - using useLayoutEffect to run before paint
   useLayoutEffect(() => {
@@ -182,62 +148,8 @@ function PaymentContent() {
     setPaymentRedirecting(false);
   };
 
-  const invokeWechatJsapi = async (params: NonNullable<NativePaymentSession['jsapiParams']>) => {
-    const invoke = () => new Promise<void>((resolve, reject) => {
-      if (!window.WeixinJSBridge) {
-        reject(new Error('未找到微信支付桥接对象'));
-        return;
-      }
-
-      window.WeixinJSBridge.invoke('getBrandWCPayRequest', params, (result) => {
-        const message = result.err_msg || '';
-        if (message.includes(':ok')) {
-          resolve();
-          return;
-        }
-
-        if (message.includes(':cancel')) {
-          reject(new Error('用户取消支付'));
-          return;
-        }
-
-        reject(new Error(message || '微信支付拉起失败'));
-      });
-    });
-
-    if (window.WeixinJSBridge) {
-      await invoke();
-      return;
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      const handleReady = () => {
-        document.removeEventListener('WeixinJSBridgeReady', handleReady);
-        invoke().then(resolve).catch(reject);
-      };
-
-      document.addEventListener('WeixinJSBridgeReady', handleReady, { once: true });
-      window.setTimeout(() => {
-        document.removeEventListener('WeixinJSBridgeReady', handleReady);
-        reject(new Error('等待微信支付环境超时'));
-      }, 5000);
-    });
-  };
-
   const handleOpenPayment = () => {
     setPaymentRedirecting(true);
-
-    if (browserInfo.isWeChat && nativePayment?.jsapiParams) {
-      invokeWechatJsapi(nativePayment.jsapiParams)
-        .catch((error) => {
-          console.error('WeChat JSAPI invoke error:', error);
-          setPaymentError(error instanceof Error ? error.message : '微信支付拉起失败，请重试。');
-        })
-        .finally(() => {
-          setPaymentRedirecting(false);
-        });
-      return;
-    }
 
     if (!paymentOpenUrl) {
       setPaymentRedirecting(false);
@@ -308,18 +220,11 @@ function PaymentContent() {
         return;
       }
 
-      if (data.requiresWechatOAuth && data.oauthUrl) {
-        setPaymentRedirecting(true);
-        window.location.assign(data.oauthUrl);
-        return;
-      }
-
       if (data.mode === 'production' && data.paymentMethod && data.orderId && data.amountDisplay) {
           const nextPaymentSession: NativePaymentSession = {
             amountDisplay: data.amountDisplay,
             expiresAt: data.expiresAt,
             h5Url: data.h5Url,
-            jsapiParams: data.jsapiParams,
             orderId: data.orderId,
             paymentMethod: data.paymentMethod,
             wechatInAppUrl: data.wechatInAppUrl,
@@ -332,16 +237,9 @@ function PaymentContent() {
         setNativePayment(nextPaymentSession);
         setSubmitting(false);
 
-        if (browserInfo.isWeChat && nextPaymentSession.jsapiParams) {
+        if (browserInfo.isWeChat && nextPaymentSession.wechatInAppUrl) {
           setPaymentRedirecting(true);
-          invokeWechatJsapi(nextPaymentSession.jsapiParams)
-            .catch((error) => {
-              console.error('WeChat JSAPI invoke error:', error);
-              setPaymentError(error instanceof Error ? error.message : '微信支付拉起失败，请重试。');
-            })
-            .finally(() => {
-              setPaymentRedirecting(false);
-            });
+          window.location.assign(nextPaymentSession.wechatInAppUrl);
         } else if (!browserInfo.isWeChat && shouldPreferH5 && nextPaymentSession.h5Url) {
           setPaymentRedirecting(true);
           window.location.assign(nextPaymentSession.h5Url);
@@ -358,24 +256,6 @@ function PaymentContent() {
       setSubmitting(false);
     }
   }, [browserInfo.isWeChat, email, paidTestType, resultData, router, selectedMethod, shouldPreferH5, submitting, testType]);
-
-  useEffect(() => {
-    handleConfirmRef.current = handleConfirm;
-  }, [handleConfirm]);
-
-  useEffect(() => {
-    if (!shouldResumeWechatAuth || wechatAuthResumedRef.current || nativePayment || submitting || !resultData) {
-      return;
-    }
-
-    wechatAuthResumedRef.current = true;
-
-    window.setTimeout(() => {
-      handleConfirmRef.current().catch((error) => {
-        console.error('Resume WeChat auth payment error:', error);
-      });
-    }, 0);
-  }, [nativePayment, resultData, shouldResumeWechatAuth, submitting]);
 
   if (!isValidTestType) {
     return (
@@ -452,8 +332,6 @@ function PaymentContent() {
             <p className="text-sm font-medium text-emerald-700">
               {browserInfo.isWeChat && nativePayment.wechatInAppUrl
                 ? (paymentRedirecting ? '正在拉起微信内支付' : '请在微信内完成支付')
-                : browserInfo.isWeChat && nativePayment.jsapiParams
-                  ? (paymentRedirecting ? '正在拉起微信支付' : '请在微信内完成支付')
                 : nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat
                   ? (paymentRedirecting ? '正在跳转到微信 H5 支付' : '请在浏览器中完成微信支付')
                   : browserInfo.isWeChat && nativePayment.h5Url
@@ -467,9 +345,7 @@ function PaymentContent() {
               <br />
               金额：{nativePayment.amountDisplay}
             </p>
-            {browserInfo.isWeChat && nativePayment.jsapiParams ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">已自动切换到微信 JSAPI 支付；若未成功拉起，可点击下方按钮重新打开。</p>
-            ) : browserInfo.isWeChat && nativePayment.wechatInAppUrl ? (
+            {browserInfo.isWeChat && nativePayment.wechatInAppUrl ? (
               <p className="mt-4 text-xs leading-6 text-slate-600">已自动按微信内环境切换到站内拉起支付；若未自动跳转，可点击下方按钮重新打开。</p>
             ) : nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat ? (
               <p className="mt-4 text-xs leading-6 text-slate-600">当前设备会优先拉起微信 H5 支付；若未自动跳转，可点击下方按钮重新打开。</p>
@@ -479,7 +355,7 @@ function PaymentContent() {
               <p className="mt-4 text-xs leading-6 text-slate-600">如果这是从支付完成页返回的新会话，页面会继续按订单号检查结果；也可以重新发起一笔支付。</p>
             )}
             <div className="mt-4 space-y-3">
-              {hasJsapiParams || paymentOpenUrl ? (
+              {paymentOpenUrl ? (
                 <button
                   className="w-full rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
                   onClick={handleOpenPayment}
@@ -512,7 +388,7 @@ function PaymentContent() {
           disabled={submitting}
           className="w-full rounded-2xl border border-amber-500/30 bg-amber-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? '处理中...' : nativePayment ? (browserInfo.isWeChat ? '重新获取微信支付参数' : '重新获取 H5 支付链接') : '确认支付'}
+          {submitting ? '处理中...' : nativePayment ? (browserInfo.isWeChat ? '重新获取微信内支付链接' : '重新获取 H5 支付链接') : '确认支付'}
         </button>
 
         {/* Back Link */}

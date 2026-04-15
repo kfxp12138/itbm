@@ -84,21 +84,6 @@ export function getWechatNativeConfigErrors(): string[] {
     .map(([name]) => name);
 }
 
-export function getWechatJsapiConfigErrors(): string[] {
-  const requiredEntries: Array<[string, string]> = [
-    ['APP_BASE_URL', APP_CONFIG.baseUrl],
-    ['WECHAT_APP_ID', WECHAT_CONFIG.appId],
-    ['WECHAT_APP_SECRET', WECHAT_CONFIG.appSecret],
-    ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],
-    ['WECHAT_API_KEY', WECHAT_CONFIG.apiKey],
-    ['WECHAT_NOTIFY_URL', WECHAT_CONFIG.notifyUrl],
-  ];
-
-  return requiredEntries
-    .filter(([, value]) => !value.trim())
-    .map(([name]) => name);
-}
-
 export function getZpayConfigErrors(): string[] {
   const requiredEntries: Array<[string, string]> = [
     ['ZPAY_PID', ZPAY_CONFIG.pid],

@@ -57,7 +57,7 @@ npm run start
 ```bash
 # 支付模式
 #   sandbox  = 沙盒模式，点击「模拟支付成功」即可跳过真实支付，用于开发测试
-#   production = 生产模式，微信内走 JSAPI，外部浏览器走 ZPAY H5
+#   production = 生产模式，微信内外都走 ZPAY 托管支付
 # 👉 首次部署建议先用 sandbox 跑通流程，确认无误后再改为 production
 PAYMENT_MODE=sandbox
 
@@ -70,7 +70,7 @@ PORT=3000
 DB_PATH=./data/payments.db
 
 # 站点公网基地址
-# 👉 微信内 OAuth / JSAPI 回跳会固定基于这个域名生成绝对地址
+# 👉 支付相关的站内绝对跳转会固定基于这个域名生成
 # 👉 ⚠️ 必须填写真实 HTTPS 域名，不能写 localhost，也不要带结尾 /
 APP_BASE_URL=https://<你的域名>
 ```
@@ -86,14 +86,14 @@ PRICE_IQ=1999
 PRICE_CAREER=999
 ```
 
-### 3.3 ZPAY 聚合支付配置（外部浏览器 H5）
+### 3.3 ZPAY 聚合支付配置（微信内外统一）
 
 > 获取方式：登录 [ZPAY 商户后台](https://7-pay.cn/doc.html)
 >
 > ⚠️ 当前生产链路仅开放微信支付。
 >
-> - 微信内浏览器：走你自己的微信 JSAPI 直连支付
-> - 外部浏览器：走 ZPAY 提供的微信 H5 支付
+> - 微信内浏览器：走 ZPAY 返回的微信内支付跳转链接
+> - 外部浏览器：走 ZPAY 提供的微信 H5 支付链接
 >
 > 请勿开启支付宝通道，除非商户后台已单独申请并审核通过。
 
@@ -116,40 +116,7 @@ ZPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/zpay
 ZPAY_RETURN_URL=https://<你的域名>/payment/return
 ```
 
-### 3.4 微信 JSAPI 配置（仅微信内浏览器）
-
-> 获取方式：登录你的微信支付商户平台 + 绑定的公众号后台
->
-> ⚠️ 这里不是旧的 Native 扫码支付，而是真正的微信内 JSAPI。
->
-> 你还需要在微信公众平台额外完成两项配置：
-> - 网页授权域名（用于静默获取 `openid`）
-> - JSAPI 支付权限与公众号 / 商户号绑定
->
-> ⚠️ `APP_BASE_URL` 必须与这里配置的网页授权域名保持一致；否则微信内支付链路可能被生成为 `localhost` 或错误域名。
-
-```bash
-# 公众号 / 服务号 AppID
-WECHAT_APP_ID=<你的WECHAT_APP_ID>
-
-# 公众号 AppSecret
-# 👉 用于微信内静默授权换取 openid
-WECHAT_APP_SECRET=<你的WECHAT_APP_SECRET>
-
-# 微信支付商户号
-WECHAT_MCH_ID=<你的WECHAT_MCH_ID>
-
-# 微信支付 APIv2 Key
-# 👉 当前仓库的微信内 JSAPI 下单 / 查单复用了 v2 签名链路
-WECHAT_API_KEY=<你的WECHAT_API_KEY>
-
-# 微信支付异步通知地址
-# 👉 ⚠️ 必须替换为你的实际域名，必须 HTTPS，公网可访问
-# 👉 ⚠️ 该地址不能自己拼接查询参数
-WECHAT_NOTIFY_URL=https://<你的域名>/api/payment/callback/wechat
-```
-
-### 3.5 邮件服务（SMTP / 服务器邮箱）
+### 3.4 邮件服务（SMTP / 服务器邮箱）
 
 > 当前项目已改为标准 SMTP 发信，适配常见服务器邮箱 / 企业邮箱。
 >
@@ -400,20 +367,18 @@ sudo apt install fonts-noto-cjk
 
 ### 4. 支付回调收不到通知
 检查清单：
-- [ ] 外部浏览器 H5：`.env` 中的 `ZPAY_NOTIFY_URL` 是否用了你的真实域名；H5 回跳需要同时检查 `ZPAY_RETURN_URL`
-- [ ] 微信内 JSAPI：`.env` 中的 `WECHAT_NOTIFY_URL` 是否用了你的真实域名
+- [ ] `.env` 中的 `ZPAY_NOTIFY_URL` 是否用了你的真实域名；浏览器回跳需要同时检查 `ZPAY_RETURN_URL`
 - [ ] 域名是否已解析到服务器 IP
 - [ ] HTTPS 是否配置成功（回调地址必须是 https://）
 - [ ] Nginx 是否正确代理到 Next.js（`nginx -t` 检查语法）
 - [ ] 防火墙是否放行了 80/443 端口
 
-### 5. 微信内无法拉起支付 / 一直跳授权
+### 5. 微信内无法拉起支付 / 跳转异常
 检查清单：
-- [ ] `WECHAT_APP_ID`、`WECHAT_APP_SECRET`、`WECHAT_MCH_ID`、`WECHAT_API_KEY` 是否填写正确
-- [ ] 公众号 AppID 是否已绑定到当前商户号
-- [ ] 微信公众平台是否已配置网页授权域名（必须与你站点域名一致）
+- [ ] `APP_BASE_URL` 是否填写为真实 HTTPS 公网域名（不能是 localhost，不能带结尾 `/`）
+- [ ] `APP_BASE_URL` 与实际访问域名是否一致
+- [ ] ZPAY 商户通道是否已开通微信内支付 / 对应跳转能力
 - [ ] 当前访问环境是否真的是微信内浏览器
-- [ ] 微信支付商户平台是否已开通 JSAPI 支付权限
 
 ### 6. 端口 3000 被占用
 ```bash
@@ -448,7 +413,7 @@ sudo chown -R www-data:www-data /var/www/xinli-test/unified-test-app/data
 - [ ] 填写邮箱后能收到邮件（需要先配置 SMTP）
 - [ ] 测试记录页面能看到历史记录
 - [ ] 手机上打开网站，布局正常、按钮可点击
-- [ ] 微信内打开支付页，能自动走 JSAPI 支付
+- [ ] 微信内打开支付页，能自动跳转到 ZPAY 微信内支付
 - [ ] 外部浏览器打开支付页，能自动走微信 H5 支付
 
-全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的 ZPAY + 微信 JSAPI 参数，重新构建部署即可上线。
+全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的 ZPAY 参数，重新构建部署即可上线。

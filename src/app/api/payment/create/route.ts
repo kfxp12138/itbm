@@ -5,17 +5,42 @@ import { formatPrice, getTestName, getTestPrice, getZpayConfigErrors, isSandboxM
 import { createZpayOrder, getZpayChannelByPaymentMethod } from '@/lib/zpay';
 
 function getClientIp(request: NextRequest): string {
+  const normalizeIp = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const withoutPort = trimmed.replace(/^\[(.*)\](:\d+)?$/, '$1').replace(/:\d+$/, '');
+    const ipv4Match = withoutPort.match(/(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)/);
+    if (ipv4Match?.[0]) {
+      return ipv4Match[0];
+    }
+
+    if (withoutPort === '::1' || withoutPort.toLowerCase() === 'localhost') {
+      return '127.0.0.1';
+    }
+
+    return null;
+  };
+
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
     const [firstIp] = forwarded.split(',');
     if (firstIp?.trim()) {
-      return firstIp.trim();
+      const normalized = normalizeIp(firstIp);
+      if (normalized) {
+        return normalized;
+      }
     }
   }
 
   const realIp = request.headers.get('x-real-ip');
   if (realIp?.trim()) {
-    return realIp.trim();
+    const normalized = normalizeIp(realIp);
+    if (normalized) {
+      return normalized;
+    }
   }
 
   return '127.0.0.1';
@@ -23,7 +48,7 @@ function getClientIp(request: NextRequest): string {
 
 interface CreatePaymentRequest {
   testType: 'mbti' | 'iq' | 'career';
-  paymentMethod: 'wechat' | 'alipay';
+  paymentMethod: 'wechat';
   email?: string;
   resultData?: string;
 }
@@ -48,9 +73,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate paymentMethod
-    if (!['wechat', 'alipay'].includes(paymentMethod)) {
+    if (paymentMethod !== 'wechat') {
       return NextResponse.json(
-        { error: '无效的支付方式' },
+        { error: '当前仅开放微信支付，请使用微信扫码支付。' },
         { status: 400 }
       );
     }
@@ -71,7 +96,7 @@ export async function POST(request: NextRequest) {
       if (configErrors.length > 0) {
         return NextResponse.json(
           {
-            error: `ZPAY 配置不完整：${configErrors.join('、')}`,
+            error: `微信支付配置不完整：${configErrors.join('、')}`,
             mode: 'production',
           },
           { status: 400 }

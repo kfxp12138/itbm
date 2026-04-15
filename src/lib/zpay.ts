@@ -107,6 +107,7 @@ export function getZpayChannelByPaymentMethod(paymentMethod: 'wechat' | 'alipay'
 
 export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<ZpayCreateOrderResult> {
   const payload = {
+    device: 'pc',
     clientip: params.clientIp,
     money: formatZpayAmount(params.total),
     name: params.description,
@@ -118,16 +119,18 @@ export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<Zp
     type: params.type,
   };
 
-  const requestBody = new URLSearchParams({
+  const requestBody = new FormData();
+  const signedPayload = {
     ...payload,
     sign: createZpaySignature(payload),
+  };
+
+  Object.entries(signedPayload).forEach(([key, value]) => {
+    requestBody.append(key, String(value));
   });
 
   const response = await fetch(`${ZPAY_API_BASE_URL}/mapi.php`, {
-    body: requestBody.toString(),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-    },
+    body: requestBody,
     method: 'POST',
   });
 

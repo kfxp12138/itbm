@@ -13,7 +13,7 @@ import {
   type PaidTestType,
 } from '@/lib/client-result-storage';
 
-type PaymentMethod = 'wechat' | 'alipay';
+type PaymentMethod = 'wechat';
 
 type NativePaymentSession = ActivePaymentSession;
 
@@ -47,16 +47,14 @@ function PaymentContent() {
   const router = useRouter();
   const testType = searchParams.get('testType') || '';
   const orderIdFromQuery = searchParams.get('orderId') || '';
-  const methodFromQuery = searchParams.get('method');
   const paidTestType = isValidPaidTestType(testType) ? testType : null;
-  const restoredMethodFromQuery: PaymentMethod = methodFromQuery === 'alipay' ? 'alipay' : 'wechat';
   const initialPaymentSession = paidTestType
     ? readActivePaymentSession(paidTestType) || (orderIdFromQuery
       ? {
           amountDisplay: TEST_PRICES[testType] || '¥9.99',
           codeUrl: '',
           orderId: orderIdFromQuery,
-          paymentMethod: restoredMethodFromQuery,
+          paymentMethod: 'wechat' as const,
         }
       : null)
     : null;
@@ -64,7 +62,7 @@ function PaymentContent() {
   // Validate testType synchronously
   const isValidTestType = ['mbti', 'iq', 'career'].includes(testType);
 
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(initialPaymentSession?.paymentMethod || 'wechat');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('wechat');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(initialPaymentSession);
@@ -300,7 +298,7 @@ function PaymentContent() {
 
         {/* Payment Method */}
         <div className="mb-6">
-          <p className="mb-3 text-sm font-medium text-slate-700">选择支付方式</p>
+          <p className="mb-3 text-sm font-medium text-slate-700">微信支付</p>
           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => handleMethodChange('wechat')}
@@ -315,21 +313,8 @@ function PaymentContent() {
                 微信支付
               </span>
             </button>
-            <button
-              onClick={() => handleMethodChange('alipay')}
-              className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
-                selectedMethod === 'alipay'
-                  ? 'border-sky-300 bg-sky-50'
-                  : 'border-slate-200 bg-white hover:border-sky-200'
-               }`}
-            >
-              <span className="text-2xl">🅰️</span>
-              <span className={`text-sm font-medium ${selectedMethod === 'alipay' ? 'text-sky-700' : 'text-slate-600'}`}>
-                支付宝
-              </span>
-            </button>
           </div>
-          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上已切换到 ZPAY 通道，可选择微信或支付宝扫码完成支付。</p>
+          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信支付，请使用微信扫码完成支付。</p>
         </div>
 
         {/* Email Input */}
@@ -356,7 +341,7 @@ function PaymentContent() {
           <div className="mb-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-5 text-center">
             <p className="text-sm font-medium text-emerald-700">
               {nativePayment.codeUrl
-                ? `请使用${nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}扫码完成支付`
+                ? '请使用微信完成支付'
                 : '正在确认这笔订单的支付状态'}
             </p>
             <p className="mt-2 text-xs leading-6 text-emerald-800">
@@ -367,7 +352,7 @@ function PaymentContent() {
             <div className="mt-4 flex justify-center">
               {nativePayment.codeUrl && qrCodeDataUrl ? (
                 <Image
-                  alt={`${nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}支付二维码`}
+                  alt="微信支付二维码"
                   className="rounded-2xl border border-emerald-100 bg-white p-3 shadow-sm"
                   height={280}
                   src={qrCodeDataUrl}
@@ -380,7 +365,7 @@ function PaymentContent() {
               )}
             </div>
             {nativePayment.codeUrl ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">推荐直接使用{nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}扫码支付；下方链接仅作为备用方式保留。</p>
+              <p className="mt-4 text-xs leading-6 text-slate-600">请使用微信扫码支付；下方链接仅作为备用方式保留。</p>
             ) : (
               <p className="mt-4 text-xs leading-6 text-slate-600">如果这是从支付完成页返回的新会话，页面会继续按订单号检查结果；也可以重新发起一笔支付。</p>
             )}
@@ -391,7 +376,7 @@ function PaymentContent() {
                     className="block rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
                     href={nativePayment.codeUrl}
                   >
-                    打开{nativePayment.paymentMethod === 'alipay' ? '支付宝' : '微信'}支付链接
+                    打开微信支付链接
                   </a>
                   <button
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-emerald-200 hover:text-emerald-700"

@@ -87,16 +87,28 @@ export default function IQTestPage() {
   };
 
   useEffect(() => {
-    if (step !== 'test') return;
-    if (timeLeft <= 0) {
-      submitTest();
+    if (step !== 'test' || timeLeft > 0) {
       return;
     }
-    const timer = setInterval(() => {
-      setTimeLeft((t) => t - 1);
-    }, 1000);
-    return () => clearInterval(timer);
+
+    const submitTimer = window.setTimeout(() => {
+      submitTest();
+    }, 0);
+
+    return () => window.clearTimeout(submitTimer);
   }, [step, timeLeft, submitTest]);
+
+  useEffect(() => {
+    if (step !== 'test' || timeLeft <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setTimeLeft((current) => (current <= 1 ? 0 : current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [step, timeLeft]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);

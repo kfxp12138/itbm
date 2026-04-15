@@ -14,6 +14,7 @@ export const TEST_NAMES: Record<string, string> = {
 
 export const WECHAT_CONFIG = {
   appId: process.env.WECHAT_APP_ID || '',
+  appSecret: process.env.WECHAT_APP_SECRET || '',
   mchId: process.env.WECHAT_MCH_ID || '',
   apiKey: process.env.WECHAT_API_KEY || '',
   apiV3Key: process.env.WECHAT_API_V3_KEY || '',
@@ -69,6 +70,20 @@ export function getTestName(testType: string): string {
 export function getWechatNativeConfigErrors(): string[] {
   const requiredEntries: Array<[string, string]> = [
     ['WECHAT_APP_ID', WECHAT_CONFIG.appId],
+    ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],
+    ['WECHAT_API_KEY', WECHAT_CONFIG.apiKey],
+    ['WECHAT_NOTIFY_URL', WECHAT_CONFIG.notifyUrl],
+  ];
+
+  return requiredEntries
+    .filter(([, value]) => !value.trim())
+    .map(([name]) => name);
+}
+
+export function getWechatJsapiConfigErrors(): string[] {
+  const requiredEntries: Array<[string, string]> = [
+    ['WECHAT_APP_ID', WECHAT_CONFIG.appId],
+    ['WECHAT_APP_SECRET', WECHAT_CONFIG.appSecret],
     ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],
     ['WECHAT_API_KEY', WECHAT_CONFIG.apiKey],
     ['WECHAT_NOTIFY_URL', WECHAT_CONFIG.notifyUrl],

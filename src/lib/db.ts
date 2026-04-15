@@ -22,6 +22,7 @@ function initSchema(db: Database.Database) {
       amount INTEGER NOT NULL,
       status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'failed', 'refunded')),
       payment_method TEXT CHECK(payment_method IN ('wechat', 'alipay')),
+      payment_provider TEXT CHECK(payment_provider IN ('zpay', 'wechat_jsapi', 'wechat_native')),
       transaction_id TEXT,
       email TEXT,
       created_at INTEGER NOT NULL DEFAULT (unixepoch()),
@@ -33,6 +34,7 @@ function initSchema(db: Database.Database) {
   `);
 
   ensureOrdersColumn(db, 'payment_method', "ALTER TABLE orders ADD COLUMN payment_method TEXT CHECK(payment_method IN ('wechat', 'alipay'))");
+  ensureOrdersColumn(db, 'payment_provider', "ALTER TABLE orders ADD COLUMN payment_provider TEXT CHECK(payment_provider IN ('zpay', 'wechat_jsapi', 'wechat_native'))");
 }
 
 function ensureOrdersColumn(db: Database.Database, columnName: string, alterSql: string) {
@@ -50,6 +52,7 @@ export interface Order {
   amount: number;
   status: 'pending' | 'paid' | 'failed' | 'refunded';
   payment_method?: 'wechat' | 'alipay';
+  payment_provider?: 'zpay' | 'wechat_jsapi' | 'wechat_native';
   transaction_id?: string;
   email?: string;
   created_at: number;
@@ -63,18 +66,20 @@ export function createOrder(params: {
   amount: number;
   email?: string;
   payment_method?: Order['payment_method'];
+  payment_provider?: Order['payment_provider'];
   result_data?: string;
 }): Order {
   const db = getDb();
   const stmt = db.prepare(`
-    INSERT INTO orders (id, test_type, amount, payment_method, email, result_data)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (id, test_type, amount, payment_method, payment_provider, email, result_data)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   stmt.run(
     params.id,
     params.test_type,
     params.amount,
     params.payment_method || null,
+    params.payment_provider || null,
     params.email || null,
     params.result_data || null
   );
@@ -89,7 +94,7 @@ export function getOrder(id: string): Order | null {
 export function updateOrderStatus(
   id: string,
   status: Order['status'],
-  extra?: { transactionId?: string; paymentMethod?: Order['payment_method'] }
+  extra?: { transactionId?: string; paymentMethod?: Order['payment_method']; paymentProvider?: Order['payment_provider'] }
 ): void {
   const db = getDb();
   const updates: string[] = ['status = ?'];
@@ -106,6 +111,10 @@ export function updateOrderStatus(
     updates.push('payment_method = ?');
     params.push(extra.paymentMethod);
   }
+  if (extra?.paymentProvider) {
+    updates.push('payment_provider = ?');
+    params.push(extra.paymentProvider);
+  }
   params.push(id);
 
   db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
@@ -113,7 +122,7 @@ export function updateOrderStatus(
 
 export function markOrderPaidIfPending(
   id: string,
-  extra?: { transactionId?: string; paymentMethod?: Order['payment_method'] }
+  extra?: { transactionId?: string; paymentMethod?: Order['payment_method']; paymentProvider?: Order['payment_provider'] }
 ): boolean {
   const db = getDb();
   const updates: string[] = ['status = ?', 'paid_at = unixepoch()'];
@@ -127,6 +136,11 @@ export function markOrderPaidIfPending(
   if (extra?.paymentMethod) {
     updates.push('payment_method = ?');
     params.push(extra.paymentMethod);
+  }
+
+  if (extra?.paymentProvider) {
+    updates.push('payment_provider = ?');
+    params.push(extra.paymentProvider);
   }
 
   params.push(id, 'pending');

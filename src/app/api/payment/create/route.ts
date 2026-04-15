@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { createOrder, updateOrderStatus } from '@/lib/db';
-import { formatPrice, getTestName, getTestPrice, getZpayConfigErrors, isSandboxMode } from '@/lib/payment-config';
+import { formatPrice, getTestName, getTestPrice, getWechatJsapiConfigErrors, getZpayConfigErrors, isSandboxMode } from '@/lib/payment-config';
+import { createWechatJsapiOrder } from '@/lib/wechat-pay';
+import { WECHAT_OPENID_COOKIE } from '@/lib/wechat-oauth';
 import { createZpayOrder, getZpayChannelByPaymentMethod } from '@/lib/zpay';
 
 function getClientIp(request: NextRequest): string {
@@ -51,6 +53,17 @@ function getZpayDevice(request: NextRequest): string {
   return /android|iphone|ipad|ipod|mobile|windows phone/.test(userAgent) ? 'mobile' : 'pc';
 }
 
+function isWeChatBrowser(request: NextRequest): boolean {
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+  return /micromessenger/.test(userAgent);
+}
+
+function buildWechatOauthUrl(request: NextRequest, testType: CreatePaymentRequest['testType']): string {
+  const oauthStartUrl = new URL('/api/payment/wechat/oauth/start', request.url);
+  oauthStartUrl.searchParams.set('returnTo', `/payment?testType=${testType}`);
+  return oauthStartUrl.toString();
+}
+
 interface CreatePaymentRequest {
   testType: 'mbti' | 'iq' | 'career';
   paymentMethod: 'wechat';
@@ -96,12 +109,71 @@ export async function POST(request: NextRequest) {
     const amount = getTestPrice(testType);
 
     if (!isSandboxMode()) {
+      const isWechat = isWeChatBrowser(request);
+
+      if (isWechat) {
+        const wechatConfigErrors = getWechatJsapiConfigErrors();
+        if (wechatConfigErrors.length > 0) {
+          return NextResponse.json(
+            {
+              error: `微信内支付配置不完整：${wechatConfigErrors.join('、')}`,
+              mode: 'production',
+            },
+            { status: 400 }
+          );
+        }
+
+        const openId = request.cookies.get(WECHAT_OPENID_COOKIE)?.value?.trim();
+        if (!openId) {
+          return NextResponse.json({
+            mode: 'production',
+            oauthUrl: buildWechatOauthUrl(request, testType),
+            paymentMethod,
+            requiresWechatOAuth: true,
+          });
+        }
+
+        createOrder({
+          id: orderId,
+          test_type: testType,
+          amount,
+          email,
+          payment_method: paymentMethod,
+          payment_provider: 'wechat_jsapi',
+          result_data: resultData,
+        });
+
+        try {
+          const jsapiOrder = await createWechatJsapiOrder({
+            description: `${getTestName(testType)}结果解锁`,
+            notifyUrl: undefined,
+            openId,
+            outTradeNo: orderId,
+            spbillCreateIp: getClientIp(request),
+            total: amount,
+          });
+
+          return NextResponse.json({
+            amount,
+            amountDisplay: formatPrice(amount),
+            expiresAt: jsapiOrder.expiresAt,
+            jsapiParams: jsapiOrder.invokeParams,
+            mode: 'production',
+            orderId,
+            paymentMethod,
+          });
+        } catch (error) {
+          updateOrderStatus(orderId, 'failed', { paymentProvider: 'wechat_jsapi' });
+          throw error;
+        }
+      }
+
       const configErrors = getZpayConfigErrors();
 
       if (configErrors.length > 0) {
         return NextResponse.json(
           {
-            error: `微信支付配置不完整：${configErrors.join('、')}`,
+            error: `微信 H5 支付配置不完整：${configErrors.join('、')}`,
             mode: 'production',
           },
           { status: 400 }
@@ -114,6 +186,7 @@ export async function POST(request: NextRequest) {
         amount,
         email,
         payment_method: paymentMethod,
+        payment_provider: 'zpay',
         result_data: resultData,
       });
 
@@ -136,10 +209,9 @@ export async function POST(request: NextRequest) {
           h5Url: nativeOrder.h5Url,
           mode: 'production',
           paymentMethod,
-          wechatInAppUrl: nativeOrder.wechatInAppUrl,
         });
       } catch (error) {
-        updateOrderStatus(orderId, 'failed');
+        updateOrderStatus(orderId, 'failed', { paymentProvider: 'zpay' });
         throw error;
       }
     }
@@ -151,6 +223,7 @@ export async function POST(request: NextRequest) {
       amount,
       email,
       payment_method: paymentMethod,
+      payment_provider: 'zpay',
       result_data: resultData,
     });
 

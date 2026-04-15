@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MBTI_DIMENSIONS, mbtiQuestions } from '@/data/mbti-questions';
 import { calculateMBTIResult, type MBTIAnswerValue } from '@/lib/mbti-scoring';
 import { savePendingResult } from '@/lib/client-result-storage';
+import { TEST_DISPLAY_PRICES } from '@/lib/test-catalog';
 
 const MBTI_DRAFT_KEY = 'mbti_draft_v2';
 const SECTION_SIZE = 50;
@@ -174,13 +175,15 @@ export default function MBTITestPage() {
                   <span>MBTI 完整版</span>
                   <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
                   <span>200 题</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                  <span>{TEST_DISPLAY_PRICES.mbti}</span>
                 </div>
 
                 <h1 className="mt-8 max-w-3xl text-4xl font-semibold leading-tight text-slate-900 sm:text-6xl sm:leading-[1.05]">
                   用更完整的题量，看到更稳定的 MBTI 结果和四维倾向。
                 </h1>
                 <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                  测试共 200 题，分为 4 个部分，采用 5 级作答。完成后会给出 16 型结果、四个维度倾向以及详细的人格解读。
+                  测试共 200 题，分为 4 个部分，采用 5 级作答。完成测试后可支付 {TEST_DISPLAY_PRICES.mbti} 查看 16 型结果、四个维度倾向以及详细的人格解读。
                 </p>
 
                 <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -218,7 +221,7 @@ export default function MBTITestPage() {
             <aside className="glass-card rounded-[2rem] p-8 sm:p-10">
               <p className="section-kicker">完整版说明</p>
               <ul className="mt-5 space-y-4 text-sm leading-7 text-slate-700">
-                <li className="glass-card-soft rounded-2xl px-4 py-4">适合想看详细人格解读和四维倾向的人。</li>
+                <li className="glass-card-soft rounded-2xl px-4 py-4">适合想看详细人格解读和四维倾向的人，完整报告价格为 {TEST_DISPLAY_PRICES.mbti}。</li>
                 <li className="glass-card-soft rounded-2xl px-4 py-4">请按自己平时的真实状态作答，不必追求理想答案。</li>
                 <li className="glass-card-soft rounded-2xl px-4 py-4">如果想先快速试一版，也可以先做 20 题免费版。</li>
               </ul>

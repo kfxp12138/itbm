@@ -10,6 +10,7 @@ import {
   type ActivePaymentSession,
   type PaidTestType,
 } from '@/lib/client-result-storage';
+import { TEST_DISPLAY_PRICES, TEST_NAMES } from '@/lib/test-catalog';
 
 type PaymentMethod = 'wechat';
 
@@ -28,18 +29,6 @@ interface CreatePaymentResponse {
   redirectUrl?: string;
   wechatInAppUrl?: string;
 }
-
-const TEST_NAMES: Record<string, string> = {
-  mbti: 'MBTI人格测试',
-  iq: 'IQ智力测试',
-  career: '职业性格测试',
-};
-
-const TEST_PRICES: Record<string, string> = {
-  mbti: '¥29.99',
-  iq: '¥19.99',
-  career: '¥9.99',
-};
 
 function PaymentContent() {
   const searchParams = useSearchParams();
@@ -62,7 +51,7 @@ function PaymentContent() {
   const initialPaymentSession = paidTestType
     ? readActivePaymentSession(paidTestType) || (orderIdFromQuery
       ? {
-          amountDisplay: TEST_PRICES[testType] || '¥39.90',
+          amountDisplay: TEST_DISPLAY_PRICES[paidTestType],
           orderId: orderIdFromQuery,
           paymentMethod: 'wechat' as const,
         }
@@ -267,6 +256,9 @@ function PaymentContent() {
     );
   }
 
+  const testName = paidTestType ? TEST_NAMES[paidTestType] : testType;
+  const testDisplayPrice = paidTestType ? TEST_DISPLAY_PRICES[paidTestType] : TEST_DISPLAY_PRICES.mbti;
+
   return (
     <div className="app-shell-module-amber flex min-h-screen items-center justify-center p-4">
       <div className="glass-card w-full max-w-md rounded-[2rem] p-6 sm:p-8">
@@ -278,11 +270,11 @@ function PaymentContent() {
         <div className="glass-card-soft mb-6 rounded-[1.5rem] p-4">
           <div className="flex justify-between items-center">
             <span className="text-slate-500">测试项目</span>
-            <span className="font-medium text-slate-900">{TEST_NAMES[testType] || testType}</span>
+            <span className="font-medium text-slate-900">{testName}</span>
           </div>
           <div className="flex justify-between items-center mt-2">
             <span className="text-slate-500">支付金额</span>
-          <span className="text-xl font-bold text-amber-300">{TEST_PRICES[testType] || '¥39.90'}</span>
+          <span className="text-xl font-bold text-amber-300">{testDisplayPrice}</span>
           </div>
         </div>
 

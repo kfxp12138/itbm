@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { mbtiFreeQuestions } from '@/data/mbti-free-questions';
 import { calculateFreeMBTIResult } from '@/lib/mbti-free-scoring';
 import type { MBTIAnswerValue } from '@/lib/mbti-scoring';
+import { TEST_DISPLAY_PRICES } from '@/lib/test-catalog';
 
 const MBTI_FREE_DRAFT_KEY = 'mbti_free_draft_v1';
 
@@ -136,7 +137,7 @@ export default function MBTIFreePage() {
                 先用 20 道题，快速判断你的主 MBTI 类型。
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                免费版会给出一个当前最接近的 MBTI 类型，以及几个可能接近的相邻类型。想看四维倾向和详细解读，再进入 200 题完整版。
+                免费版会给出一个当前最接近的 MBTI 类型，以及几个可能接近的相邻类型。想看四维倾向和详细解读，再进入 200 题完整版（{TEST_DISPLAY_PRICES.mbti}）。
               </p>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -150,7 +151,7 @@ export default function MBTIFreePage() {
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">03</p>
-                  <p className="mt-3 text-sm leading-7 text-slate-700">如果你想看更稳定的判断，可以继续做 200 题完整版。</p>
+                  <p className="mt-3 text-sm leading-7 text-slate-700">如果你想看更稳定的判断，可以继续做 200 题完整版（{TEST_DISPLAY_PRICES.mbti}）。</p>
                 </div>
               </div>
             </section>
@@ -160,7 +161,7 @@ export default function MBTIFreePage() {
               <ul className="mt-5 space-y-4 text-sm leading-7 text-slate-700">
                 <li className="glass-card-soft rounded-2xl px-4 py-4">第一次接触 MBTI，想先快速了解一个大致方向。</li>
                 <li className="glass-card-soft rounded-2xl px-4 py-4">时间有限，只想先知道自己最可能是哪一类。</li>
-                <li className="glass-card-soft rounded-2xl px-4 py-4">做完之后再决定是否继续做 200 题完整版。</li>
+                <li className="glass-card-soft rounded-2xl px-4 py-4">做完之后再决定是否继续做 200 题完整版（{TEST_DISPLAY_PRICES.mbti}）。</li>
               </ul>
 
               {draft ? (
@@ -199,7 +200,7 @@ export default function MBTIFreePage() {
                   {draft ? '重新开始免费版' : '开始 20 题免费版'}
                 </button>
                 <button onClick={() => router.push('/mbti')} className="app-button-secondary w-full justify-center px-5 py-4 text-sm font-semibold">
-                  去做 200 题完整版
+                  去做 200 题完整版（{TEST_DISPLAY_PRICES.mbti}）
                 </button>
               </div>
             </aside>

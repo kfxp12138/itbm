@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { careerQuestions } from '@/data/career-data';
 import { calculateCareerResult } from '@/lib/career-scoring';
 import { savePendingResult } from '@/lib/client-result-storage';
+import { TEST_DISPLAY_PRICES } from '@/lib/test-catalog';
 
 const LIKERT_OPTIONS = [
   { value: 1, label: '非常不同意', color: 'bg-red-500', hoverColor: 'hover:bg-red-400', size: 'w-11 h-11 sm:w-12 sm:h-12' },
@@ -44,7 +45,7 @@ export default function CareerTestPage() {
           <div className="text-4xl text-center mb-4">💼</div>
           <h1 className="mb-4 text-center text-2xl font-bold text-slate-900">职业性格测试</h1>
           <div className="mb-8 space-y-4 text-slate-600">
-            <p>本测试基于大五人格模型（BFI-10），通过10道简短的自我评估题目，分析你的五大人格特质，并映射到MBTI类型，为你推荐最适合的职业方向。</p>
+            <p>本测试基于大五人格模型（BFI-10），通过10道简短的自我评估题目，分析你的五大人格特质，并映射到MBTI类型，为你推荐最适合的职业方向。完成后可支付 {TEST_DISPLAY_PRICES.career} 查看完整建议。</p>
             <div className="rounded-[1.5rem] border border-emerald-100 bg-emerald-50 p-4">
               <p className="mb-2 font-medium text-emerald-700">五大人格特质：</p>
               <ul className="space-y-1 text-sm text-emerald-700/80">
@@ -55,7 +56,7 @@ export default function CareerTestPage() {
                 <li>• 神经质 — 情绪稳定性和压力应对</li>
               </ul>
             </div>
-            <p className="text-sm text-slate-500">共10道题，约2分钟完成。请根据直觉作答。</p>
+            <p className="text-sm text-slate-500">共10道题，约2分钟完成。请根据直觉作答，完成后可支付 {TEST_DISPLAY_PRICES.career} 查看职业方向建议。</p>
           </div>
           <button
             onClick={() => setStarted(true)}

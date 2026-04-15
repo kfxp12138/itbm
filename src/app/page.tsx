@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TEST_DISPLAY_PRICES } from "@/lib/test-catalog";
 
 const tests = [
   {
@@ -12,7 +13,7 @@ const tests = [
   {
     title: "MBTI人格测试（完整版）",
     icon: "🧠",
-    description: "200道五级倾向题，保留经典16型结果，同时呈现更细腻的四维偏好强度与人格画像。",
+    description: `200道五级倾向题，${TEST_DISPLAY_PRICES.mbti} 解锁完整报告，看到更细腻的四维偏好强度与人格画像。`,
     href: "/mbti",
     color: "from-violet-500 to-purple-600",
     bgColor: "bg-violet-50",
@@ -20,7 +21,7 @@ const tests = [
   {
     title: "IQ智力测试",
     icon: "🧩",
-    description: "60道瑞文推理题，20分钟限时挑战，科学评估你的逻辑推理与空间想象能力。",
+    description: `60道瑞文推理题，20分钟限时挑战，完成后仅需 ${TEST_DISPLAY_PRICES.iq} 查看完整智力结果。`,
     href: "/iq",
     color: "from-blue-500 to-indigo-600",
     bgColor: "bg-blue-50",
@@ -28,7 +29,7 @@ const tests = [
   {
     title: "职业性格测试",
     icon: "💼",
-    description: "10道题目，基于大五人格模型，发现最适合你的职业方向与发展路径。",
+    description: `10道题快速了解职业倾向，${TEST_DISPLAY_PRICES.career} 获取更清晰的发展方向建议。`,
     href: "/career",
     color: "from-emerald-500 to-teal-600",
     bgColor: "bg-emerald-50",
@@ -47,7 +48,7 @@ export default function Home() {
                 礼至在线潜能测试 三步测出你的潜能地图：性格 × 智商 × 职业
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                先做 20 题免费 MBTI 快速定位，再深入 200 题完整版，最后用 IQ 与职业测试补全画像——每一步都清晰，每一份报告都实用。
+                先做 20 题免费 MBTI 快速定位，再按需解锁 200 题 MBTI 完整版（{TEST_DISPLAY_PRICES.mbti}）、IQ 智力测试（{TEST_DISPLAY_PRICES.iq}）和职业测试（{TEST_DISPLAY_PRICES.career}），一步步补全你的潜能画像。
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="#tests" className="app-button-primary px-8 py-3 text-base font-medium">
@@ -63,17 +64,17 @@ export default function Home() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">MBTI</p>
-                  <p className="mt-3 text-2xl font-semibold text-violet-700">免费 20 题 + 完整 200 题</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">先快速判断主类型，再按需查看完整版深度画像。</p>
+                  <p className="mt-3 text-2xl font-semibold text-violet-700">免费 20 题 + 完整 200 题 {TEST_DISPLAY_PRICES.mbti}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">先快速判断主类型，再按需解锁完整版深度画像。</p>
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5">
                   <p className="section-kicker">IQ</p>
-                  <p className="mt-3 text-2xl font-semibold text-blue-700">20 分钟推理挑战</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">图形推理、分组作答、即时反馈。</p>
+                  <p className="mt-3 text-2xl font-semibold text-blue-700">60 题挑战 · {TEST_DISPLAY_PRICES.iq}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">图形推理、分组作答，完成后查看完整结果。</p>
                 </div>
                 <div className="glass-card-soft rounded-[1.5rem] p-5 sm:col-span-2">
                   <p className="section-kicker">职业画像</p>
-                  <p className="mt-3 text-2xl font-semibold text-emerald-700">人格维度 × 职业建议</p>
+                  <p className="mt-3 text-2xl font-semibold text-emerald-700">人格维度 × 职业建议 · {TEST_DISPLAY_PRICES.career}</p>
                   <p className="mt-2 text-sm leading-7 text-slate-600">从大五人格出发，把结果落到可理解、可行动的职业方向上。</p>
                 </div>
               </div>

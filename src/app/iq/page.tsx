@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { SETS, QUESTIONS_PER_SET, TEST_DURATION_SECONDS, getQuestionImagePath, getAnswerCount } from '@/data/iq-data';
 import { calculateIQScore } from '@/lib/iq-scoring';
 import { savePendingResult } from '@/lib/client-result-storage';
+import { TEST_DISPLAY_PRICES } from '@/lib/test-catalog';
 
 type Step = 'age' | 'instructions' | 'test';
 
@@ -138,7 +139,8 @@ export default function IQTestPage() {
         <div className="glass-card w-full max-w-md rounded-[2rem] p-8">
           <p className="section-kicker text-center">IQ Test</p>
           <h1 className="mb-4 mt-4 text-center text-3xl font-bold text-slate-900">瑞文智力测试</h1>
-          <p className="mb-8 text-center text-slate-600">请输入您的年龄以开始测试</p>
+          <p className="mb-2 text-center text-slate-600">请输入您的年龄以开始测试</p>
+          <p className="mb-8 text-center text-sm leading-6 text-slate-500">完成 60 题测试后，可支付 {TEST_DISPLAY_PRICES.iq} 查看完整智力结果。</p>
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-slate-700">年龄</label>
             <input
@@ -175,7 +177,7 @@ export default function IQTestPage() {
           <p className="section-kicker text-center">Instructions</p>
           <h1 className="mb-6 mt-4 text-center text-3xl font-bold text-slate-900">测试说明</h1>
           <div className="mb-8 space-y-4 text-slate-600">
-            <p>本测试是瑞文标准推理测验（Raven&apos;s Progressive Matrices），用于评估您的逻辑推理能力。</p>
+            <p>本测试是瑞文标准推理测验（Raven&apos;s Progressive Matrices），用于评估您的逻辑推理能力。完成后可支付 {TEST_DISPLAY_PRICES.iq} 查看完整结果。</p>
             <ul className="list-disc list-inside space-y-2">
               <li>共 60 道图形推理题，分为 A、B、C、D、E 五组</li>
               <li>每题有一个图形矩阵，需要找出缺失的部分</li>

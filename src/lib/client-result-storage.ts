@@ -10,6 +10,7 @@ export interface ActivePaymentSession {
   h5Url?: string;
   orderId: string;
   paymentMethod: StoredPaymentMethod;
+  wechatInAppUrl?: string;
 }
 
 const HISTORY_KEYS: Record<PaidTestType, string> = {
@@ -110,6 +111,7 @@ export function readActivePaymentSession(testType: PaidTestType): ActivePaymentS
         : legacyCodeUrl,
       orderId: parsed.orderId,
       paymentMethod: parsed.paymentMethod,
+      wechatInAppUrl: typeof parsed.wechatInAppUrl === 'string' ? parsed.wechatInAppUrl : undefined,
     };
   } catch {
     return null;

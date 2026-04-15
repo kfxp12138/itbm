@@ -136,6 +136,7 @@ export async function POST(request: NextRequest) {
           h5Url: nativeOrder.h5Url,
           mode: 'production',
           paymentMethod,
+          wechatInAppUrl: nativeOrder.wechatInAppUrl,
         });
       } catch (error) {
         updateOrderStatus(orderId, 'failed');

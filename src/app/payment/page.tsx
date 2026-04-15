@@ -26,6 +26,7 @@ interface CreatePaymentResponse {
   orderId?: string;
   paymentMethod?: PaymentMethod;
   redirectUrl?: string;
+   wechatInAppUrl?: string;
 }
 
 const TEST_NAMES: Record<string, string> = {
@@ -76,7 +77,7 @@ function PaymentContent() {
   const [submitting, setSubmitting] = useState(false);
   const [nativePayment, setNativePayment] = useState<NativePaymentSession | null>(initialPaymentSession);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [h5Redirecting, setH5Redirecting] = useState(false);
+  const [paymentRedirecting, setPaymentRedirecting] = useState(false);
   const resultData = useMemo(() => {
     if (testType === 'mbti' || testType === 'iq' || testType === 'career') {
       return readPendingResultRaw(testType);
@@ -85,7 +86,9 @@ function PaymentContent() {
     return null;
   }, [testType]);
 
-  const paymentOpenUrl = nativePayment?.h5Url || null;
+  const paymentOpenUrl = browserInfo.isWeChat
+    ? (nativePayment?.wechatInAppUrl || null)
+    : (nativePayment?.h5Url || null);
 
   // Redirect if invalid - using useLayoutEffect to run before paint
   useLayoutEffect(() => {
@@ -142,16 +145,16 @@ function PaymentContent() {
     setSelectedMethod(method);
     setNativePayment(null);
     setPaymentError(null);
-    setH5Redirecting(false);
+    setPaymentRedirecting(false);
   };
 
-  const handleOpenH5Payment = () => {
-    if (!nativePayment?.h5Url) {
+  const handleOpenPayment = () => {
+    if (!paymentOpenUrl) {
       return;
     }
 
-    setH5Redirecting(true);
-    window.location.assign(nativePayment.h5Url);
+    setPaymentRedirecting(true);
+    window.location.assign(paymentOpenUrl);
   };
 
   const checkPaymentNow = async () => {
@@ -216,13 +219,14 @@ function PaymentContent() {
       }
 
       if (data.mode === 'production' && data.paymentMethod && data.orderId && data.amountDisplay) {
-        const nextPaymentSession: NativePaymentSession = {
-          amountDisplay: data.amountDisplay,
-          expiresAt: data.expiresAt,
-          h5Url: data.h5Url,
-          orderId: data.orderId,
-          paymentMethod: data.paymentMethod,
-        };
+          const nextPaymentSession: NativePaymentSession = {
+            amountDisplay: data.amountDisplay,
+            expiresAt: data.expiresAt,
+            h5Url: data.h5Url,
+            orderId: data.orderId,
+            paymentMethod: data.paymentMethod,
+            wechatInAppUrl: data.wechatInAppUrl,
+          };
 
         if (paidTestType) {
           saveActivePaymentSession(paidTestType, nextPaymentSession);
@@ -231,9 +235,13 @@ function PaymentContent() {
         setNativePayment(nextPaymentSession);
         setSubmitting(false);
 
-        if (shouldPreferH5 && nextPaymentSession.h5Url) {
-          setH5Redirecting(true);
-          window.location.assign(nextPaymentSession.h5Url);
+        const nextOpenUrl = browserInfo.isWeChat
+          ? nextPaymentSession.wechatInAppUrl
+          : (shouldPreferH5 ? nextPaymentSession.h5Url : undefined);
+
+        if (nextOpenUrl) {
+          setPaymentRedirecting(true);
+          window.location.assign(nextOpenUrl);
         }
 
         return;
@@ -295,7 +303,7 @@ function PaymentContent() {
               </span>
             </button>
           </div>
-          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上仅开放微信 H5 支付。</p>
+          <p className="mt-3 text-xs leading-6 text-slate-500">当前线上支持微信内支付与微信 H5 支付，系统会自动识别当前浏览器环境。</p>
         </div>
 
         {/* Email Input */}
@@ -321,34 +329,42 @@ function PaymentContent() {
         {nativePayment ? (
           <div className="mb-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/80 p-5 text-center">
             <p className="text-sm font-medium text-emerald-700">
-              {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat
-                ? (h5Redirecting ? '正在跳转到微信 H5 支付' : '请在浏览器中完成微信支付')
-                : browserInfo.isWeChat && nativePayment.h5Url
-                  ? '当前微信内暂不支持此 H5 支付链路'
-                  : nativePayment.h5Url
-                    ? '请打开微信 H5 支付链接完成支付'
-                    : '正在确认这笔订单的支付状态'}
+              {browserInfo.isWeChat && nativePayment.wechatInAppUrl
+                ? (paymentRedirecting ? '正在拉起微信内支付' : '请在微信内完成支付')
+                : nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat
+                  ? (paymentRedirecting ? '正在跳转到微信 H5 支付' : '请在浏览器中完成微信支付')
+                  : browserInfo.isWeChat && nativePayment.h5Url
+                    ? '当前订单未返回微信内支付链接'
+                    : nativePayment.h5Url
+                      ? '请打开微信 H5 支付链接完成支付'
+                      : '正在确认这笔订单的支付状态'}
             </p>
             <p className="mt-2 text-xs leading-6 text-emerald-800">
               订单号：{nativePayment.orderId}
               <br />
               金额：{nativePayment.amountDisplay}
             </p>
-            {nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat ? (
+            {browserInfo.isWeChat && nativePayment.wechatInAppUrl ? (
+              <p className="mt-4 text-xs leading-6 text-slate-600">已自动按微信内环境切换到站内拉起支付；若未自动跳转，可点击下方按钮重新打开。</p>
+            ) : nativePayment.h5Url && shouldPreferH5 && !browserInfo.isWeChat ? (
               <p className="mt-4 text-xs leading-6 text-slate-600">当前设备会优先拉起微信 H5 支付；若未自动跳转，可点击下方按钮重新打开。</p>
             ) : browserInfo.isWeChat && nativePayment.h5Url ? (
-              <p className="mt-4 text-xs leading-6 text-slate-600">当前页面只保留 H5 支付，请在系统浏览器中重新打开本页后再完成支付。</p>
+              <p className="mt-4 text-xs leading-6 text-slate-600">当前处于微信内浏览器，但通道未返回可直接拉起的微信内支付链接。请联系我检查商户通道是否已开通对应能力。</p>
             ) : (
               <p className="mt-4 text-xs leading-6 text-slate-600">如果这是从支付完成页返回的新会话，页面会继续按订单号检查结果；也可以重新发起一笔支付。</p>
             )}
             <div className="mt-4 space-y-3">
-              {paymentOpenUrl && !browserInfo.isWeChat ? (
+              {paymentOpenUrl ? (
                 <button
                   className="w-full rounded-2xl border border-emerald-500/20 bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-emerald-400"
-                  onClick={handleOpenH5Payment}
+                  onClick={handleOpenPayment}
                   type="button"
                 >
-                  {h5Redirecting ? '正在跳转支付...' : '打开微信 H5 支付'}
+                  {paymentRedirecting
+                    ? '正在跳转支付...'
+                    : browserInfo.isWeChat
+                      ? '打开微信内支付'
+                      : '打开微信 H5 支付'}
                 </button>
               ) : null}
               <button
@@ -371,7 +387,7 @@ function PaymentContent() {
           disabled={submitting}
           className="w-full rounded-2xl border border-amber-500/30 bg-amber-500 py-3 font-medium text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? '处理中...' : nativePayment ? '重新获取 H5 支付链接' : '确认支付'}
+          {submitting ? '处理中...' : nativePayment ? (browserInfo.isWeChat ? '重新获取微信支付链接' : '重新获取 H5 支付链接') : '确认支付'}
         </button>
 
         {/* Back Link */}

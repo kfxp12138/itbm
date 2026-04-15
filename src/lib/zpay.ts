@@ -21,6 +21,7 @@ export interface ZpayCreateOrderResult {
   h5Url?: string;
   orderId?: string;
   tradeNo?: string;
+  wechatInAppUrl?: string;
 }
 
 export interface ZpayOrderQueryResult {
@@ -146,6 +147,8 @@ export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<Zp
 
   const record = data as Record<string, unknown>;
   const h5Url = typeof record.payurl2 === 'string' ? record.payurl2.trim() : '';
+  const wechatInAppUrl = typeof record.payurl === 'string' ? record.payurl.trim() : '';
+
   if (!h5Url) {
     throw new Error('ZPAY 下单成功，但未返回 H5 支付链接');
   }
@@ -154,6 +157,7 @@ export async function createZpayOrder(params: ZpayCreateOrderParams): Promise<Zp
     h5Url: h5Url || undefined,
     orderId: typeof record.O_id === 'string' ? record.O_id : undefined,
     tradeNo: typeof record.trade_no === 'string' ? record.trade_no : undefined,
+    wechatInAppUrl: wechatInAppUrl || undefined,
   };
 }
 

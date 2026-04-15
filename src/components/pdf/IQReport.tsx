@@ -1,4 +1,3 @@
-import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
 interface IQReportProps {
@@ -238,7 +237,7 @@ export function IQReport({
         <View style={styles.headerAccent} />
         <View style={styles.coverHeader}>
           <Text style={styles.coverTitle}>智商测试报告</Text>
-          <Text style={styles.coverSubtitle}>瑞文标准推理测验 · 专业评估</Text>
+          <Text style={styles.coverSubtitle}>瑞文推理测试结果概览</Text>
         </View>
 
         <View style={styles.scoreSection}>
@@ -298,8 +297,8 @@ export function IQReport({
 
         <View style={[styles.descriptionBox, { marginTop: 40 }]}>
           <Text style={styles.descriptionText}>
-            智商（IQ）分数基于瑞文标准推理测验计算，该测验主要评估抽象推理能力和流体智力。
-            分数采用标准化计算方法，平均值为100，标准差为15。上表显示了各分数段在人群中的分布比例。
+            这份结果结合了当前测试中的图形推理表现、答题正确数以及站内使用的分数换算规则。
+            上表展示的是站内报告使用的分数段分布参考，可帮助理解你当前分数大致位于哪一类区间，但不代表精确人口百分位或医学、教育诊断结论。
           </Text>
         </View>
 

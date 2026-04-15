@@ -23,12 +23,12 @@ export function calculateIQScore(answers: (number | null)[], age: number): { sco
 }
 
 export function getIQDescription(score: number): { level: string; description: string } {
-  if (score >= 130) return { level: '非常优秀', description: '你的智力水平远超常人，属于极少数的天才级别。' };
-  if (score >= 120) return { level: '优秀', description: '你的智力水平非常出色，具有很强的逻辑推理能力。' };
-  if (score >= 110) return { level: '中上', description: '你的智力水平高于平均，具有良好的分析和推理能力。' };
-  if (score >= 90) return { level: '中等', description: '你的智力水平处于正常范围，与大多数人相当。' };
-  if (score >= 80) return { level: '中下', description: '你的智力水平略低于平均，但仍在正常范围内。' };
-  return { level: '偏低', description: '你的测试成绩偏低，可能受到测试环境或状态的影响。' };
+  if (score >= 130) return { level: '非常优秀', description: '你的表现非常突出，说明你在这次测试中的抽象推理与图形规律识别能力处于较高水平。' };
+  if (score >= 120) return { level: '优秀', description: '你的表现较为出色，说明你在图形推理和模式识别方面有不错的稳定性。' };
+  if (score >= 110) return { level: '中上', description: '你的表现高于常见中位区间，展现出较好的分析、比较和归纳能力。' };
+  if (score >= 90) return { level: '中等', description: '你的表现处于常见区间，整体推理节奏和大多数测试者接近。' };
+  if (score >= 80) return { level: '中下', description: '你的表现略低于常见中位区间，这类结果也可能受到年龄换算、作答节奏和当时状态影响。' };
+  return { level: '偏低', description: '这次测试结果偏低，建议把它理解为一次阶段性表现，而不是对个人能力的固定结论。' };
 }
 
 export interface IQRangeStat {

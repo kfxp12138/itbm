@@ -1,3 +1,7 @@
+import { DEFAULT_TEST_PRICES, TEST_NAMES, formatPrice as formatTestPrice } from '@/lib/test-catalog';
+
+export { TEST_NAMES } from '@/lib/test-catalog';
+
 export const PAYMENT_MODE = process.env.PAYMENT_MODE || 'sandbox';
 
 export const APP_CONFIG = {
@@ -5,15 +9,9 @@ export const APP_CONFIG = {
 };
 
 export const TEST_PRICES: Record<string, number> = {
-  mbti: parseInt(process.env.PRICE_MBTI || '3990', 10),
-  iq: parseInt(process.env.PRICE_IQ || '5990', 10),
-  career: parseInt(process.env.PRICE_CAREER || '990', 10),
-};
-
-export const TEST_NAMES: Record<string, string> = {
-  mbti: 'MBTI人格测试',
-  iq: 'IQ智力测试',
-  career: '职业性格测试',
+  mbti: parseInt(process.env.PRICE_MBTI || String(DEFAULT_TEST_PRICES.mbti), 10),
+  iq: parseInt(process.env.PRICE_IQ || String(DEFAULT_TEST_PRICES.iq), 10),
+  career: parseInt(process.env.PRICE_CAREER || String(DEFAULT_TEST_PRICES.career), 10),
 };
 
 export const WECHAT_CONFIG = {
@@ -64,11 +62,15 @@ export function getTestPrice(testType: string): number {
 }
 
 export function formatPrice(cents: number): string {
-  return `¥${(cents / 100).toFixed(2)}`;
+  return formatTestPrice(cents);
 }
 
 export function getTestName(testType: string): string {
-  return TEST_NAMES[testType] || testType;
+  if (testType === 'mbti' || testType === 'iq' || testType === 'career') {
+    return TEST_NAMES[testType];
+  }
+
+  return testType;
 }
 
 export function getWechatNativeConfigErrors(): string[] {

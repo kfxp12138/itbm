@@ -36,9 +36,9 @@ const TEST_NAMES: Record<string, string> = {
 };
 
 const TEST_PRICES: Record<string, string> = {
-  mbti: '¥39.90',
-  iq: '¥59.90',
-  career: '¥9.90',
+  mbti: '¥29.99',
+  iq: '¥19.99',
+  career: '¥9.99',
 };
 
 function PaymentContent() {

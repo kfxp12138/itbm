@@ -1,5 +1,9 @@
 export const PAYMENT_MODE = process.env.PAYMENT_MODE || 'sandbox';
 
+export const APP_CONFIG = {
+  baseUrl: (process.env.APP_BASE_URL || '').trim().replace(/\/$/, ''),
+};
+
 export const TEST_PRICES: Record<string, number> = {
   mbti: parseInt(process.env.PRICE_MBTI || '999', 10),
   iq: parseInt(process.env.PRICE_IQ || '1999', 10),
@@ -82,6 +86,7 @@ export function getWechatNativeConfigErrors(): string[] {
 
 export function getWechatJsapiConfigErrors(): string[] {
   const requiredEntries: Array<[string, string]> = [
+    ['APP_BASE_URL', APP_CONFIG.baseUrl],
     ['WECHAT_APP_ID', WECHAT_CONFIG.appId],
     ['WECHAT_APP_SECRET', WECHAT_CONFIG.appSecret],
     ['WECHAT_MCH_ID', WECHAT_CONFIG.mchId],

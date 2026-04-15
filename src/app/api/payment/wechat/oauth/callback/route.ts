@@ -1,25 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildAppPathUrl } from '@/lib/app-url';
 import { exchangeWechatOauthCodeForOpenId, WECHAT_OPENID_COOKIE, WECHAT_OAUTH_RETURN_TO_COOKIE, WECHAT_OAUTH_STATE_COOKIE } from '@/lib/wechat-oauth';
 
-function appendWechatAuthFlag(returnTo: string, request: NextRequest): string {
-  const url = new URL(returnTo, request.url);
+function normalizeReturnTo(returnTo: string | null | undefined): string {
+  if (!returnTo || !returnTo.startsWith('/') || returnTo.startsWith('//')) {
+    return '/payment';
+  }
+
+  return returnTo;
+}
+
+function appendWechatAuthFlag(returnTo: string): string {
+  const url = new URL(buildAppPathUrl(returnTo));
   url.searchParams.set('wechatAuth', '1');
   return url.toString();
+}
+
+function buildSafeRedirectResponse(returnTo: string) {
+  const response = NextResponse.redirect(buildAppPathUrl(returnTo));
+  response.cookies.delete(WECHAT_OAUTH_STATE_COOKIE);
+  response.cookies.delete(WECHAT_OAUTH_RETURN_TO_COOKIE);
+  return response;
 }
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const storedState = request.cookies.get(WECHAT_OAUTH_STATE_COOKIE)?.value;
-  const returnTo = request.cookies.get(WECHAT_OAUTH_RETURN_TO_COOKIE)?.value || '/payment';
+  const returnTo = normalizeReturnTo(request.cookies.get(WECHAT_OAUTH_RETURN_TO_COOKIE)?.value);
 
   if (!code || !state || !storedState || state !== storedState) {
-    return NextResponse.redirect(new URL(returnTo, request.url));
+    return buildSafeRedirectResponse(returnTo);
   }
 
   try {
     const openId = await exchangeWechatOauthCodeForOpenId(code);
-    const response = NextResponse.redirect(appendWechatAuthFlag(returnTo, request));
+    const response = NextResponse.redirect(appendWechatAuthFlag(returnTo));
 
     response.cookies.set(WECHAT_OPENID_COOKIE, openId, {
       httpOnly: true,
@@ -34,6 +50,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('WeChat OAuth callback error:', error);
-    return NextResponse.redirect(new URL(returnTo, request.url));
+    return buildSafeRedirectResponse(returnTo);
   }
 }

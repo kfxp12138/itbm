@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildAppUrl } from '@/lib/app-url';
 import { getWechatJsapiConfigErrors } from '@/lib/payment-config';
 import {
   buildWechatOauthAuthorizeUrl,
@@ -7,8 +8,12 @@ import {
   WECHAT_OAUTH_STATE_COOKIE,
 } from '@/lib/wechat-oauth';
 
-function buildAbsoluteUrl(request: NextRequest, pathname: string): string {
-  return new URL(pathname, request.url).toString();
+function normalizeReturnTo(returnTo: string | null): string {
+  if (!returnTo || !returnTo.startsWith('/') || returnTo.startsWith('//')) {
+    return '/payment';
+  }
+
+  return returnTo;
 }
 
 export async function GET(request: NextRequest) {
@@ -20,9 +25,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const returnTo = request.nextUrl.searchParams.get('returnTo') || '/payment';
+  const returnTo = normalizeReturnTo(request.nextUrl.searchParams.get('returnTo'));
   const state = createWechatOauthState();
-  const redirectUri = buildAbsoluteUrl(request, '/api/payment/wechat/oauth/callback');
+  const redirectUri = buildAppUrl('/api/payment/wechat/oauth/callback');
   const authorizeUrl = buildWechatOauthAuthorizeUrl({ redirectUri, state });
 
   const response = NextResponse.redirect(authorizeUrl);

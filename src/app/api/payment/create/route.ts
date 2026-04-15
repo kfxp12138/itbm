@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
+import { buildAppPathUrl } from '@/lib/app-url';
 import { createOrder, updateOrderStatus } from '@/lib/db';
 import { formatPrice, getTestName, getTestPrice, getWechatJsapiConfigErrors, getZpayConfigErrors, isSandboxMode } from '@/lib/payment-config';
 import { createWechatJsapiOrder } from '@/lib/wechat-pay';
@@ -58,8 +59,8 @@ function isWeChatBrowser(request: NextRequest): boolean {
   return /micromessenger/.test(userAgent);
 }
 
-function buildWechatOauthUrl(request: NextRequest, testType: CreatePaymentRequest['testType']): string {
-  const oauthStartUrl = new URL('/api/payment/wechat/oauth/start', request.url);
+function buildWechatOauthUrl(testType: CreatePaymentRequest['testType']): string {
+  const oauthStartUrl = new URL(buildAppPathUrl('/api/payment/wechat/oauth/start'));
   oauthStartUrl.searchParams.set('returnTo', `/payment?testType=${testType}`);
   return oauthStartUrl.toString();
 }
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         if (!openId) {
           return NextResponse.json({
             mode: 'production',
-            oauthUrl: buildWechatOauthUrl(request, testType),
+              oauthUrl: buildWechatOauthUrl(testType),
             paymentMethod,
             requiresWechatOAuth: true,
           });

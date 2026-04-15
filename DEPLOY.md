@@ -68,6 +68,11 @@ PORT=3000
 # SQLite 数据库文件路径
 # 👉 一般不需要改，默认存在项目根目录的 data/ 文件夹下
 DB_PATH=./data/payments.db
+
+# 站点公网基地址
+# 👉 微信内 OAuth / JSAPI 回跳会固定基于这个域名生成绝对地址
+# 👉 ⚠️ 必须填写真实 HTTPS 域名，不能写 localhost，也不要带结尾 /
+APP_BASE_URL=https://<你的域名>
 ```
 
 ### 3.2 测试价格
@@ -120,6 +125,8 @@ ZPAY_RETURN_URL=https://<你的域名>/payment/return
 > 你还需要在微信公众平台额外完成两项配置：
 > - 网页授权域名（用于静默获取 `openid`）
 > - JSAPI 支付权限与公众号 / 商户号绑定
+>
+> ⚠️ `APP_BASE_URL` 必须与这里配置的网页授权域名保持一致；否则微信内支付链路可能被生成为 `localhost` 或错误域名。
 
 ```bash
 # 公众号 / 服务号 AppID
@@ -249,7 +256,7 @@ After=network.target
 [Service]
 Type=simple
 User=www-data                                              # ← 运行用户，确保该用户对项目目录有读写权限
-WorkingDirectory=/var/www/xinli-test/       # ← 如果你的项目路径不同，改这里
+WorkingDirectory=/var/www/xinli-test/unified-test-app       # ← 如果你的项目路径不同，改这里
 Environment=NODE_ENV=production
 Environment=PORT=3000                                      # ← 如果你改了端口，这里也要改
 ExecStart=/usr/bin/npm run start

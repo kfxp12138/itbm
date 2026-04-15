@@ -36,9 +36,9 @@ const TEST_NAMES: Record<string, string> = {
 };
 
 const TEST_PRICES: Record<string, string> = {
-  mbti: '¥9.99',
-  iq: '¥19.99',
-  career: '¥9.99',
+  mbti: '¥39.90',
+  iq: '¥59.90',
+  career: '¥9.90',
 };
 
 function PaymentContent() {
@@ -62,7 +62,7 @@ function PaymentContent() {
   const initialPaymentSession = paidTestType
     ? readActivePaymentSession(paidTestType) || (orderIdFromQuery
       ? {
-          amountDisplay: TEST_PRICES[testType] || '¥9.99',
+          amountDisplay: TEST_PRICES[testType] || '¥39.90',
           orderId: orderIdFromQuery,
           paymentMethod: 'wechat' as const,
         }
@@ -282,7 +282,7 @@ function PaymentContent() {
           </div>
           <div className="flex justify-between items-center mt-2">
             <span className="text-slate-500">支付金额</span>
-            <span className="text-xl font-bold text-amber-300">{TEST_PRICES[testType] || '¥9.99'}</span>
+          <span className="text-xl font-bold text-amber-300">{TEST_PRICES[testType] || '¥39.90'}</span>
           </div>
         </div>
 

@@ -79,11 +79,11 @@ APP_BASE_URL=https://<你的域名>
 
 ```bash
 # 单位：分（1元 = 100分）
-# 👉 999 = ¥9.99，1999 = ¥19.99
+# 👉 990 = ¥9.90，3990 = ¥39.90，5990 = ¥59.90
 # 👉 修改价格后需要重新构建：npm run build
-PRICE_MBTI=999
-PRICE_IQ=1999
-PRICE_CAREER=999
+PRICE_MBTI=3990
+PRICE_IQ=5990
+PRICE_CAREER=990
 ```
 
 ### 3.3 ZPAY 聚合支付配置（微信内外统一）
@@ -116,7 +116,29 @@ ZPAY_NOTIFY_URL=https://<你的域名>/api/payment/callback/zpay
 ZPAY_RETURN_URL=https://<你的域名>/payment/return
 ```
 
-### 3.4 邮件服务（SMTP / 服务器邮箱）
+### 3.4 历史微信直连订单兼容（可选）
+
+> ⚠️ 这不是当前新支付链路的必填项。
+>
+> 只有当你的数据库里还存在旧的 `payment_provider=wechat_jsapi` 未完成订单，才需要保留这组配置，供历史订单继续查单 / 回调兼容。
+>
+> 如果你已经没有旧微信直连订单，可以跳过这一节。
+
+```bash
+# 历史微信商户号
+WECHAT_MCH_ID=<历史订单兼容时填写>
+
+# 历史微信 APIv2 Key
+WECHAT_API_KEY=<历史订单兼容时填写>
+
+# 历史微信 AppID
+WECHAT_APP_ID=<历史订单兼容时填写>
+
+# 历史微信支付回调地址
+WECHAT_NOTIFY_URL=https://<你的域名>/api/payment/callback/wechat
+```
+
+### 3.5 邮件服务（SMTP / 服务器邮箱）
 
 > 当前项目已改为标准 SMTP 发信，适配常见服务器邮箱 / 企业邮箱。
 >
@@ -368,6 +390,7 @@ sudo apt install fonts-noto-cjk
 ### 4. 支付回调收不到通知
 检查清单：
 - [ ] `.env` 中的 `ZPAY_NOTIFY_URL` 是否用了你的真实域名；浏览器回跳需要同时检查 `ZPAY_RETURN_URL`
+- [ ] 如果还要兼容历史 `wechat_jsapi` 订单，`.env` 中也要保留正确的 `WECHAT_NOTIFY_URL`
 - [ ] 域名是否已解析到服务器 IP
 - [ ] HTTPS 是否配置成功（回调地址必须是 https://）
 - [ ] Nginx 是否正确代理到 Next.js（`nginx -t` 检查语法）
@@ -416,4 +439,4 @@ sudo chown -R www-data:www-data /var/www/xinli-test/unified-test-app/data
 - [ ] 微信内打开支付页，能自动跳转到 ZPAY 微信内支付
 - [ ] 外部浏览器打开支付页，能自动走微信 H5 支付
 
-全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的 ZPAY 参数，重新构建部署即可上线。
+全部通过后，将 `.env` 中 `PAYMENT_MODE` 改为 `production`，填入真实的 ZPAY 参数；若还要兼容历史微信直连订单，再补上对应 `WECHAT_*` 参数，重新构建部署即可上线。

@@ -5,9 +5,9 @@ export const APP_CONFIG = {
 };
 
 export const TEST_PRICES: Record<string, number> = {
-  mbti: parseInt(process.env.PRICE_MBTI || '999', 10),
-  iq: parseInt(process.env.PRICE_IQ || '1999', 10),
-  career: parseInt(process.env.PRICE_CAREER || '999', 10),
+  mbti: parseInt(process.env.PRICE_MBTI || '3990', 10),
+  iq: parseInt(process.env.PRICE_IQ || '5990', 10),
+  career: parseInt(process.env.PRICE_CAREER || '990', 10),
 };
 
 export const TEST_NAMES: Record<string, string> = {
